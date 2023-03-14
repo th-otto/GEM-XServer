@@ -11,11 +11,6 @@
  */
 #ifndef __CLNT_H__
 #define __CLNT_H__
-#ifdef _clnt_
-#	define CONST
-#else
-#	define CONST const
-#endif
 
 #include "xrsc.h"
 #include <stdarg.h>
@@ -97,8 +92,8 @@ typedef struct
 } REQUEST;
 extern const REQUEST RequestTable[ /*FirstExtensionError */ ];
 
-extern CONST CLIENT *CLNT_Base;
-extern CONST CARD16 CLNT_BaseNum;
+extern CLIENT *CLNT_Base;
+extern CARD16 CLNT_BaseNum;
 
 
 static inline CLIENT *ClntFind(CARD32 id)
@@ -151,7 +146,5 @@ static inline void *_clnt_r_ptr(O_BUFF *buf, size_t need)
 		r = ClntOutBuffer(buf, need, 0, 1);
 	return r;
 }
-
-#undef CONST
 
 #endif /* __CLNT_H__ */

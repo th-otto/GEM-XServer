@@ -11,11 +11,6 @@
  */
 #ifndef __WMGR_H__
 #define __WMGR_H__
-#ifdef _wmgr_
-#	define CONST
-#else
-#	define CONST const
-#endif
 
 void WmgrIntro(BOOL onNoff);
 BOOL WmgrInit(BOOL initNreset);
@@ -50,15 +45,14 @@ void WmgrKeybd(short chng_meta);
 short WmgrLaunch(const char *prg, int argc, const char *argv[]);
 
 
-extern CONST BOOL WMGR_ExitFlag;
-extern CONST BOOL WMGR_Active;
-extern CONST CARD16 WMGR_Cursor;
-extern CONST short WMGR_Decor;
+extern BOOL WMGR_ExitFlag;
+extern BOOL WMGR_Active;
+extern CARD16 WMGR_Cursor;
+extern short WMGR_Decor;
 
-extern CONST CARD16 WMGR_OpenCounter;
-extern CONST short WMGR_Focus;
-extern CONST short WMGR_FocusHolder;
+extern CARD16 WMGR_OpenCounter;
+extern short WMGR_Focus;
+extern short WMGR_FocusHolder;
 
 
-#undef CONST
 #endif /* __WMGR_H__ */

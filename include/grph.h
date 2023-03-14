@@ -11,11 +11,6 @@
  */
 #ifndef __GRPH_H__
 #define __GRPH_H__
-#ifdef _grph_
-#define CONST
-#else
-#define CONST   const
-#endif
 
 
 BOOL GrphInit(void);
@@ -28,13 +23,13 @@ CARD16 GrphInterList(p_GRECT r, const struct s_GRECT *a, CARD16 n, const struct 
 void GrphCombine(p_GRECT a, const struct s_GRECT *b);
 
 
-extern CONST short GRPH_Handle;
-extern CONST short GRPH_Vdi;
-extern CONST short GRPH_ScreenW;
-extern CONST short GRPH_ScreenH;
-extern CONST short GRPH_Depth;
-extern CONST short GRPH_muWidth;
-extern CONST short GRPH_muHeight;
+extern short GRPH_Handle;
+extern short GRPH_Vdi;
+extern short GRPH_ScreenW;
+extern short GRPH_ScreenH;
+extern short GRPH_Depth;
+extern short GRPH_muWidth;
+extern short GRPH_muHeight;
 enum
 {
 	SCRN_Interleaved = 0,
@@ -42,7 +37,7 @@ enum
 	SCRN_PackedPixel = 2,
 	SCRN_FalconHigh = 3
 };
-extern CONST short GRPH_Format;
+extern short GRPH_Format;
 
 struct memory_form;
 extern BOOL(*GrphRasterPut) (struct memory_form *, CARD16 wdth, CARD16 hght);

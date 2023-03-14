@@ -37,7 +37,7 @@ LIBS   = -lgem -liio
 LDFLAGS = $(CCOPTS) -Wl,-stack,128k -s
 
 .c.o:
-	$(AM_V_CC)$(CC) $(CCFLAGS) -Wp,-MD,.deps/$(@:.o=.P) -D_$(<:.c=)_ -c $< -o $@
+	$(AM_V_CC)$(CC) $(CCFLAGS) -Wp,-MD,.deps/$(@:.o=.P) -c $< -o $@
 
 
 all: $(PRG)

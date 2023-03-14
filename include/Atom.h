@@ -18,13 +18,6 @@
 
 #include <X11/X.h>
 
-#if defined(_Atom_) || defined(_selection_)
-#define CONST
-#else
-#define CONST   const
-#endif
-
-
 typedef struct s_ATOM
 {
 	Atom Id;
@@ -34,8 +27,8 @@ typedef struct s_ATOM
 	size_t Length;
 	char Name[1];
 } ATOM;
-extern CONST ATOM *CONST ATOM_Table[];
-extern CONST CARD32 ATOM_Count;
+extern ATOM *ATOM_Table[];
+extern CARD32 ATOM_Count;
 
 void AtomInit(BOOL initNreset);
 Atom AtomGet(const char *name, size_t len, BOOL onlyIfExists);
@@ -50,7 +43,5 @@ Atom AtomGet(const char *name, size_t len, BOOL onlyIfExists);
 
 #define LAST_PREDEF_ATOM (XA_LAST_PREDEFINED +2)
 
-
-#undef CONST
 
 #endif /* __ATOM_H__ */

@@ -16,12 +16,6 @@
 #undef TRACE
 #endif
 
-#ifdef _main_
-#	define CONST
-#else
-#	define CONST const
-#endif
-
 #include <stddef.h>
 #include <X11/Xmd.h>
 
@@ -72,9 +66,9 @@ struct s_CURSOR;
 typedef struct s_CURSOR *p_CURSOR;
 
 
-extern CONST CARD32 MAIN_TimeStamp;
-extern CONST p_PXY MAIN_PointerPos;
-extern CONST CARD16 MAIN_KeyButMask;
+extern CARD32 MAIN_TimeStamp;
+extern p_PXY MAIN_PointerPos;
+extern CARD16 MAIN_KeyButMask;
 
 #define             MAIN_Key_Mask (((CARD8*)&MAIN_KeyButMask)[1])
 #define             MAIN_But_Mask (((CARD8*)&MAIN_KeyButMask)[0])
@@ -144,5 +138,4 @@ extern const char PATH_LibDir[];
 extern const char PATH_FontsDb[];
 
 
-#undef CONST
 #endif /* __MAIN_H__ */
