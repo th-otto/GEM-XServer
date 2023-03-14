@@ -9,6 +9,7 @@
 //==============================================================================
 //
 #include <stdio.h>
+#include <string.h>
 #include <mint/ssystem.h>
 
 #include "main.h"
@@ -229,7 +230,7 @@ ins_map (const char * set)
 
 //------------------------------------------------------------------------------
 static int
-analyse_ktbl (const char * tbl, int shift)
+analyse_ktbl (const CARD8 * tbl, int shift)
 {
 	// Analyse a standard keytable returned by Keytbl() and store the results in
 	// the KeyCode-to-KeySym translation table KYBD_Symbol[].

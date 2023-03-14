@@ -698,6 +698,7 @@ void FT_Evnt_send_MSB(CLIENT *clnt, WINDOW *wind, CARD16 evnt, va_list vap)
 		char *ptr = ((char *) evn) + 4; /* skip type, detail & sequenceNumber */
 
 #define ARG(t)   { *(t*)ptr = va_arg (vap, t); ptr += sizeof(t); }
+#define ARGINT(t)   { *(t*)ptr = va_arg (vap, int); ptr += sizeof(t); }
 
 		evn->u.u.type = evnt;
 		evn->u.u.detail = 0;
@@ -728,13 +729,13 @@ void FT_Evnt_send_MSB(CLIENT *clnt, WINDOW *wind, CARD16 evnt, va_list vap)
 				ARG(CARD32);
 				break;
 			case 's':
-				ARG(CARD16);
+				ARGINT(CARD16);
 				break;
 			case 'c':
-				ARG(CARD8);
+				ARGINT(CARD8);
 				break;
 			case 'b':
-				ARG(BOOL);
+				ARGINT(BOOL);
 				break;
 			case 'p':
 				ARG(PXY);
@@ -744,7 +745,7 @@ void FT_Evnt_send_MSB(CLIENT *clnt, WINDOW *wind, CARD16 evnt, va_list vap)
 				ptr += sizeof(GRECT);
 				break;
 			case 'D':
-				evn->u.u.detail = va_arg(vap, CARD8);
+				evn->u.u.detail = va_arg(vap, int /* CARD8 */ );
 				break;
 			case 'X':
 				*(Window *) ptr = ROOT_WINDOW;
@@ -773,6 +774,9 @@ void FT_Evnt_send_MSB(CLIENT *clnt, WINDOW *wind, CARD16 evnt, va_list vap)
 		}
 		clnt->oBuf.Left += sizeof(xEvent);
 		MAIN_FDSET_wr |= clnt->FdSet;
+
+#undef ARG
+#undef ARGINT
 	}
 }
 
@@ -785,9 +789,12 @@ void FT_Evnt_send_LSB(CLIENT *clnt, WINDOW *wind, CARD16 evnt, va_list vap)
 	if (evn)
 	{
 		char *ptr = ((char *) evn) + 4;
+		PXY pxy;
 
 #define ARG32(t) { *(t*)ptr = Swap32(va_arg (vap, t)); ptr += 4; }
 #define ARG16(t) { *(t*)ptr = Swap16(va_arg (vap, t)); ptr += 2; }
+#define ARG16INT(t) { *(t*)ptr = Swap16(va_arg (vap, int)); ptr += 2; }
+#define ARGINT(t)   { *(t*)ptr = va_arg (vap, int); ptr += sizeof(t); }
 
 		evn->u.u.type = evnt;
 		evn->u.u.detail = 0;
@@ -817,16 +824,17 @@ void FT_Evnt_send_LSB(CLIENT *clnt, WINDOW *wind, CARD16 evnt, va_list vap)
 				ARG32(CARD32);
 				break;
 			case 's':
-				ARG16(CARD16);
+				ARG16INT(CARD16);
 				break;
 			case 'c':
-				ARG(CARD8);
+				ARGINT(CARD8);
 				break;
 			case 'b':
-				ARG(BOOL);
+				ARGINT(BOOL);
 				break;
 			case 'p':
-				SwapPXY((PXY *) ptr, &va_arg(vap, PXY));
+				pxy = va_arg(vap, PXY);
+				SwapPXY((PXY *) ptr, &pxy);
 				ptr += sizeof(PXY);
 				break;
 			case 'r':
@@ -834,7 +842,7 @@ void FT_Evnt_send_LSB(CLIENT *clnt, WINDOW *wind, CARD16 evnt, va_list vap)
 				ptr += sizeof(GRECT);
 				break;
 			case 'D':
-				evn->u.u.detail = va_arg(vap, CARD8);
+				evn->u.u.detail = va_arg(vap, int /*CARD8 */ );
 				break;
 			case 'X':
 				*(Window *) ptr = SWAP32(ROOT_WINDOW);
@@ -863,6 +871,11 @@ void FT_Evnt_send_LSB(CLIENT *clnt, WINDOW *wind, CARD16 evnt, va_list vap)
 		}
 		clnt->oBuf.Left += sizeof(xEvent);
 		MAIN_FDSET_wr |= clnt->FdSet;
+
+#undef ARG32
+#undef ARG16
+#undef ARG16INT
+#undef ARGINT
 	}
 }
 

@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>
+#include <string.h>
 #include <X11/Xmd.h>
 
 #include "xrsc.h"
@@ -105,7 +106,7 @@ _xrsc_insert (p_XRSCPOOL pool, p_XRSC r)
 		exit(1);
 	}
 	r->DEBUG_tag = pool;
-#endif HEAVY_DEBUG
+#endif
 	
 	r->NextXRSC = *p;
 	*p          = r;
@@ -146,7 +147,7 @@ _xrsc_remove (p_XRSCPOOL pool, p_XRSC r)
 		x_printf ("### _xrsc_remove(%p,Id:%X) tag is cleared!\n\n", pool, r->Id);
 		exit(1);
 	}
-#endif HEAVY_DEBUG
+#endif
 
 	while (*p) {
 #ifdef HEAVY_DEBUG
@@ -155,14 +156,14 @@ _xrsc_remove (p_XRSCPOOL pool, p_XRSC r)
 			         pool, r->Id, (*p)->DEBUG_tag, (*p)->Id);
 			exit(1);
 		}
-#endif HEAVY_DEBUG
+#endif
 
 		if (*p == r) {
 			*p          = r->NextXRSC;
 			r->NextXRSC = NULL;
 #ifdef HEAVY_DEBUG
 			r->DEBUG_tag = NULL;
-#endif HEAVY_DEBUG
+#endif
 			
 			DEBUG_SET (pool);
 			
@@ -173,7 +174,7 @@ _xrsc_remove (p_XRSCPOOL pool, p_XRSC r)
 #ifdef HEAVY_DEBUG
 	x_printf ("### _xrsc_remove(%p,Id:%X) not in pool!\n\n", pool, r->Id);
 	exit(1);
-#endif HEAVY_DEBUG
+#endif
 	
 	return xFalse;
 }
@@ -206,7 +207,7 @@ _xrsc_search (const struct s_XRSCPOOL * pool, CARD32 id)
 			         pool, id, r->DEBUG_tag, r->Id);
 			exit(1);
 		}
-#endif HEAVY_DEBUG
+#endif
 		if (r->Id == id) break;
 		r = r->NextXRSC;
 	}

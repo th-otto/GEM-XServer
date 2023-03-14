@@ -809,7 +809,7 @@ WmgrSetDesktop (BOOL onNoff)
 			WMGR_Desktop.ob_spec.index = 0x000011F0L | WIND_Root.Back.Pixel;
 		}
 		wind_set (0, WF_NEWDESK,
-		          (long)&WMGR_Desktop >>16, (short)&WMGR_Desktop, 0,0);
+		          (long)&WMGR_Desktop >>16, (short)(long)&WMGR_Desktop, 0,0);
 		WIND_UPDATE_END;
 	
 	} else if (WMGR_Desktop.ob_type) {

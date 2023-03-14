@@ -15,6 +15,8 @@
 #include <netdb.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "main.h"
 #include "tools.h"

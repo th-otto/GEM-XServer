@@ -957,7 +957,7 @@ RQ_MapWindow (CLIENT * clnt, xMapWindowReq * q)
 	} else if (wind == &WIND_Root) {
 	#	ifndef NODEBUG
 		PRINT (0,"\033pWARNING\033q MapWindow(W:%lX) ignored.", ROOT_WINDOW);
-	#	endif NODEBUG
+	#	endif
 		
 	} else if (!wind->isMapped) {
 		
@@ -996,7 +996,7 @@ RQ_MapSubwindows (CLIENT * clnt, xMapSubwindowsReq * q)
 	} else if (wind == &WIND_Root) {
 	#	ifndef NODEBUG
 		PRINT (0,"\033pWARNING\033q MapSubwindows(W:%lX) ignored.", ROOT_WINDOW);
-	#	endif NODEBUG
+	#	endif
 		
 	} else if (wind->StackTop) {
 		BOOL     visible = WindVisible (wind);
@@ -1035,7 +1035,7 @@ RQ_UnmapWindow (CLIENT * clnt, xUnmapWindowReq * q)
 	} else if (wind == &WIND_Root) {
 	#	ifndef NODEBUG
 		PRINT (0,"\033pWARNING\033q UnmapWindow(W:%lX) ignored.", ROOT_WINDOW);
-	#	endif NODEBUG
+	#	endif
 		
 	} else if (wind->isMapped) { //..............................................
 		
@@ -1373,7 +1373,7 @@ RQ_ReparentWindow (CLIENT * clnt, xReparentWindowReq * q)
 	} else if (wind->Parent == pwnd) {
 	#	ifndef NODEBUG
 		PRINT (0,"\033pIGNORED\033q ReparentWindow() with same parent.");
-	#	endif NODEBUG
+	#	endif
 		
 	} else {
 		BOOL     map;
