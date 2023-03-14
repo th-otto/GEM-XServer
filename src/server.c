@@ -72,9 +72,6 @@ _SRVR_ConnLSB;
 static size_t _SRVR_SetupBytes  = sizeof(xConnSetupPrefix) + sizeof(xConnSetup)
                                 + Align(sizeof(_SRVR_Vendor)-1)
                                 + sizeof(xWindowRoot);
-extern int      GRPH_DepthNum;
-extern xDepth * GRPH_DepthMSB[], * GRPH_DepthLSB[];
-
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 int
 SrvrInit (int port)
@@ -299,7 +296,7 @@ SrvrSetup (void* buf, CARD16 maxreqlen, int DoSwap, long rid)
 	char           * p   = ((char*)buf) + _SRVR_SetupBytes;
 	size_t           len = _SRVR_SetupBytes;
 	int              i;
-	xDepth        ** d;
+	struct xDepthAndVisual **d;
 	
 	if (DoSwap) {
 		memcpy (s, &_SRVR_ConnLSB, _SRVR_SetupBytes);

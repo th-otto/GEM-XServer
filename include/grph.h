@@ -19,8 +19,8 @@ BOOL GrphInit(void);
 void GrphExit(void);
 int GrphSetup(void *format_arr);
 
-BOOL GrphIntersect(GRECT* a, const GRECT *b);
-BOOL GrphIntersectP(p_PRECT a, const struct s_PRECT *b);
+BOOL GrphIntersect(GRECT *a, const GRECT *b);
+BOOL GrphIntersectP(PRECT *a, const PRECT *b);
 CARD16 GrphInterList(GRECT *r, const GRECT *a, CARD16 n, const GRECT *b, CARD16 m);
 void GrphCombine(GRECT *a, const GRECT *b);
 
@@ -32,6 +32,16 @@ extern short GRPH_ScreenH;
 extern short GRPH_Depth;
 extern short GRPH_muWidth;
 extern short GRPH_muHeight;
+extern int GRPH_DepthNum;
+
+struct xDepthAndVisual
+{
+	xDepth dpth;
+	xVisualType visl;
+};
+extern struct xDepthAndVisual *GRPH_DepthMSB[2];
+extern struct xDepthAndVisual *GRPH_DepthLSB[2];
+
 enum
 {
 	SCRN_Interleaved = 0,
