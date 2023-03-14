@@ -402,11 +402,11 @@ RQ_ListInstalledColormaps (CLIENT * clnt, xListInstalledColormapsReq * q)
 void
 RQ_AllocColor (CLIENT * clnt, xAllocColorReq * q)
 {
-	ClntReplyPtr (AllocColor, r,);
+	ClntReplyPtr (AllocColor, r,0);
 	
 	r->pixel = CmapLookup ((RGB*)&r->red, (RGB*)&q->red);
 	
-	ClntReply (AllocColor,, ":.2l");
+	ClntReply (AllocColor,0, ":.2l");
 	
 	DEBUG (AllocColor," M:%lX rgb=%04X,%04X,%04X -> %li",
 	       q->cmap, q->red, q->green, q->blue, r->pixel);
@@ -420,18 +420,18 @@ RQ_AllocNamedColor (CLIENT * clnt, xAllocNamedColorReq * q)
 	const RGB * rgb = _Cmap_LookupName ((char*)(q +1), q->nbytes);
 	
 	if (!rgb) {
-		Bad(Name,, AllocNamedColor,);
+		Bad(BadName,0, X_AllocNamedColor,"_");
 	
 	} else {
-		ClntReplyPtr (AllocNamedColor, r,);
+		ClntReplyPtr (AllocNamedColor, r,0);
 		r->exactRed     = rgb->r;
 		r->exactGreen   = rgb->g;
 		r->exactBlue    = rgb->b;
 		r->pixel        = CmapLookup ((RGB*)&r->screenRed, rgb);
 		
-		ClntReply (AllocNamedColor,, "l:::");
+		ClntReply (AllocNamedColor,0, "l:::");
 	}
-	PRINT (AllocNamedColor," M:%lX '%.*s'", q->cmap, q->nbytes, (char*)(q +1));
+	PRINT (X_AllocNamedColor," M:%lX '%.*s'", q->cmap, q->nbytes, (char*)(q +1));
 }
 
 
@@ -439,11 +439,11 @@ RQ_AllocNamedColor (CLIENT * clnt, xAllocNamedColorReq * q)
 void
 RQ_AllocColorCells (CLIENT * clnt, xAllocColorCellsReq * q)
 {
-//	ClntReplyPtr (AllocColorCells, r);
+//	ClntReplyPtr (AllocColorCells, r, 0);
 	
 	PRINT (- X_AllocColorCells," M:%lX %i/%i", q->cmap, q->colors, q->planes);
 	
-	Bad(Alloc,, AllocColorCells,);
+	Bad(BadAlloc,0, X_AllocColorCells,"_");
 	/*
 	r->nPixels = q->colors;
 	r->nMasks  = q->planes;
@@ -563,16 +563,16 @@ RQ_LookupColor (CLIENT * clnt, xLookupColorReq * q)
 	const RGB * rgb = _Cmap_LookupName ((char*)(q +1), q->nbytes);
 	
 	if (!rgb) {
-		Bad(Name,, LookupColor,);
+		Bad(BadName,0, X_LookupColor,"_");
 	
 	} else {
-		ClntReplyPtr (LookupColor, r,);
+		ClntReplyPtr (LookupColor, r,0);
 		r->exactRed     = rgb->r;
 		r->exactGreen   = rgb->g;
 		r->exactBlue    = rgb->b;
 		CmapLookup ((RGB*)&r->screenRed, rgb);
 		
-		ClntReply (LookupColor,, ":::");
+		ClntReply (LookupColor,0, ":::");
 	}
 
 	DEBUG (LookupColor," M:%lX '%.*s'", q->cmap, q->nbytes, (char*)(q +1));

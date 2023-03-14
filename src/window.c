@@ -342,7 +342,7 @@ _Wind_setup (CLIENT * clnt, WINDOW * w, CARD32 mask, CARD32 * val, CARD8 req)
 			}
 			m >>= 1;
 		}
-//		if (i) PRINT (,"+-\n          (%i):", i);
+//		if (i) PRINT (0,"+-\n          (%i):", i);
 //	
 //	} else if (mask) {
 //		CARD32 m = mask;
@@ -351,7 +351,7 @@ _Wind_setup (CLIENT * clnt, WINDOW * w, CARD32 mask, CARD32 * val, CARD8 req)
 //			if (m & 1) i++;
 //			m >>= 1;
 //		}
-//		PRINT (,"+-\n          (%i):", i);
+//		PRINT (0,"+-\n          (%i):", i);
 //	
 //	} else {
 //		return; // mask == 0, nothing to do
@@ -361,75 +361,75 @@ _Wind_setup (CLIENT * clnt, WINDOW * w, CARD32 mask, CARD32 * val, CARD8 req)
 		if (*val != None  &&  *val != ParentRelative) {
 			PIXMAP * pmap = PmapFind (*val);
 			if (!pmap) {
-//				PRINT(," ");
-				Bad(Pixmap, *val, +req, "          invalid backbground.");
+//				PRINT(0," ");
+				Bad(BadPixmap, *val, req, "_          invalid backbground.");
 				return;
 			} else if (pmap->Depth != w->Depth) {
-//				PRINT(," ");
-				Bad(Match,, +req, "          background depth %u not %u.",
+//				PRINT(0," ");
+				Bad(BadMatch,0, req, "_          background depth %u not %u.",
 				                  pmap->Depth, w->Depth);
 				return;
 			} else {
-//				PRINT (,"+- bpix=%lX", *val);
+//				PRINT (0,"+- bpix=%lX", *val);
 				w->Back.Pixmap = PmapShare(pmap);
 				w->hasBackPix  = xTrue;
 				w->hasBackGnd  = xTrue;
 			}
 		} else {
-//			PRINT (,"+- bpix=<none>");
+//			PRINT (0,"+- bpix=<none>");
 		}
 		val++;
 	}
 	if (mask & CWBackPixel) {
 		// overrides prev
-//		PRINT (,"+- bgnd=%lu", *val);
+//		PRINT (0,"+- bgnd=%lu", *val);
 		w->Back.Pixel = CmapPixelIdx (*(val++), w->Depth);
 		w->hasBackGnd = xTrue;
 	}
 	if (mask & CWBorderPixmap) {
-//		PRINT (,"+- fpix=P:%lX", *val);
+//		PRINT (0,"+- fpix=P:%lX", *val);
 		val++;
 	}
 	if (mask & CWBorderPixel) {
 		// overrides pref
-//		PRINT (,"+- fgnd=%lu", *val);
+//		PRINT (0,"+- fgnd=%lu", *val);
 		w->BorderPixel = CmapPixelIdx (*(val++), w->Depth);
 		w->hasBorder   = xTrue;
 	}
 	if (mask & CWBitGravity) {
-//		PRINT (,"+- bgrv=%u", (CARD8)*val);
+//		PRINT (0,"+- bgrv=%u", (CARD8)*val);
 		w->BitGravity = *(val++);
 	}
 	if (mask & CWWinGravity) {
-//		PRINT (,"+- wgrv=%u", (CARD8)*val);
+//		PRINT (0,"+- wgrv=%u", (CARD8)*val);
 		w->WinGravity = *(val++);
 	}
 	if (mask & CWBackingStore) {
-//		PRINT (,"+- bstr=%u", (CARD8)*val);
+//		PRINT (0,"+- bstr=%u", (CARD8)*val);
 		w->BackingStore = *(val++);
 	}
 	if (mask & CWBackingPlanes) {
-//		PRINT (,"+- bpln=%lX", *val);
+//		PRINT (0,"+- bpln=%lX", *val);
 		val++;
 	}
 	if (mask & CWBackingPixel) {
-//		PRINT (,"+- bpix=%lX", *val);
+//		PRINT (0,"+- bpix=%lX", *val);
 		val++;
 	}
 	if (mask & CWOverrideRedirect) {
-//		PRINT (,"+- rdir=%u", (CARD8)*val);
+//		PRINT (0,"+- rdir=%u", (CARD8)*val);
 		w->Override = *(val++);
 	}
 	if (mask & CWSaveUnder) {
-//		PRINT (,"+- save=%u", (CARD8)*val);
+//		PRINT (0,"+- save=%u", (CARD8)*val);
 		w->SaveUnder = *(val++);
 	}
 	if (mask & CWEventMask) {
 		CARD32 evnt = *val & AllEventMask;
 		if (evnt) {
-//			PRINT (,"+- evnt=%lX", evnt);
+//			PRINT (0,"+- evnt=%lX", evnt);
 			EvntSet (w, clnt, evnt);
-//			#define __V(e) if(evnt & e##Mask) PRINT (,"+-|" #e);
+//			#define __V(e) if(evnt & e##Mask) PRINT (0,"+-|" #e);
 //			__V(ResizeRedirect)
 //			__V(SubstructureRedirect)
 //			__V(VisibilityChange)
@@ -446,29 +446,29 @@ _Wind_setup (CLIENT * clnt, WINDOW * w, CARD32 mask, CARD32 * val, CARD8 req)
 			__V(OwnerGrabButton)
 			*/
 		} else if (w->u.List.AllMasks) {
-//			PRINT (,"+- evnt=<remove>");
+//			PRINT (0,"+- evnt=<remove>");
 			EvntClr (w, clnt);
 		}
 		val++;
 	}
 	if (mask & CWDontPropagate) {
 		w->PropagateMask = ~*(val++) & AllEventMask;
-//		PRINT (,"+- dprp=%lX", ~w->PropagateMask & AllEventMask);
+//		PRINT (0,"+- dprp=%lX", ~w->PropagateMask & AllEventMask);
 	}
 	if (mask & CWColormap) {
-//		PRINT (,"+- cmap=M:%lX", (CARD32)*val);
+//		PRINT (0,"+- cmap=M:%lX", (CARD32)*val);
 		val++;
 	}
 	if (mask & CWCursor) {
-//		PRINT (,"+- crsr=");
+//		PRINT (0,"+- crsr=");
 		if (*val != None) {
 			if (!(w->Cursor = CrsrGet (*val))) {
-//				PRINT (,"+-<invalid>");
+//				PRINT (0,"+-<invalid>");
 			} else {
-//				PRINT (,"+-%lX", (CARD32)*val);
+//				PRINT (0,"+-%lX", (CARD32)*val);
 			}
 		} else {
-//			PRINT (,"+-<none>");
+//			PRINT (0,"+-<none>");
 		}
 		val++;
 	}
@@ -854,24 +854,23 @@ RQ_CreateWindow (CLIENT * clnt, xCreateWindowReq * q)
 	WINDOW * wind = NULL;
 	
 	if (DrawFind (q->wid).p) {
-		Bad(IDChoice, q->wid, CreateWindow,);
+		Bad(BadIDChoice, q->wid, X_CreateWindow,"_");
 		
 	} else if (!(pwnd = WindFind(q->parent))) {
-		Bad(Window, q->parent, CreateWindow,);
+		Bad(BadWindow, q->parent, X_CreateWindow,"_");
 		
 	} else if ((short)q->width <= 0  ||  (short)q->height <= 0) {
-		Bad(Value, (short)((short)q->width <= 0 ? q->width : q->height),
-		           CreateWindow," width = %i height = %i",
+		Bad(BadValue, (short)((short)q->width <= 0 ? q->width : q->height), X_CreateWindow,"_ width = %i height = %i",
 		           (short)q->width, (short)q->height);
 		
 	/* check visual */
 	/* check depth */
 	
 	} else if (!(wind = XrscCreate(WINDOW, q->wid, clnt->Drawables,))) {
-		Bad(Alloc,, CreateWindow,"(W:%lX)", q->wid);
+		Bad(BadAlloc,0, X_CreateWindow,"_(W:%lX)", q->wid);
 	
 	} else {
-//		PRINT (CreateWindow,"-(%u) W:%lX [%i,%i/%u,%u/%u:%u] on W:%lX with V:%lX",
+//		PRINT (X_CreateWindow,"-(%u) W:%lX [%i,%i/%u,%u/%u:%u] on W:%lX with V:%lX",
 //		       q->class, q->wid, q->x, q->y, q->width, q->height, q->borderWidth,
 //		       q->depth, q->parent, q->visual);
 		
@@ -928,13 +927,13 @@ RQ_CreateWindow (CLIENT * clnt, xCreateWindowReq * q)
 		
 		_Wind_setup (clnt, wind, q->mask, (CARD32*)(q +1), X_CreateWindow);
 		
-//		PRINT (,"+");
+//		PRINT (0,"+");
 		
 		if (pwnd != &WIND_Root) {
 			wind->Handle = -WindHandle (pwnd);
 		
 		} else if (!WmgrWindHandle (wind)) {
-			Bad(Alloc,, CreateWindow,"(W:%lX): AES", q->wid);
+			Bad(BadAlloc,0, X_CreateWindow,"_(W:%lX): AES", q->wid);
 			WindDelete (wind, clnt);
 			return;
 		}
@@ -953,11 +952,11 @@ RQ_MapWindow (CLIENT * clnt, xMapWindowReq * q)
 	WINDOW * wind = WindFind(q->id);
 
 	if (!wind) {
-		Bad(Window, q->id, MapWindow,);
+		Bad(BadWindow, q->id, X_MapWindow,"_");
 	
 	} else if (wind == &WIND_Root) {
 	#	ifndef NODEBUG
-		PRINT (,"\33pWARNING\33q MapWindow(W:%lX) ignored.", ROOT_WINDOW);
+		PRINT (0,"\33pWARNING\33q MapWindow(W:%lX) ignored.", ROOT_WINDOW);
 	#	endif NODEBUG
 		
 	} else if (!wind->isMapped) {
@@ -992,11 +991,11 @@ RQ_MapSubwindows (CLIENT * clnt, xMapSubwindowsReq * q)
 	WINDOW * wind = WindFind (q->id);
 	
 	if (!wind) {
-		Bad(Window, q->id, MapSubwindows,);
+		Bad(BadWindow, q->id, X_MapSubwindows,"_");
 	
 	} else if (wind == &WIND_Root) {
 	#	ifndef NODEBUG
-		PRINT (,"\33pWARNING\33q MapSubwindows(W:%lX) ignored.", ROOT_WINDOW);
+		PRINT (0,"\33pWARNING\33q MapSubwindows(W:%lX) ignored.", ROOT_WINDOW);
 	#	endif NODEBUG
 		
 	} else if (wind->StackTop) {
@@ -1031,11 +1030,11 @@ RQ_UnmapWindow (CLIENT * clnt, xUnmapWindowReq * q)
 	WINDOW * wind = WindFind (q->id);
 	
 	if (!wind) {
-		Bad(Window, q->id, UnmapWindow,);
+		Bad(BadWindow, q->id, X_UnmapWindow,"_");
 	
 	} else if (wind == &WIND_Root) {
 	#	ifndef NODEBUG
-		PRINT (,"\33pWARNING\33q UnmapWindow(W:%lX) ignored.", ROOT_WINDOW);
+		PRINT (0,"\33pWARNING\33q UnmapWindow(W:%lX) ignored.", ROOT_WINDOW);
 	#	endif NODEBUG
 		
 	} else if (wind->isMapped) { //..............................................
@@ -1058,7 +1057,7 @@ RQ_UnmapSubwindows (CLIENT * clnt, xUnmapSubwindowsReq * q)
 	WINDOW * wind = WindFind (q->id);
 	
 	if (!wind) {
-		Bad(Window, q->id, UnmapSubwindows,);
+		Bad(BadWindow, q->id, X_UnmapSubwindows,"_");
 	
 	} else if (wind->StackBot) { //..............................................
 		
@@ -1068,7 +1067,7 @@ RQ_UnmapSubwindows (CLIENT * clnt, xUnmapSubwindowsReq * q)
 		BOOL     root = (wind == &WIND_Root);
 		BOOL     draw = xFalse;
 		
-		PRINT (UnmapSubwindows," W:%lX", q->id);
+		PRINT (X_UnmapSubwindows," W:%lX", q->id);
 		
 		do if (w->isMapped) {
 			if (vis && (draw = !root)) {
@@ -1111,14 +1110,14 @@ RQ_ConfigureWindow (CLIENT * clnt, xConfigureWindowReq * q)
 	WINDOW * wind = WindFind (q->window);
 	
 	if (!wind) {
-		Bad(Window, q->window, ConfigureWindow,);
+		Bad(BadWindow, q->window, X_ConfigureWindow,"_");
 	
 	} else {
 		CARD32 * val = (CARD32*)(q +1);
 		GRECT    d   = { 0,0, 0,0 }, * r = &wind->Rect;
 		short    db  = wind->BorderWidth;
 		
-//		PRINT (ConfigureWindow,"- W:%lX:", q->window);
+//		PRINT (X_ConfigureWindow,"- W:%lX:", q->window);
 		
 		if (clnt->DoSwap) {
 			CARD16 mask = q->mask;
@@ -1130,28 +1129,28 @@ RQ_ConfigureWindow (CLIENT * clnt, xConfigureWindowReq * q)
 		}
 		
 		if (q->mask & CWX)      { d.g_x = (short)*(val++) + db - r->g_x;
-}//		                          PRINT (,"+- x=%+i", d.g_x); }
+}//		                          PRINT (0,"+- x=%+i", d.g_x); }
 		if (q->mask & CWY)      { d.g_y = (short)*(val++) + db - r->g_y;
-}//		                          PRINT (,"+- y=%+i", d.g_y); }
+}//		                          PRINT (0,"+- y=%+i", d.g_y); }
 		if (q->mask & CWWidth)  { d.g_w = (short)*(val++) - r->g_w;
-}//		                          PRINT (,"+- w=%+i", d.g_w); }
+}//		                          PRINT (0,"+- w=%+i", d.g_w); }
 		if (q->mask & CWHeight) { d.g_h = (short)*(val++) - r->g_h;
-}//		                          PRINT (,"+- h=%+i", d.g_h); }
+}//		                          PRINT (0,"+- h=%+i", d.g_h); }
 		if (q->mask & CWBorderWidth) {
 			db = (wind->BorderWidth = (short)*(val++)) - db;
 			r->g_x += db;
 			r->g_y += db;
-//			PRINT (,"+- brdr=%+i", db);
+//			PRINT (0,"+- brdr=%+i", db);
 		}
 		if (q->mask & CWSibling) {
-//			PRINT (,"+- sibl=0x%lX", (CARD32)*val);
+//			PRINT (0,"+- sibl=0x%lX", (CARD32)*val);
 			val++;
 		}
 			if (q->mask & CWStackMode) {
-//				PRINT (,"+- stck=%i", (int)(CARD8)*val);
+//				PRINT (0,"+- stck=%i", (int)(CARD8)*val);
 				val++;
 		}
-//		PRINT (,"+");
+//		PRINT (0,"+");
 		
 		if (wind->Handle > 0) {
 			WindResize (wind, &d);
@@ -1181,12 +1180,12 @@ RQ_ChangeWindowAttributes (CLIENT * clnt, xChangeWindowAttributesReq * q)
 	WINDOW * wind = WindFind (q->window);
 	
 	if (!wind) {
-		Bad(Window, q->window, ChangeWindowAttributes,);
+		Bad(BadWindow, q->window, X_ChangeWindowAttributes,"_");
 	
 	} else {
 		PIXMAP * desktop = NULL;
 		
-//		PRINT (ChangeWindowAttributes,"- W:%lX ", q->window);
+//		PRINT (X_ChangeWindowAttributes,"- W:%lX ", q->window);
 		
 		if ((q->valueMask & CWCursor) && wind->Cursor) {
 			CrsrFree (wind->Cursor, NULL);
@@ -1205,7 +1204,7 @@ RQ_ChangeWindowAttributes (CLIENT * clnt, xChangeWindowAttributesReq * q)
 		_Wind_setup (clnt, wind, q->valueMask, (CARD32*)(q +1),
 		             X_ChangeWindowAttributes);
 		
-//		PRINT (,"+");
+//		PRINT (0,"+");
 		
 		if ((q->valueMask & CWOverrideRedirect)
 		    && WMGR_Active && !wind->isMapped  &&  wind->Handle > 0) {
@@ -1254,10 +1253,10 @@ RQ_GetWindowAttributes (CLIENT * clnt, xGetWindowAttributesReq * q)
 	WINDOW * wind = NULL;
 	
 	if (!(wind = WindFind(q->id)) && (q->id & ~RID_MASK)) {
-		Bad(Window, q->id, GetWindowAttributes,);
+		Bad(BadWindow, q->id, X_GetWindowAttributes,"_");
 	
 	} else {
-		ClntReplyPtr (GetWindowAttributes, r,);
+		ClntReplyPtr (GetWindowAttributes, r,0);
 		
 		DEBUG (GetWindowAttributes," W:%lX", q->id);
 		
@@ -1314,7 +1313,7 @@ RQ_GetWindowAttributes (CLIENT * clnt, xGetWindowAttributesReq * q)
 			r->doNotPropagateMask = (CARD16)AllEventMask;
 		}
 		
-		ClntReply (GetWindowAttributes,, "v.2ll4mss.");
+		ClntReply (GetWindowAttributes,0, "v.2ll4mss.");
 	}
 }
 
@@ -1325,7 +1324,7 @@ RQ_DestroyWindow (CLIENT * clnt, xDestroyWindowReq * q)
 	WINDOW * wind = WindFind (q->id);
 	
 	if (!wind) {
-		Bad(Window, q->id, DestroyWindow,);
+		Bad(BadWindow, q->id, X_DestroyWindow,"_");
 	
 	} else {
 		WINDOW * pwnd;
@@ -1366,14 +1365,14 @@ RQ_ReparentWindow (CLIENT * clnt, xReparentWindowReq * q)
 	WINDOW * pwnd = WindFind (q->parent);
 	
 	if (!wind) {
-		Bad(Window, q->window, ReparentWindow,"(): invalid child.");
+		Bad(BadWindow, q->window, X_ReparentWindow,"_(): invalid child.");
 	
 	} else if (!pwnd) {
-		Bad(Window, q->parent, ReparentWindow,"(): invalid parent.");
+		Bad(BadWindow, q->parent, X_ReparentWindow,"_(): invalid parent.");
 	
 	} else if (wind->Parent == pwnd) {
 	#	ifndef NODEBUG
-		PRINT (,"\33pIGNORED\33q ReparentWindow() with same parent.");
+		PRINT (0,"\33pIGNORED\33q ReparentWindow() with same parent.");
 	#	endif NODEBUG
 		
 	} else {
@@ -1381,12 +1380,12 @@ RQ_ReparentWindow (CLIENT * clnt, xReparentWindowReq * q)
 		
 		WINDOW * w = pwnd;
 		do if (w == wind) {
-			Bad(Match,, ReparentWindow,"(): parent is inferior.");
+			Bad(BadMatch,0, X_ReparentWindow,"_(): parent is inferior.");
 			return;
 		} while ((w = w->Parent));
 		//........................................................................
 		
-		PRINT (ReparentWindow," W:%lX for W:%lX", q->window, q->parent);
+		PRINT (X_ReparentWindow," W:%lX for W:%lX", q->window, q->parent);
 		
 		if ((map = wind->isMapped)) {
 			_Wind_Unmap (wind, WindVisible (wind->Parent), xFalse);
@@ -1451,10 +1450,10 @@ RQ_QueryTree (CLIENT * clnt, xQueryTreeReq * q)
 {
 	WINDOW * wind = WindFind (q->id);
 	
-	ClntReplyPtr (QueryTree, r,);
+	ClntReplyPtr (QueryTree, r,0);
 	
 	if (!wind) {
-		Bad(Window, q->id, QueryTree,);
+		Bad(BadWindow, q->id, X_QueryTree,"_");
 	
 	} else {
 		WINDOW * chld = wind->StackBot;
@@ -1463,7 +1462,7 @@ RQ_QueryTree (CLIENT * clnt, xQueryTreeReq * q)
 		size_t   bspc = clnt->oBuf.Size - (clnt->oBuf.Done + clnt->oBuf.Left)
 		              - sz_xQueryTreeReply;
 		
-		PRINT (QueryTree," W:%lX", q->id);
+		PRINT (X_QueryTree," W:%lX", q->id);
 		
 		r->root      = ROOT_WINDOW;
 		r->parent    = (wind->Parent ? wind->Parent->Id : None);

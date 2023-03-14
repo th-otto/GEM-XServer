@@ -654,7 +654,7 @@ RQ_GetKeyboardControl (CLIENT * clnt, xGetKeyboardControlReq * q)
 	// BYTE   map[32]:         bit masks start here
 	//...........................................................................
 	
-	ClntReplyPtr (GetKeyboardControl, r,);
+	ClntReplyPtr (GetKeyboardControl, r,0);
 	char conterm = Ssystem (S_GETBVAL, 0x484, 0);
 	
 	DEBUG (GetKeyboardControl," ");
@@ -669,7 +669,7 @@ RQ_GetKeyboardControl (CLIENT * clnt, xGetKeyboardControlReq * q)
 	if (r->globalAutoRepeat) memcpy (r->map, KYBD_Rep, sizeof(r->map));
 	else                     memset (r->map, 0,        sizeof(r->map));
 	
-	ClntReply (GetKeyboardControl,, "l2:");
+	ClntReply (GetKeyboardControl,0, "l2:");
 }
 
 
@@ -707,11 +707,11 @@ RQ_GetKeyboardMapping (CLIENT * clnt, xGetKeyboardMappingReq * q)
 	//...........................................................................
 	
 	if (q->firstKeyCode < KYBD_CodeMin) {
-		Bad(Value, q->firstKeyCode, GetKeyboardMapping,"(): \n"
+		Bad(BadValue, q->firstKeyCode, X_GetKeyboardMapping,"_(): \n"
 		    "          firstKeyCode %u < %u \n", q->firstKeyCode, KYBD_CodeMin);
 	
 	} else if (q->firstKeyCode + q->count -1 > KYBD_CodeMax) {
-		Bad(Value, q->count, GetKeyboardMapping,"(): \n"
+		Bad(BadValue, q->count, X_GetKeyboardMapping,"_(): \n"
 		    "          firstKeyCode + count -1 %u > %u \n",
 		           q->firstKeyCode + q->count -1, KYBD_CodeMax);
 	
@@ -749,16 +749,16 @@ RQ_ChangeKeyboardMapping (CLIENT * clnt, xChangeKeyboardMappingReq * q)
 	//...........................................................................
 	
 	if (q->firstKeyCode < KYBD_CodeMin) {
-		Bad(Value, q->firstKeyCode, ChangeKeyboardMapping,"(): \n"
+		Bad(BadValue, q->firstKeyCode, X_ChangeKeyboardMapping,"_(): \n"
 		    "          firstKeyCode %u < %u \n", q->firstKeyCode, KYBD_CodeMin);
 	
 	} else if (q->firstKeyCode + q->keyCodes -1 > KYBD_CodeMax) {
-		Bad(Value, q->keyCodes, ChangeKeyboardMapping,"(): \n"
+		Bad(BadValue, q->keyCodes, X_ChangeKeyboardMapping,"_(): \n"
 		    "          firstKeyCode + keyCodes -1 %u > %u \n",
 		           q->firstKeyCode + q->keyCodes -1, KYBD_CodeMax);
 	
 	} else if (q->keySymsPerKeyCode > numberof(*KYBD_Symbol)) {
-		Bad(Alloc,, ChangeKeyboardMapping," %i (%i*%i)",
+		Bad(BadAlloc,0, X_ChangeKeyboardMapping,"_ %i (%i*%i)",
 	       q->firstKeyCode, q->keyCodes, q->keySymsPerKeyCode);
 		
 		// no support for dynamical expansion of keySymsPerKeyCode for now!
@@ -812,11 +812,11 @@ RQ_QueryKeymap (CLIENT * clnt, xQueryKeymapReq * q)
 	// bit set to 1 indicates that the corresponding key is currently pressed.
 	//...........................................................................
 	
-	ClntReplyPtr (QueryKeymap, r,);
+	ClntReplyPtr (QueryKeymap, r,0);
 	
-	PRINT (QueryKeymap," ");
+	PRINT (X_QueryKeymap," ");
 	
 	Kybd_GetMapping (r->map);
 	
-	ClntReply (QueryKeymap,, NULL);
+	ClntReply (QueryKeymap,0, NULL);
 }

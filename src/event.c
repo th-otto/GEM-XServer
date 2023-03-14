@@ -485,7 +485,7 @@ _Evnt_Window (WINDOW * wind, CARD32 mask, CARD16 evnt, ...)
 		if (lst->Mask & mask) {
 			va_list   vap;
 			va_start (vap, evnt);
-			lst->Client->Fnct->event (lst->Client, wind, evnt, vap);
+			lst->Client->Fnct->event_send (lst->Client, wind, evnt, vap);
 			va_end (vap);
 		}
 		lst++;
@@ -514,7 +514,7 @@ _Evnt_Struct (WINDOW * wind, CARD16 evnt, ...)
 			if (lst->Mask & StructureNotifyMask) {
 				va_list   vap;
 				va_start (vap, evnt);
-				lst->Client->Fnct->event (lst->Client, wind, evnt, vap);
+				lst->Client->Fnct->event_send (lst->Client, wind, evnt, vap);
 				va_end (vap);
 			}
 			lst++;
@@ -528,7 +528,7 @@ _Evnt_Struct (WINDOW * wind, CARD16 evnt, ...)
 			if (lst->Mask & SubstructureNotifyMask) {
 				va_list   vap;
 				va_start (vap, evnt);
-				lst->Client->Fnct->event (lst->Client, wind, evnt, vap);
+				lst->Client->Fnct->event_send (lst->Client, wind, evnt, vap);
 				va_end (vap);
 			}
 			lst++;
@@ -549,7 +549,7 @@ _Evnt_Client (CLIENT * clnt, CARD16 evnt, ...)
 	} else {
 		va_list   vap;
 		va_start (vap, evnt);
-		clnt->Fnct->event (clnt, NULL, evnt, vap);
+		clnt->Fnct->event_send (clnt, NULL, evnt, vap);
 		va_end (vap);
 	}
 }
@@ -693,7 +693,7 @@ RQ_SendEvent (CLIENT * clnt, xSendEventReq * q)
 	WINDOW * wind = NULL;
 	
 	if (q->event.u.u.type < 2 || q->event.u.u.type >= LASTEvent) {
-		Bad(Value, q->event.u.u.type, SendEvent,);
+		Bad(BadValue, q->event.u.u.type, X_SendEvent,"_");
 	
 	} else if (q->destination == PointerWindow) {
 		wind = _WIND_PointerRoot;
@@ -705,7 +705,7 @@ RQ_SendEvent (CLIENT * clnt, xSendEventReq * q)
 		wind = _WIND_PointerRoot;
 	
 	} else if (!(wind = WindFind (q->destination))) {
-		Bad(Window, q->destination, SendEvent,);
+		Bad(BadWindow, q->destination, X_SendEvent,"_");
 	}
 	//...........................................................................
 	
@@ -714,7 +714,7 @@ RQ_SendEvent (CLIENT * clnt, xSendEventReq * q)
 		CARD16   num  = 0;
 		CARD32   mask = q->eventMask;
 		
-		PRINT (SendEvent," W:%lX mask=%lX #%i %s",
+		PRINT (X_SendEvent," W:%lX mask=%lX #%i %s",
 		       q->destination, q->eventMask, q->event.u.u.type,
 		       (q->propagate ? "prop." : "first"));
 	

@@ -203,7 +203,7 @@ RQ_ListFonts (CLIENT * clnt, xListFontsReq * q)
 	// CARD16 nFonts: number of names found
 	//...........................................................................
    
-	ClntReplyPtr (ListFonts, r,);
+	ClntReplyPtr (ListFonts, r,0);
 	FONTFACE  * face = _FONT_List->Next; // skip cursor font
 	char      * list = (char*)(r +1);
 	CARD16      num  = 0;
@@ -212,7 +212,7 @@ RQ_ListFonts (CLIENT * clnt, xListFontsReq * q)
 	                 - sz_xListFontsReply;
 	char        buf[500] = "";
 	
-	PRINT (ListFonts," '%.*s' max=%u",
+	PRINT (X_ListFonts," '%.*s' max=%u",
 	       q->nbytes, (char*)(q +1), q->maxNames);
 	
 	_Font_Alias (buf, patt, q->nbytes);
@@ -254,7 +254,7 @@ RQ_OpenFont (CLIENT * clnt, xOpenFontReq * q)
 	//...........................................................................
    
    if (FablFind (q->fid).p) {
-		Bad(IDChoice, q->fid, OpenFont,);
+		Bad(BadIDChoice, q->fid, X_OpenFont,"_");
 	
 	} else { //..................................................................
 		
@@ -263,7 +263,7 @@ RQ_OpenFont (CLIENT * clnt, xOpenFontReq * q)
 		unsigned    w, h;
 		char        buf[500] = "";
 
-		PRINT (OpenFont," F:%lX '%.*s'", q->fid, q->nbytes, patt);
+		PRINT (X_OpenFont," F:%lX '%.*s'", q->fid, q->nbytes, patt);
 		
 		_Font_Alias (buf, patt, q->nbytes);
 		face = *_Font_Match (buf, NULL);
@@ -288,7 +288,7 @@ RQ_OpenFont (CLIENT * clnt, xOpenFontReq * q)
 					short i, dmy[3];
 					face = _Font_Create (patt, strlen(patt), 0, xFalse, xTrue);
 					if (!face) {
-						Bad(Alloc,, OpenFont," (generic)");
+						Bad(BadAlloc,9, X_OpenFont,"_ (generic)");
 						return;
 					}
 					face->CharSet = (*prot)->CharSet;
@@ -324,11 +324,11 @@ RQ_OpenFont (CLIENT * clnt, xOpenFontReq * q)
 			}
 		}
 		if (!face) {
-			Bad(Name,, OpenFont,"('%.*s')\n          -> '%s'",
+			Bad(BadName,0, X_OpenFont,"_('%.*s')\n          -> '%s'",
 			           (int)q->nbytes, patt, buf);
 		
 		} else if (!(font = XrscCreate (FONT, q->fid, clnt->Fontables,))) {
-			Bad(Alloc,, OpenFont,);
+			Bad(BadAlloc,0, X_OpenFont,"_");
 		
 		} else {
 			font->isFont = xTrue;
@@ -365,7 +365,7 @@ RQ_CloseFont (CLIENT * clnt, xCloseFontReq * q)
 	FONT * font = FontFind (q->id);
 	
 	if (!font) {
-		Bad(Font, q->id, CloseFont,);
+		Bad(BadFont, q->id, X_CloseFont,"_");
 	
 	} else { //..................................................................
 	
@@ -398,7 +398,7 @@ RQ_QueryFont (CLIENT * clnt, xQueryFontReq * q)
 	FONT * font = FontFind (q->id);
 	
 	if (!font) {
-		Bad(Font, q->id, QueryFont,);
+		Bad(BadFont, q->id, X_QueryFont,"_");
 	
 	} else { //..................................................................
 	
@@ -407,10 +407,9 @@ RQ_QueryFont (CLIENT * clnt, xQueryFontReq * q)
 		CARD32      n_inf = face->MaxChr - face->MinChr +1;
 		xCharInfo * info;
 		short       asc[5], desc[5];
-		ClntReplyPtr (QueryFont, r,
-		              (sizeof(Atom) *2) + (n_inf * sizeof(xCharInfo)));
+		ClntReplyPtr (QueryFont, r, (sizeof(Atom) *2) + (n_inf * sizeof(xCharInfo)));
 		
-		PRINT (QueryFont," F:%lX", q->id);
+		PRINT (X_QueryFont," F:%lX", q->id);
 		
 		memcpy (&r->minBounds, &face->MinLftBr, (sizeof(xCharInfo) *2) +4);
 		r->minCharOrByte2 = face->MinChr;
@@ -527,7 +526,7 @@ RQ_QueryTextExtents (CLIENT * clnt, xQueryTextExtentsReq * q)
 	p_FONTABLE fabl = FablFind (q->fid);
 	
 	if (!fabl.p) {
-		Bad(Font, q->fid, QueryTextExtents,);
+		Bad(BadFont, q->fid, X_QueryTextExtents,"_");
 	
 	} else { //..................................................................
 	
@@ -536,9 +535,9 @@ RQ_QueryTextExtents (CLIENT * clnt, xQueryTextExtentsReq * q)
 		                - (q->oddLength ? 1 : 0);
 		short str[size];
 		short ext[8];
-		ClntReplyPtr (QueryTextExtents, r,);
+		ClntReplyPtr (QueryTextExtents, r,0);
 		
-		PRINT (QueryTextExtents,"('%*s') F:%lX", (int)size, text, q->fid);
+		PRINT (X_QueryTextExtents,"('%*s') F:%lX", (int)size, text, q->fid);
 		
 		vst_font    (GRPH_Vdi, fabl.p->FontIndex);
 		vst_effects (GRPH_Vdi, fabl.p->FontEffects);
@@ -558,7 +557,7 @@ RQ_QueryTextExtents (CLIENT * clnt, xQueryTextExtentsReq * q)
 		r->overallLeft    = face->MinLftBr; 
 		r->overallRight   = face->MaxRgtBr;
 		
-		ClntReply (QueryTextExtents,, "PPlll");
+		ClntReply (QueryTextExtents,0, "PPlll");
 	}
 }
 

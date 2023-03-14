@@ -54,22 +54,21 @@ RQ_SetPointerMapping (CLIENT * clnt, xSetPointerMappingReq * q)
 	//...........................................................................
 	
 	if (q->nElts != PNTR_MAP) {
-		Bad(Value, q->nElts, SetPointerMapping,"(): wrong button count.");
+		Bad(BadValue, q->nElts, X_SetPointerMapping,"_(): wrong button count.");
 	
 	} else if ((but[0] && (but[0] == but[1] || but[0] == but[2])) ||
 	           (but[1] &&  but[1] == but[2])) {
-		Bad(Value, (but[1] &&  but[1] == but[2] ? but[1] : but[0]),
-		           SetPointerMapping,"():\n          duplicate button %i,%i,%i.",
+		Bad(BadValue, (but[1] &&  but[1] == but[2] ? but[1] : but[0]), X_SetPointerMapping,"_():\n          duplicate button %i,%i,%i.",
 		           but[0], but[1], but[2]);
 	
 	} else { //..................................................................
 	
-		ClntReplyPtr (SetPointerMapping, r,);
+		ClntReplyPtr (SetPointerMapping, r,0);
 		
 		if (MAIN_But_Mask) {
 			DEBUG (SetPointerMapping," ignored %i,%i,%i.", but[0], but[1], but[2]);
 			r->success = MappingBusy;
-			ClntReply (SetPointerMapping,,NULL);
+			ClntReply (SetPointerMapping,0,NULL);
 			
 		} else {
 			int i;
@@ -84,7 +83,7 @@ RQ_SetPointerMapping (CLIENT * clnt, xSetPointerMappingReq * q)
 				}
 			}
 			r->success = MappingSuccess;
-			ClntReply (SetPointerMapping,,NULL);
+			ClntReply (SetPointerMapping,0,NULL);
 			
 			EvntMappingNotify (MappingPointer, 0,0);
 		}
@@ -127,8 +126,7 @@ RQ_ChangePointerControl (CLIENT * clnt, xChangePointerControlReq * q)
 	//...........................................................................
 	
 	if (q->accelNum < -1  ||  q->accelDenum <= 0) {
-		Bad(Value, (q->accelNum < -1 ? q->accelNum : q->accelDenum),
-		           ChangePointerControl,"(): %s.",
+		Bad(BadValue, (q->accelNum < -1 ? q->accelNum : q->accelDenum),  X_ChangePointerControl,"_(): %s.",
 		           (q->accelNum < -1 ? "numerator" : "denominator"));
 		
 	} else {
@@ -149,12 +147,12 @@ RQ_GetPointerControl (CLIENT * clnt, xGetPointerControlReq * q)
 	// CARD16 threshold:
 	//...........................................................................
 	
-	ClntReplyPtr (GetPointerControl, r,);
+	ClntReplyPtr (GetPointerControl, r,0);
 	
 	DEBUG (GetPointerControl," ");
 	
 	r->accelNumerator   = 1;
 	r->accelDenominator = 1;
 	r->threshold        = 1;
-	ClntReply (GetPointerControl,, ":.");
+	ClntReply (GetPointerControl,0, ":.");
 }

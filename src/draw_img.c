@@ -34,22 +34,21 @@ RQ_PutImage (CLIENT * clnt, xPutImageReq * q)
 	GC       * gc   = GcntFind (q->gc);
 	
 	if (!draw.p) {
-		Bad(Drawable, q->drawable, PutImage,);
+		Bad(BadDrawable, q->drawable, X_PutImage,"_");
 		
 	} else if (!gc) {
-		Bad(GC, q->gc, PutImage,);
+		Bad(BadGC, q->gc, X_PutImage,"_");
 	
 	} else if ((q->format == XYBitmap  &&  q->depth != 1) ||
 	           (q->format != XYBitmap  &&  q->depth != draw.p->Depth)) {
-		Bad(Match,, PutImage, /* q->depth */);
+		Bad(BadMatch,0, X_PutImage, "_");
 	
 	} else if ((q->format == ZPixmap  &&  q->leftPad) ||
 	           q->leftPad >= PADD_BITS) {
-		Bad(Match,, PutImage, /* q->leftPad */);
+		Bad(BadMatch,0, X_PutImage, "_");
 	
 	} else if ((short)q->width <= 0  ||  (short)q->height <= 0) {
-		Bad(Value, (short)((short)q->width <= 0 ? q->width : q->height),
-		           PutImage," width = %i height = %i",
+		Bad(BadValue, (short)((short)q->width <= 0 ? q->width : q->height), X_PutImage,"_ width = %i height = %i",
 		           (short)q->width, (short)q->height);
 	
 	} else {
@@ -149,14 +148,14 @@ RQ_GetImage (CLIENT * clnt, xGetImageReq * q)
 	BOOL       ok     = xFalse;
 	
 	if ((q->drawable & ~RID_MASK) && !(draw = DrawFind(q->drawable)).p) {
-		Bad(Drawable, q->drawable, GetImage,);
+		Bad(BadDrawable, q->drawable, X_GetImage,"_");
 		
 	} else if (!(q->drawable & ~RID_MASK) &&
 	           !wind_get_work (q->drawable & 0x7FFF, (GRECT*)&rec[1])) {
-		Bad(Drawable, q->drawable, GetImage,);
+		Bad(BadDrawable, q->drawable, X_GetImage,"_");
 		
 	} else if (q->format != XYPixmap  &&  q->format != ZPixmap) {
-		Bad(Value, q->format, GetImage,);
+		Bad(BadValue, q->format, X_GetImage,"_");
 	
 	} else {
 		short xy, w, h;
@@ -171,7 +170,7 @@ RQ_GetImage (CLIENT * clnt, xGetImageReq * q)
 		}
 		if (q->x < xy || q->x + q->width  > w ||
 		    q->y < xy || q->y + q->height > h) {
-			Bad(Match,, GetImage,);
+			Bad(BadMatch,0, X_GetImage,"_");
 		
 		} else {
 			rec[1].rd = rec[0].rd;
@@ -185,8 +184,7 @@ RQ_GetImage (CLIENT * clnt, xGetImageReq * q)
 		ClntReplyPtr (GetImage, r, size);
 		
 		if (!r) {
-			Bad(Match,, GetImage,
-			    " memory exhausted in output buffer (%li).", size);
+			Bad(BadMatch,0, X_GetImage, "_ memory exhausted in output buffer (%li).", size);
 		
 		} else {
 			MFDB   dst = { (r +1), q->width, q->height, 
@@ -346,16 +344,16 @@ RQ_CopyArea (CLIENT * clnt, xCopyAreaReq * q)
 	GC       * gc    = GcntFind(q->gc);
 	
 	if (!src_d.p) {
-		Bad(Drawable, q->srcDrawable, CopyArea,);
+		Bad(BadDrawable, q->srcDrawable, X_CopyArea,"_");
 		
 	} else if (!dst_d.p) {
-		Bad(Drawable, q->dstDrawable, CopyArea,);
+		Bad(BadDrawable, q->dstDrawable, X_CopyArea,"_");
 		
 	} else if (!gc) {
-		Bad(GC, q->gc, CopyArea,);
+		Bad(BadGC, q->gc, X_CopyArea,"_");
 	
 	} else if (src_d.p->Depth != dst_d.p->Depth) {
-		Bad(Match,, CopyArea,"(%c:%X,%c:%X):\n           depth %u != %u.",
+		Bad(BadMatch,0, X_CopyArea,"_(%c:%X,%c:%X):\n           depth %u != %u.",
 		            (src_d.p->isWind ? 'W' : 'P'), src_d.p->Id,
 		            (dst_d.p->isWind ? 'W' : 'P'), dst_d.p->Id,
 		            src_d.p->Depth, dst_d.p->Depth);
@@ -365,8 +363,7 @@ if (gc->GraphExpos) {
 	EvntNoExposure (clnt, dst_d.p->Id, X_CopyArea);
 }
 return;
-		Bad(Value, (short)((short)q->width <= 0 ? q->width : q->height),
-		           CopyArea,"(%c:%X,%c:%X) [%i,%i] -> [%i,%i] \n"
+		Bad(BadValue, (short)((short)q->width <= 0 ? q->width : q->height), X_CopyArea,"_(%c:%X,%c:%X) [%i,%i] -> [%i,%i] \n"
 		           "           width = %i height = %i",
 		           (src_d.p->isWind ? 'W' : 'P'), src_d.p->Id,
 		           (dst_d.p->isWind ? 'W' : 'P'), dst_d.p->Id,
@@ -552,7 +549,7 @@ return;
 		if (sect) WindClipOff();
 		
 		if (debug) {
-			PRINT (CopyArea," G:%lX %c:%lX [%i,%i/%u,%u] to %c:%lX (%i,%i)\n"
+			PRINT (X_CopyArea," G:%lX %c:%lX [%i,%i/%u,%u] to %c:%lX (%i,%i)\n"
 				             "          [%i,%i/%i,%i] -> [%i,%i/%i,%i]  %c <%02X>",
 			       q->gc, (src_d.p->isWind ? 'W' : 'P'), q->srcDrawable,
 			       q->srcX, q->srcY, q->width, q->height,
@@ -590,20 +587,19 @@ RQ_CopyPlane (CLIENT * clnt, xCopyPlaneReq * q)
 	int        plane;
 	
 	if (!src_d.p) {
-		Bad(Drawable, q->srcDrawable, CopyPlane,);
+		Bad(BadDrawable, q->srcDrawable, X_CopyPlane,"_");
 		
 	} else if (!dst_d.p) {
-		Bad(Drawable, q->dstDrawable, CopyPlane,);
+		Bad(BadDrawable, q->dstDrawable, X_CopyPlane,"_");
 		
 	} else if (!gc) {
-		Bad(GC, q->gc, CopyPlane,);
+		Bad(BadGC, q->gc, X_CopyPlane,"_");
 	
 	} else if ((plane = _mask2plane(q->bitPlane, src_d.p->Depth)) < 0) {
-		Bad(Value, q->bitPlane, CopyPlane," bit-plane = %lX", q->bitPlane);
+		Bad(BadValue, q->bitPlane, X_CopyPlane,"_ bit-plane = %lX", q->bitPlane);
 	
 	} else if ((short)q->width <= 0  ||  (short)q->height <= 0) {
-		Bad(Value, (short)((short)q->width <= 0 ? q->width : q->height),
-		           CopyPlane," width = %i height = %i",
+		Bad(BadValue, (short)((short)q->width <= 0 ? q->width : q->height), X_CopyPlane,"_ width = %i height = %i",
 		           (short)q->width, (short)q->height);
 	
 	} else {

@@ -923,10 +923,10 @@ RQ_ClearArea (CLIENT * clnt, xClearAreaReq * q)
 	BOOL     evn;
 	
 	if (!wind) {
-		Bad(Window, q->window, ClearArea,);
+		Bad(BadWindow, q->window, X_ClearArea,"_");
 	
 	} else if (!wind->ClassInOut) {
-		Bad(Match,, ClearArea,"(W:%X) class InputOnly", wind->Id);
+		Bad(BadMatch,0, X_ClearArea,"_(W:%X) class InputOnly", wind->Id);
 	
 	} else if ((evn = (q->exposures && (wind->u.List.AllMasks & ExposureMask)))
 	           || wind->hasBackGnd) {

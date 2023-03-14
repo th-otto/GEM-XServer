@@ -47,13 +47,13 @@ _Clnt__EvalSelect (CLIENT * clnt, xReq * q)
 	clnt->SeqNum++;
 	
 	if (q->reqType >= FirstExtensionError) {
-		PRINT (,"Invalid extension request '%0x'.", q->reqType);
+		PRINT (0,"Invalid extension request '%0x'.", q->reqType);
 	printf("!!! %p %p \n", q, clnt->iBuf.Mem);
 	exit(1);
 		longjmp (CLNT_Error, 2);
 	}
 	if (q->length > CNFG_MaxReqLength || !q->length) {
-		PRINT (,"\33pError\33q Bad request length %u/%lu in '%s'.",
+		PRINT (0,"\33pError\33q Bad request length %u/%lu in '%s'.",
 		       q->length, CNFG_MaxReqLength, RequestTable[q->reqType].Name);
 		longjmp (CLNT_Error, 2);
 	}

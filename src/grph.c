@@ -1121,7 +1121,7 @@ FT_Grph_ShiftR2P_LSB (const PXY *origin, GRECT *rct, size_t num)
 void
 RQ_QueryBestSize (CLIENT * clnt, xQueryBestSizeReq * q)
 {
-	ClntReplyPtr (QueryBestSize, r,);
+	ClntReplyPtr (QueryBestSize, r,0);
 	
 	PRINT (- X_QueryBestSize," #%i of D:%lX (%u/%u)",
 	       q->class, q->drawable, q->width, q->height);
@@ -1129,5 +1129,5 @@ RQ_QueryBestSize (CLIENT * clnt, xQueryBestSizeReq * q)
 	r->width  = 16;
 	r->height = 16;
 	
-	ClntReply (QueryBestSize,, "P");
+	ClntReply (QueryBestSize,0, "P");
 }

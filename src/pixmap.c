@@ -272,20 +272,19 @@ RQ_CreatePixmap (CLIENT * clnt, xCreatePixmapReq * q)
 	PIXMAP * pmap = NULL;
 	
 	if (DrawFind(q->pid).p) {
-		Bad(IDChoice, q->pid, CreatePixmap,);
+		Bad(BadIDChoice, q->pid, X_CreatePixmap,"_");
 		
 	} else if ((short)q->width <= 0  ||  (short)q->height <= 0) {
-		Bad(Value, (short)((short)q->width <= 0 ? q->width : q->height),
-		           CreatePixmap," width = %i height = %i",
+		Bad(BadValue, (short)((short)q->width <= 0 ? q->width : q->height), X_CreatePixmap,"_ width = %i height = %i",
 		           (short)q->width, (short)q->height);
 	
 	} else if (!q->depth) {
-		Bad(Value, 0, CreatePixmap," depth = %i", q->depth);
+		Bad(BadValue, 0, X_CreatePixmap,"_ depth = %i", q->depth);
 	
 	// else check depth 
 	
 	} else if (!(pmap = XrscCreate (PIXMAP, q->pid, clnt->Drawables, size -2))) {
-		Bad(Alloc,, CreatePixmap,);
+		Bad(BadAlloc,0, X_CreatePixmap,"_");
 	
 	} else {
 		DEBUG (CreatePixmap," P:%lX [%i: %i(%u),%i] of D:%lX",
@@ -315,7 +314,7 @@ RQ_FreePixmap (CLIENT * clnt, xFreePixmapReq * q)
 	p_PIXMAP pmap = PmapFind (q->id);
 	
 	if (!pmap) {
-		Bad(Pixmap, q->id, FreePixmap,);
+		Bad(BadPixmap, q->id, X_FreePixmap,"_");
 	
 	} else {
 		DEBUG (FreePixmap," P:%lX", q->id);

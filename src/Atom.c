@@ -187,7 +187,7 @@ RQ_InternAtom (CLIENT * clnt, xInternAtomReq * q)
 	//...........................................................................
 	
 	if (!q->nbytes) {
-		Bad(Value, 0, InternAtom, "():\n          zero length string.");
+		Bad(BadValue, 0, X_InternAtom, "_():\n          zero length string.");
 	
 	} else { //..................................................................
 		
@@ -197,19 +197,19 @@ RQ_InternAtom (CLIENT * clnt, xInternAtomReq * q)
 		Atom   atom = AtomGet (name, q->nbytes, q->onlyIfExists);
 		
 		if (atom == None  &&  !q->onlyIfExists) {
-			Bad(Alloc,, InternAtom, "('%.*s'):\n"
+			Bad(BadAlloc,0, X_InternAtom, "_('%.*s'):\n"
 			            "          %s.", q->nbytes, name,
 			            (ATOM_Count >= MAX_ATOM
 			             ? "maximum number reached" : "memory exhausted"));
 		
 		} else {
-			ClntReplyPtr (InternAtom, r,);
+			ClntReplyPtr (InternAtom, r,0);
 			
 			DEBUG (InternAtom, "('%.*s') -> %lu%s",
 			       q->nbytes, name, atom, (cnt < ATOM_Count < 0 ? "+" : ""));
 			
 			r->atom = atom;
-			ClntReply (InternAtom,, "a");
+			ClntReply (InternAtom,0, "a");
 		}
 	}
 }
@@ -228,7 +228,7 @@ RQ_GetAtomName (CLIENT * clnt, xGetAtomNameReq * q)
 	//...........................................................................
 	
 	if (!AtomValid(q->id)) {
-		Bad(Atom, q->id, GetAtomName,);
+		Bad(BadAtom, q->id, X_GetAtomName,"_");
 	
 	} else { //..................................................................
 		

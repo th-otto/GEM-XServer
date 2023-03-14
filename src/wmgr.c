@@ -272,7 +272,7 @@ WmgrActivate (BOOL onNoff)
 					WmgrWindMap (w, &dummy);
 				} else {
 				#	define clnt &_WMGR_Client
-					PRINT (ReparentWindow, "(W:%X) active", w->Id);
+					PRINT (X_ReparentWindow, "(W:%X) active", w->Id);
 				#	undef clnt
 				}
 				wind_delete (hdl);
@@ -308,7 +308,7 @@ WmgrActivate (BOOL onNoff)
 						wind_get_grect (hdl, WF_UNICONIFY, &curr);
 					}
 				#	define clnt &_WMGR_Client
-					PRINT (ReparentWindow, "(W:%X) revert", w->Id);
+					PRINT (X_ReparentWindow, "(W:%X) revert", w->Id);
 				#	undef clnt
 					if       (w->WinGravity == NorthWestGravity ||
 					          w->WinGravity == NorthGravity     ||
@@ -343,7 +343,7 @@ WmgrActivate (BOOL onNoff)
 					}
 				} else {
 				#	define clnt &_WMGR_Client
-					PRINT (ReparentWindow, "(W:%X) passive", w->Id);
+					PRINT (X_ReparentWindow, "(W:%X) passive", w->Id);
 				#	undef clnt
 				}
 				wind_delete (hdl);
@@ -539,7 +539,7 @@ WmgrWindMap (WINDOW * wind, GRECT * curr)
 			int    dx = wind->Rect.g_x - curr->g_x, dy = wind->Rect.g_y - curr->g_y, d;
 			PXY    pos;
 		#	define clnt &_WMGR_Client
-			PRINT (ReparentWindow, "(W:%X) mapped", wind->Id);
+			PRINT (X_ReparentWindow, "(W:%X) mapped", wind->Id);
 		#	undef clnt
 			if       (wind->WinGravity == NorthWestGravity ||
 			          wind->WinGravity == WestGravity      ||
@@ -1363,7 +1363,7 @@ FT_Wmgr_reply (p_CLIENT clnt, CARD32 size, const char * form)
 	
 	_WMGR_Client.oBuf.Done = Align(size);
 	
-	PRINT (,"reply to '%s'",
+	PRINT (0,"reply to '%s'",
 	       (req < 0  ? "<n/a>" :
 	        req > 0 && req < FirstExtensionError ? RequestTable[req].Name :
 	        "<invalid>"));

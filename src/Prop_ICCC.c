@@ -154,7 +154,7 @@ _Prop_ICCC (WINDOW * wind, PROPERTY * prop, BOOL changed)
 						
 						default: {
 							CLIENT * clnt = ClntFind (wind->Id);
-							PRINT (,"-_Prop_ICCC(W:%X): unknown WM_PROTOCOL ",
+							PRINT (0,"-_Prop_ICCC(W:%X): unknown WM_PROTOCOL ",
 							        wind->Id);
 							if (AtomValid(*atom)) {
 								printf ("'%s'.\n", ATOM_Table[*atom]->Name);

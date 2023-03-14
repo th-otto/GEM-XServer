@@ -14,6 +14,7 @@
 
 #include "xrsc.h"
 #include <stdarg.h>
+#include <X11/Xproto.h>
 
 
 struct _xReq;
@@ -42,19 +43,14 @@ typedef struct
 /* --- Request Callback Functions --- */
 typedef void (*RQSTCB)(p_CLIENT, p_xReq);
 
-#ifndef __p_xArc
-#define __p_xArc
-struct _xArc;
-typedef struct _xArc *p_xArc;
-#endif
 typedef struct
 {
-	void (*reply)(p_CLIENT, CARD32 size, const char *form);
-	void (*error)(p_CLIENT, CARD8 code, CARD8 majOp, CARD16 minOp, CARD32 val);
-	void (*event)(p_CLIENT, p_WINDOW, CARD16 evnt, va_list);
-	void (*shift_arc)(const PXY *origin, p_xArc arc, size_t num, short mode);
-	void (*shift_pnt)(const PXY *origin, PXY *pxy, size_t num, short mode);
-	void (*shift_r2p)(const PXY *origin, GRECT *rct, size_t num);
+	void (*clnt_reply)(p_CLIENT, CARD32 size, const char *form);
+	void (*clnt_error)(p_CLIENT, CARD8 code, CARD8 majOp, CARD16 minOp, CARD32 val);
+	void (*event_send)(p_CLIENT, p_WINDOW, CARD16 evnt, va_list);
+	void (*grph_shift_arc)(const PXY *origin, xArc *arc, size_t num, short mode);
+	void (*grph_shift_pnt)(const PXY *origin, PXY *pxy, size_t num, short mode);
+	void (*grph_shift_r2p)(const PXY *origin, GRECT *rct, size_t num);
 } FUNCTABL;
 
 
@@ -94,12 +90,13 @@ extern const REQUEST RequestTable[ /*FirstExtensionError */ ];
 
 extern CLIENT *CLNT_Base;
 extern CARD16 CLNT_BaseNum;
+extern CLIENT *CLNT_Requestor;
 
+typedef XRSCPOOL(CLIENT, CLNT_POOL, 4);
+extern CLNT_POOL CLNT_Pool;
 
 static inline CLIENT *ClntFind(CARD32 id)
 {
-	extern XRSCPOOL(CLIENT, CLNT_Pool, 0);
-
 	return Xrsc(CLIENT, RID_Base(id), CLNT_Pool);
 }
 
@@ -113,19 +110,18 @@ void ClntError(CLIENT *, int err, CARD32 val, int req, const char *form, ...) __
 
 void *ClntOutBuffer(O_BUFF *buf, size_t need, size_t copy_n, BOOL refuse);
 
-#define ClntReplyPtr(T,r,s)  x##T##Reply *r = _clnt_r_ptr (&clnt->oBuf, sz_x##T##Reply + (s+0))
-#define ClntReply(T,s,f)    clnt->Fnct->reply (clnt, sz_x##T##Reply + (s +0), f)
+#define ClntReplyPtr(T,r,s)  x##T##Reply *r = _clnt_r_ptr (&clnt->oBuf, sz_x##T##Reply + (s))
+#define ClntReply(T,s,f)    clnt->Fnct->clnt_reply (clnt, sz_x##T##Reply + (s), f)
 
 
-#define X_   0
-#define PRINT( req, frm, args...)   ClntPrint (clnt, X_##req, frm, ## args)
+#define PRINT( req, frm, args...)   ClntPrint (clnt, req, frm, ## args)
 
 #ifndef NODEBUG
 #define Bad( err, val, req, frm, args...) \
-	ClntError (clnt, Bad##err, val +0, X_##req, "_" frm, ## args)
+	ClntError (clnt, err, val, req, frm, ## args)
 #else
 #define Bad( err, val, req, frm, args...) \
-	clnt->Fnct->error (clnt, Bad##err, X_##req,0, val +0)
+	clnt->Fnct->clnt_error (clnt, err, req,0, val)
 #endif
 
 #ifdef TRACE

@@ -138,14 +138,14 @@ RQ_GrabPointer (CLIENT * clnt, xGrabPointerReq * q)
 	CURSOR * crsr = NULL;
 	
 	if (!wind) {
-		Bad(Window, q->grabWindow, GrabPointer,);
+		Bad(BadWindow, q->grabWindow, X_GrabPointer,"_");
 	
 	} else if (q->cursor && !(crsr = CrsrGet(q->cursor))) {
-		Bad(Cursor, q->cursor, GrabPointer,);
+		Bad(BadCursor, q->cursor, X_GrabPointer,"_");
 	
 	} else { //..................................................................
 	
-		ClntReplyPtr (GrabPointer, r,);
+		ClntReplyPtr (GrabPointer, r,0);
 		CARD32 time = (q->time ? q->time : MAIN_TimeStamp);
 		
 		DEBUG (GrabPointer," W:%lX(W:%lX) evnt=0x%04X/%i mode=%i/%i"
@@ -165,7 +165,7 @@ RQ_GrabPointer (CLIENT * clnt, xGrabPointerReq * q)
 		} else {
 			r->status = GrabSuccess;
 		}
-		ClntReply (GrabPointer,, NULL);
+		ClntReply (GrabPointer,0, NULL);
 		
 		if (r->status == GrabSuccess) {
 			_Wind_PgrabSet (clnt, wind, crsr,
@@ -193,7 +193,7 @@ RQ_ChangeActivePointerGrab (CLIENT * clnt, xChangeActivePointerGrabReq * q)
 	CARD32   time = (q->time ? q->time : MAIN_TimeStamp);
 	
 	if (q->cursor && !(crsr = CrsrGet(q->cursor))) {
-		Bad(Cursor, q->cursor, ChangeActivePointerGrab,);
+		Bad(BadCursor, q->cursor, X_ChangeActivePointerGrab,"_");
 	
 	} else { //..................................................................
 	
@@ -270,10 +270,10 @@ RQ_GrabButton (CLIENT * clnt, xGrabButtonReq * q)
 	CURSOR  * crsr = NULL;
 	
 	if (!wind) {
-		Bad(Window, q->grabWindow, GrabButton,);
+		Bad(BadWindow, q->grabWindow, X_GrabButton,"_");
 	
 	} else if (q->cursor && !(crsr = CrsrGet(q->cursor))) {
-		Bad(Cursor, q->cursor, GrabButton,);
+		Bad(BadCursor, q->cursor, X_GrabButton,"_");
 	
 	} else {
 		BTNGRAB * grab = wind->ButtonGrab;
@@ -287,13 +287,13 @@ RQ_GrabButton (CLIENT * clnt, xGrabButtonReq * q)
 		if (grab) {
 			if (grab->Client != clnt) {
 				grab = NULL;
-				Bad(Access,, GrabButton,);
+				Bad(BadAccess,0, X_GrabButton,"_");
 			
 			} else if (grab->Cursor  &&  grab->Cursor != crsr) {
 				CrsrFree (grab->Cursor, NULL);
 			}
 		} else if (!(grab = malloc (sizeof(BTNGRAB)))) {
-			Bad(Alloc,, GrabButton,);
+			Bad(BadAlloc,0, X_GrabButton,"_");
 		
 		} else { //...............................................................
 			grab->Next       = wind->ButtonGrab;
@@ -331,7 +331,7 @@ RQ_UngrabButton (CLIENT * clnt, xUngrabButtonReq * q)
 	WINDOW  * wind = WindFind (q->grabWindow);
 	
 	if (!wind) {
-		Bad(Window, q->grabWindow, GrabButton,);
+		Bad(BadWindow, q->grabWindow, X_GrabButton,"_");
 	
 	} else { //..................................................................
 		BTNGRAB ** pGrab = &wind->ButtonGrab;
@@ -360,10 +360,10 @@ RQ_GrabKeyboard (CLIENT * clnt, xGrabKeyboardReq * q)
 	WINDOW * wind = WindFind (q->grabWindow);
 	
 	if (!wind) {
-		Bad(Window, q->grabWindow, GrabKeyboard,);
+		Bad(BadWindow, q->grabWindow, X_GrabKeyboard,"_");
 	
 	} else {
-		ClntReplyPtr (GrabKeyboard, r,);
+		ClntReplyPtr (GrabKeyboard, r,0);
 		
 		PRINT (- X_GrabKeyboard," W:%lX ownr=%i mode=%i/%i T:%lX",
 		       q->grabWindow, q->ownerEvents,
@@ -371,7 +371,7 @@ RQ_GrabKeyboard (CLIENT * clnt, xGrabKeyboardReq * q)
 		
 		r->status = GrabSuccess;
 		
-		ClntReply (GrabKeyboard,, NULL);
+		ClntReply (GrabKeyboard,0, NULL);
 	}
 }
 
@@ -410,12 +410,12 @@ RQ_SetInputFocus (CLIENT * clnt, xSetInputFocusReq * q)
 void
 RQ_GetInputFocus (CLIENT * clnt, xGetInputFocusReq * q)
 {
-	ClntReplyPtr (GetInputFocus, r,);
+	ClntReplyPtr (GetInputFocus, r,0);
 	
 //	PRINT (- X_GetInputFocus," ");
 	
 	r->revertTo = None;
 	r->focus    = PointerRoot; //None;
 	
-	ClntReply (GetInputFocus,, "w");
+	ClntReply (GetInputFocus,0, "w");
 }

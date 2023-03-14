@@ -71,8 +71,8 @@ _Gcnt_setup (CLIENT * clnt, GC * gc, CARD32 mask, CARD32 * val, CARD8 req)
 			gc->Function = funct;
 			DEBUG (,"+- func=%u", funct);
 		} else {
-			PRINT(," ");
-			Bad(Value, funct, +req, "          invalid function code.");
+			PRINT(0," ");
+			Bad(BadValue, funct, req, "_          invalid function code.");
 			return;
 		}
 	}
@@ -98,8 +98,8 @@ _Gcnt_setup (CLIENT * clnt, GC * gc, CARD32 mask, CARD32 * val, CARD8 req)
 			gc->LineStyle = style;
 			DEBUG (,"+- lsty=%u", style);
 		} else {
-			PRINT(," ");
-			Bad(Value, style, +req, "          invalid line-style.");
+			PRINT(0," ");
+			Bad(BadValue, style, req, "_          invalid line-style.");
 			return;
 		}
 	}
@@ -109,8 +109,8 @@ _Gcnt_setup (CLIENT * clnt, GC * gc, CARD32 mask, CARD32 * val, CARD8 req)
 			gc->CapStyle = style;
 			DEBUG (,"+- csty=%u", style);
 		} else {
-			PRINT(," ");
-			Bad(Value, style, +req, "          invalid cap-style.");
+			PRINT(0," ");
+			Bad(BadValue, style, req, "_          invalid cap-style.");
 			return;
 		}
 	}
@@ -120,8 +120,8 @@ _Gcnt_setup (CLIENT * clnt, GC * gc, CARD32 mask, CARD32 * val, CARD8 req)
 			gc->JoinStyle = style;
 			DEBUG (,"+- jsty=%u", style);
 		} else {
-			PRINT(," ");
-			Bad(Value, style, +req, "          invalid join-style.");
+			PRINT(0," ");
+			Bad(BadValue, style, req, "_          invalid join-style.");
 			return;
 		}
 	}
@@ -131,8 +131,8 @@ _Gcnt_setup (CLIENT * clnt, GC * gc, CARD32 mask, CARD32 * val, CARD8 req)
 			gc->FillStyle = style;
 			DEBUG (,"+- fsty=%u", style);
 		} else {
-			PRINT(," ");
-			Bad(Value, style, +req, "          invalid fill-style.");
+			PRINT(0," ");
+			Bad(BadValue, style, req, "_          invalid fill-style.");
 			return;
 		}
 	}
@@ -142,20 +142,20 @@ _Gcnt_setup (CLIENT * clnt, GC * gc, CARD32 mask, CARD32 * val, CARD8 req)
 			gc->FillRule = rule;
 			DEBUG (,"+- frul=%u", rule);
 		} else {
-			PRINT(," ");
-			Bad(Value, rule, +req, "          invalid fill-rule.");
+			PRINT(0," ");
+			Bad(BadValue, rule, req, "_          invalid fill-rule.");
 			return;
 		}
 	}
 	if (mask & GCTile) {
 		PIXMAP * tile = PmapFind (*val);
 		if (!tile) {
-			PRINT(," ");
-			Bad(Pixmap, *val, +req, "          invalid tile.");
+			PRINT(0," ");
+			Bad(BadPixmap, *val, req, "_          invalid tile.");
 			return;
 		} else if (tile->Depth != gc->Depth) {
-			PRINT(," ");
-			Bad(Match,, +req, "          Tile depth %u not %u.",
+			PRINT(0," ");
+			Bad(BadMatch,0, req, "_          Tile depth %u not %u.",
 			                  tile->Depth, gc->Depth);
 			return;
 		} else {
@@ -170,12 +170,12 @@ _Gcnt_setup (CLIENT * clnt, GC * gc, CARD32 mask, CARD32 * val, CARD8 req)
 	if (mask & GCStipple) {
 		PIXMAP * stip = PmapFind (*val);
 		if (!stip) {
-			PRINT(," ");
-			Bad(Pixmap, *val, +req, "          invalid stipple.");
+			PRINT(0," ");
+			Bad(BadPixmap, *val, req, "_          invalid stipple.");
 			return;
 		} else if (stip->Depth != 1) {
-			PRINT(," ");
-			Bad(Match,, +req, "          Stipple depth %u.", stip->Depth);
+			PRINT(0," ");
+			Bad(BadMatch,0, req, "_          Stipple depth %u.", stip->Depth);
 			return;
 		} else {
 			DEBUG (,"+- stip=0x%lX", *val);
@@ -196,7 +196,7 @@ _Gcnt_setup (CLIENT * clnt, GC * gc, CARD32 mask, CARD32 * val, CARD8 req)
 	}
 	if (mask & GCFont) {
 		if (!FontValues ((p_FONTABLE)gc, *val)) {
-			Bad(Font, *val, +req,);
+			Bad(BadFont, *val, req,"_");
 		} else {
 			DEBUG (,"+- font=0x%lX", *val);
 		}
@@ -208,8 +208,8 @@ _Gcnt_setup (CLIENT * clnt, GC * gc, CARD32 mask, CARD32 * val, CARD8 req)
 			gc->SubwindMode = mode;
 			DEBUG (,"+- subw=%u", mode);
 		} else {
-			PRINT(," ");
-			Bad(Value, mode, +req, "          invalid subwindow-mode.");
+			PRINT(0," ");
+			Bad(BadValue, mode, req, "_          invalid subwindow-mode.");
 			return;
 		}
 	}
@@ -219,8 +219,8 @@ _Gcnt_setup (CLIENT * clnt, GC * gc, CARD32 mask, CARD32 * val, CARD8 req)
 			gc->GraphExpos = mode;
 			DEBUG (,"+- exps=%u", mode);
 		} else {
-			PRINT(," ");
-			Bad(Value, mode, +req, "          invalid graphics-exposures.");
+			PRINT(0," ");
+			Bad(BadValue, mode, req, "_          invalid graphics-exposures.");
 			return;
 		}
 	}
@@ -238,12 +238,12 @@ _Gcnt_setup (CLIENT * clnt, GC * gc, CARD32 mask, CARD32 * val, CARD8 req)
 		} else {
 			PIXMAP * clip = PmapFind (*val);
 			if (!clip) {
-				PRINT(," ");
-				Bad(Pixmap, *val, +req, "          invalid clip-mask.");
+				PRINT(0," ");
+				Bad(BadPixmap, *val, req, "_          invalid clip-mask.");
 				return;
 			} else if (clip->Depth != 1) {
-				PRINT(," ");
-				Bad(Match,, +req, "          clip-mask depth %u.", clip->Depth);
+				PRINT(0," ");
+				Bad(BadMatch,0, req, "_          clip-mask depth %u.", clip->Depth);
 				return;
 			} else {
 				DEBUG (,"+- clip=P:%X", clip->Id);
@@ -266,8 +266,8 @@ _Gcnt_setup (CLIENT * clnt, GC * gc, CARD32 mask, CARD32 * val, CARD8 req)
 			gc->ArcMode = mode;
 			DEBUG (,"+- arcm=%u", mode);
 		} else {
-			PRINT(," ");
-			Bad(Value, mode, +req, "          invalid arc-mode.");
+			PRINT(0," ");
+			Bad(BadValue, mode, req, "_          invalid arc-mode.");
 			return;
 		}
 	}
@@ -295,16 +295,16 @@ RQ_CreateGC (CLIENT * clnt, xCreateGCReq * q)
 	p_DRAWABLE draw;
 	
 	if (GcntFind (q->gc)) {
-		Bad(IDChoice, q->gc, CreateGC,);
+		Bad(BadIDChoice, q->gc, X_CreateGC,"_");
 	
 	} else if (!(draw = DrawFind (q->drawable)).p) {
-		Bad(Drawable, q->drawable, CreateGC,);
+		Bad(BadDrawable, q->drawable, X_CreateGC,"_");
 	
 	} else if (q->mask & ~((2uL << GCLastBit) -1)) {
-		Bad(Value, q->mask, CreateGC, "invalid value mask 0x%lX.", q->mask);
+		Bad(BadValue, q->mask, X_CreateGC, "_invalid value mask 0x%lX.", q->mask);
 	
 	} else if (!(gc = XrscCreate (GC, q->gc, clnt->Fontables,))) {
-		Bad(Alloc,, CreateGC,);
+		Bad(BadAlloc,0, X_CreateGC,"_");
 	
 	} else { //..................................................................
 	
@@ -359,10 +359,10 @@ RQ_ChangeGC (CLIENT * clnt, xChangeGCReq * q)
 	GC * gc = GcntFind (q->gc);
 	
 	if (!gc) {
-		Bad(GC, q->gc, ChangeGC,);
+		Bad(BadGC, q->gc, X_ChangeGC,"_");
 	
 	} else if (q->mask & ~((2uL << GCLastBit) -1)) {
-		Bad(Value, q->mask, ChangeGC, "invalid value mask 0x%lX.", q->mask);
+		Bad(BadValue, q->mask, X_ChangeGC, "_invalid value mask 0x%lX.", q->mask);
 	
 	} else { //..................................................................
 		
@@ -401,17 +401,17 @@ RQ_CopyGC (CLIENT * clnt, xCopyGCReq * q)
 	GC * dst = GcntFind (q->dstGC);
 	
 	if (!src) {
-		Bad(GC, q->srcGC, CopyGC,": invalid source.");
+		Bad(BadGC, q->srcGC, X_CopyGC,"_: invalid source.");
 	
 	} else if (!dst) {
-		Bad(GC, q->dstGC, CopyGC,": invalid destination.");
+		Bad(BadGC, q->dstGC, X_CopyGC,"_: invalid destination.");
 	
 	} else if (src->Depth != dst->Depth) {
-		Bad(Match,, CopyGC,"(G:%lX,G:%lX):\n          source depth %u is not %u.",
+		Bad(BadMatch,0, X_CopyGC,"_(G:%lX,G:%lX):\n          source depth %u is not %u.",
 		            q->srcGC, q->dstGC, src->Depth, dst->Depth);
 	
 	} else if (q->mask & ~((2uL << GCLastBit) -1)) {
-		Bad(Value, q->mask, CopyGC, "(G:%lX,G:%lX):\n"
+		Bad(BadValue, q->mask, X_CopyGC, "_(G:%lX,G:%lX):\n"
 		                    "          invalid value mask 0x%lX.",
 		                    q->srcGC, q->dstGC, q->mask);
 	
@@ -494,10 +494,10 @@ RQ_SetClipRectangles (CLIENT * clnt, xSetClipRectanglesReq * q)
 	                / sizeof(GRECT);
 	
 	if (!gc) {
-		Bad(GC, q->gc, SetClipRectangles,);
+		Bad(BadGC, q->gc, X_SetClipRectangles,"_");
 	
 	} else if (num && !(clp = malloc (sizeof(GRECT) * num))) {
-		Bad(Alloc,, SetClipRectangles,);
+		Bad(BadAlloc,0, X_SetClipRectangles,"_");
 	
 	} else { //..................................................................
 		
@@ -534,7 +534,7 @@ RQ_FreeGC (CLIENT * clnt, xFreeGCReq * q)
 	GC * gc = GcntFind (q->id);
 	
 	if (!gc) {
-		Bad(GC, q->id, FreeGC,);
+		Bad(BadGC, q->id, X_FreeGC,"_");
 	
 	} else { //..................................................................
 		

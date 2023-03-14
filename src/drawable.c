@@ -137,10 +137,10 @@ RQ_GetGeometry (CLIENT * clnt, xGetGeometryReq * q)
 	DRAWABLE * draw = NULL;
 	
 	if ((q->id & ~RID_MASK) && !(draw = DrawFind(q->id).p)) {
-		Bad(Drawable, q->id, GetGeometry,);
+		Bad(BadDrawable, q->id, X_GetGeometry,"_");
 	
 	} else {
-		ClntReplyPtr (GetGeometry, r,);
+		ClntReplyPtr (GetGeometry, r,0);
 		r->root = ROOT_WINDOW;
 		
 		if (!draw) {
@@ -168,7 +168,7 @@ RQ_GetGeometry (CLIENT * clnt, xGetGeometryReq * q)
 			DEBUG (GetGeometry," 0x%lX", q->id);
 		}
 		
-		ClntReply (GetGeometry,, "wR.");
+		ClntReply (GetGeometry,0, "wR.");
 	}
 }
 
@@ -182,10 +182,10 @@ RQ_FillPoly (CLIENT * clnt, xFillPolyReq * q)
 	size_t     len  = ((q->length *4) - sizeof (xFillPolyReq)) / sizeof(PXY);
 	
 	if (!draw.p) {
-		Bad(Drawable, q->drawable, FillPoly,);
+		Bad(BadDrawable, q->drawable, X_FillPoly,"_");
 		
 	} else if (!gc) {
-		Bad(GC, q->drawable, FillPoly,);
+		Bad(BadGC, q->drawable, X_FillPoly,"_");
 	
 	} else if (len  &&  gc->ClipNum >= 0) {
 		BOOL    set = xTrue;
@@ -201,7 +201,7 @@ RQ_FillPoly (CLIENT * clnt, xFillPolyReq * q)
 			                     gc->ClipRect, gc->ClipNum, &orig, &sect,
 			                     gc->SubwindMode);
 			if (nClp) {
-				clnt->Fnct->shift_pnt (&orig, pxy, len, q->coordMode);
+				clnt->Fnct->grph_shift_pnt (&orig, pxy, len, q->coordMode);
 				v_hide_c (hdl);
 			}
 			DEBUG (FillPoly," W:%lX G:%lX (%lu)", q->drawable, q->gc, len);
@@ -214,7 +214,7 @@ RQ_FillPoly (CLIENT * clnt, xFillPolyReq * q)
 				sect = alloca (sizeof(PRECT));
 				nClp = SizeToPXY (sect, &draw.Pixmap->W);
 			}
-			clnt->Fnct->shift_pnt (NULL, pxy, len, q->coordMode);
+			clnt->Fnct->grph_shift_pnt (NULL, pxy, len, q->coordMode);
 			set = (draw.Pixmap->Vdi > 0);
 			hdl = PmapVdi (draw.Pixmap, gc, xFalse);
 		}
@@ -235,7 +235,7 @@ RQ_FillPoly (CLIENT * clnt, xFillPolyReq * q)
 		}
 	
 	} else {
-		PRINT (FillPoly," D:%lX G:%lX (0)",q->drawable, q->gc);
+		PRINT (X_FillPoly," D:%lX G:%lX (0)",q->drawable, q->gc);
 	}
 }
 
@@ -248,10 +248,10 @@ RQ_PolyArc (CLIENT * clnt, xPolyArcReq * q)
 	size_t     len  = ((q->length *4) - sizeof (xPolyArcReq)) / sizeof(xArc);
 	
 	if (!draw.p) {
-		Bad(Drawable, q->drawable, PolyArc,);
+		Bad(BadDrawable, q->drawable, X_PolyArc,"_");
 		
 	} else if (!gc) {
-		Bad(GC, q->drawable, PolyArc,);
+		Bad(BadGC, q->drawable, X_PolyArc,"_");
 	
 	} else if (len  &&  gc->ClipNum >= 0) {
 		BOOL    set = xTrue;
@@ -284,7 +284,7 @@ RQ_PolyArc (CLIENT * clnt, xPolyArcReq * q)
 			hdl = PmapVdi (draw.Pixmap, gc, xFalse);
 		}
 		if (nClp && gc_mode (&color, &set, hdl, gc)) {
-			clnt->Fnct->shift_arc (&orig, arc, len, ArcPieSlice);
+			clnt->Fnct->grph_shift_arc (&orig, arc, len, ArcPieSlice);
 			if (set) {
 				vsl_width (hdl, gc->LineWidth);
 				vsl_color (hdl, color);
@@ -317,10 +317,10 @@ RQ_PolyFillArc (CLIENT * clnt, xPolyFillArcReq * q)
 	size_t     len  = ((q->length *4) - sizeof (xPolyFillArcReq)) / sizeof(xArc);
 	
 	if (!draw.p) {
-		Bad(Drawable, q->drawable, PolyFillArc,);
+		Bad(BadDrawable, q->drawable, X_PolyFillArc,"_");
 		
 	} else if (!gc) {
-		Bad(GC, q->drawable, PolyFillArc,);
+		Bad(BadGC, q->drawable, X_PolyFillArc,"_");
 	
 	} else if (len  &&  gc->ClipNum >= 0) {
 		BOOL    set = xTrue;
@@ -353,7 +353,7 @@ RQ_PolyFillArc (CLIENT * clnt, xPolyFillArcReq * q)
 			hdl = PmapVdi (draw.Pixmap, gc, xFalse);
 		}
 		if (nClp && gc_mode (&color, &set, hdl, gc)) {
-			clnt->Fnct->shift_arc (&orig, arc, len, gc->ArcMode);
+			clnt->Fnct->grph_shift_arc (&orig, arc, len, gc->ArcMode);
 			if (set) {
 				vsf_color (hdl, color);
 			}
@@ -385,10 +385,10 @@ RQ_PolyLine (CLIENT * clnt, xPolyLineReq * q)
 	size_t     len  = ((q->length *4) - sizeof (xPolyLineReq)) / sizeof(PXY);
 	
 	if (!draw.p) {
-		Bad(Drawable, q->drawable, PolyLine,);
+		Bad(BadDrawable, q->drawable, X_PolyLine,"_");
 		
 	} else if (!gc) {
-		Bad(GC, q->drawable, PolyLine,);
+		Bad(BadGC, q->drawable, X_PolyLine,"_");
 	
 	} else if (len  &&  gc->ClipNum >= 0) {
 		BOOL    set = xTrue;
@@ -404,7 +404,7 @@ RQ_PolyLine (CLIENT * clnt, xPolyLineReq * q)
 			                     gc->ClipRect, gc->ClipNum, &orig, &sect,
 			                     gc->SubwindMode);
 			if (nClp) {
-				clnt->Fnct->shift_pnt (&orig, pxy, len, q->coordMode);
+				clnt->Fnct->grph_shift_pnt (&orig, pxy, len, q->coordMode);
 				v_hide_c (hdl);
 			}
 			DEBUG (PolyLine," W:%lX G:%lX (%lu)", q->drawable, q->gc, len);
@@ -417,7 +417,7 @@ RQ_PolyLine (CLIENT * clnt, xPolyLineReq * q)
 				sect = alloca (sizeof(PRECT));
 				nClp = SizeToPXY (sect, &draw.Pixmap->W);
 			}
-			clnt->Fnct->shift_pnt (NULL, pxy, len, q->coordMode);
+			clnt->Fnct->grph_shift_pnt (NULL, pxy, len, q->coordMode);
 			set = (draw.Pixmap->Vdi > 0);
 			hdl = PmapVdi (draw.Pixmap, gc, xFalse);
 		}
@@ -439,7 +439,7 @@ RQ_PolyLine (CLIENT * clnt, xPolyLineReq * q)
 		}
 	
 	} else {
-		PRINT (PolyLine," D:%lX G:%lX (0)",q->drawable, q->gc);
+		PRINT (X_PolyLine," D:%lX G:%lX (0)",q->drawable, q->gc);
 	}
 }
 
@@ -452,10 +452,10 @@ RQ_PolyPoint (CLIENT * clnt, xPolyPointReq * q)
 	size_t     len  = ((q->length *4) - sizeof (xPolyPointReq)) / sizeof(PXY);
 	
 	if (!draw.p) {
-		Bad(Drawable, q->drawable, PolyPoint,);
+		Bad(BadDrawable, q->drawable, X_PolyPoint,"_");
 		
 	} else if (!gc) {
-		Bad(GC, q->drawable, PolyPoint,);
+		Bad(BadGC, q->drawable, X_PolyPoint,"_");
 	
 	} else if (len  &&  gc->ClipNum >= 0) {
 		BOOL    set = xTrue;
@@ -471,13 +471,13 @@ RQ_PolyPoint (CLIENT * clnt, xPolyPointReq * q)
 			                     gc->ClipRect, gc->ClipNum, &orig, &sect,
 			                     gc->SubwindMode);
 			if (nClp) {
-				clnt->Fnct->shift_pnt (&orig, pxy, len, q->coordMode);
+				clnt->Fnct->grph_shift_pnt (&orig, pxy, len, q->coordMode);
 				v_hide_c (hdl);
 			}
 			DEBUG (PolyPoint," W:%lX G:%lX (%lu)", q->drawable, q->gc, len);
 		
 		} else { // Pixmap
-			clnt->Fnct->shift_pnt (NULL, pxy, len, q->coordMode);
+			clnt->Fnct->grph_shift_pnt (NULL, pxy, len, q->coordMode);
 			if (draw.p->Depth == 1) {
 				PmapDrawPoints (draw.Pixmap, gc, pxy, len);
 				nClp = 0;
@@ -512,7 +512,7 @@ RQ_PolyPoint (CLIENT * clnt, xPolyPointReq * q)
 		}
 	
 	} else {
-		PRINT (PolyPoint," D:%lX G:%lX (0)",q->drawable, q->gc);
+		PRINT (X_PolyPoint," D:%lX G:%lX (0)",q->drawable, q->gc);
 	}
 }
 
@@ -526,10 +526,10 @@ RQ_PolyFillRectangle (CLIENT * clnt, xPolyFillRectangleReq * q)
 	                / sizeof(GRECT);
 	
 	if (!draw.p) {
-		Bad(Drawable, q->drawable, PolyFillRectangle,);
+		Bad(BadDrawable, q->drawable, X_PolyFillRectangle,"_");
 		
 	} else if (!gc) {
-		Bad(GC, q->drawable, PolyFillRectangle,);
+		Bad(BadGC, q->drawable, X_PolyFillRectangle,"_");
 	
 	} else if (len  &&  gc->ClipNum >= 0) {
 		BOOL    set = xTrue;
@@ -548,7 +548,7 @@ RQ_PolyFillRectangle (CLIENT * clnt, xPolyFillRectangleReq * q)
 			                     gc->ClipRect, gc->ClipNum, &orig, &sect,
 			                     gc->SubwindMode);
 			if (nClp) {
-				clnt->Fnct->shift_r2p (&orig, rec, len);
+				clnt->Fnct->grph_shift_r2p (&orig, rec, len);
 				v_hide_c (hdl);
 			}
 		
@@ -574,7 +574,7 @@ RQ_PolyFillRectangle (CLIENT * clnt, xPolyFillRectangleReq * q)
 					sect = alloca (sizeof(PRECT));
 					nClp = SizeToPXY (sect, &draw.Pixmap->W);
 				}
-				clnt->Fnct->shift_r2p (NULL, rec, len);
+				clnt->Fnct->grph_shift_r2p (NULL, rec, len);
 				set = (draw.Pixmap->Vdi > 0);
 				hdl = PmapVdi (draw.Pixmap, gc, xFalse);
 			}
@@ -600,7 +600,7 @@ RQ_PolyFillRectangle (CLIENT * clnt, xPolyFillRectangleReq * q)
 			}
 		}
 	} else {
-		PRINT (PolyFillRectangle," D:%lX G:%lX (0)",q->drawable, q->gc);
+		PRINT (X_PolyFillRectangle," D:%lX G:%lX (0)",q->drawable, q->gc);
 	}
 }
 
@@ -614,10 +614,10 @@ RQ_PolyRectangle (CLIENT * clnt, xPolyRectangleReq * q)
 	                / sizeof(GRECT);
 	
 	if (!draw.p) {
-		Bad(Drawable, q->drawable, PolyRectangle,);
+		Bad(BadDrawable, q->drawable, X_PolyRectangle,"_");
 		
 	} else if (!gc) {
-		Bad(GC, q->drawable, PolyRectangle,);
+		Bad(BadGC, q->drawable, X_PolyRectangle,"_");
 	
 	} else if (len  &&  gc->ClipNum >= 0) {
 		BOOL    set = xTrue;
@@ -694,10 +694,10 @@ RQ_PolySegment (CLIENT * clnt, xPolySegmentReq * q)
 	size_t     len  = ((q->length *4) - sizeof (xPolySegmentReq)) / sizeof(PXY);
 	
 	if (!draw.p) {
-		Bad(Drawable, q->drawable, PolySegment,);
+		Bad(BadDrawable, q->drawable, X_PolySegment,"_");
 		
 	} else if (!gc) {
-		Bad(GC, q->drawable, PolySegment,);
+		Bad(BadGC, q->drawable, X_PolySegment,"_");
 	
 	} else if (len  &&  gc->ClipNum >= 0) {
 		BOOL    set = xTrue;
@@ -713,7 +713,7 @@ RQ_PolySegment (CLIENT * clnt, xPolySegmentReq * q)
 			                     gc->ClipRect, gc->ClipNum, &orig, &sect,
 			                     gc->SubwindMode);
 			if (nClp) {
-				clnt->Fnct->shift_pnt (&orig, pxy, len, CoordModeOrigin);
+				clnt->Fnct->grph_shift_pnt (&orig, pxy, len, CoordModeOrigin);
 				v_hide_c (hdl);
 			}
 			DEBUG (PolySegment," W:%lX G:%lX (%lu)", q->drawable, q->gc, len);
@@ -726,7 +726,7 @@ RQ_PolySegment (CLIENT * clnt, xPolySegmentReq * q)
 				sect = alloca (sizeof(PRECT));
 				nClp = SizeToPXY (sect, &draw.Pixmap->W);
 			}
-			clnt->Fnct->shift_pnt (NULL, pxy, len, CoordModeOrigin);
+			clnt->Fnct->grph_shift_pnt (NULL, pxy, len, CoordModeOrigin);
 			set = (draw.Pixmap->Vdi > 0);
 			hdl = PmapVdi (draw.Pixmap, gc, xFalse);
 		}
@@ -834,10 +834,10 @@ RQ_ImageText8 (CLIENT * clnt, xImageTextReq * q)
 	p_GC       gc   = GcntFind (q->gc);
 	
 	if (!draw.p) {
-		Bad(Drawable, q->drawable, ImageText8,);
+		Bad(BadDrawable, q->drawable, X_ImageText8,"_");
 		
 	} else if (!gc) {
-		Bad(GC, q->drawable, ImageText8,);
+		Bad(BadGC, q->drawable, X_ImageText8,"_");
 	
 	} else if (q->nChars  &&  gc->ClipNum >= 0) {
 		DEBUG (ImageText8," %c:%lX G:%lX (%i,%i)",
@@ -855,10 +855,10 @@ RQ_ImageText16 (CLIENT * clnt, xImageTextReq * q)
 	p_GC       gc   = GcntFind (q->gc);
 	
 	if (!draw.p) {
-		Bad(Drawable, q->drawable, ImageText16,);
+		Bad(BadDrawable, q->drawable, X_ImageText16,"_");
 		
 	} else if (!gc) {
-		Bad(GC, q->drawable, ImageText16,);
+		Bad(BadGC, q->drawable, X_ImageText16,"_");
 	
 	} else if (q->nChars  &&  gc->ClipNum >= 0) {
 		DEBUG (ImageText16," %c:%lX G:%lX (%i,%i)",
@@ -943,10 +943,10 @@ RQ_PolyText8 (CLIENT * clnt, xPolyTextReq * q)
 	p_GC       gc   = GcntFind (q->gc);
 	
 	if (!draw.p) {
-		Bad(Drawable, q->drawable, PolyText8,);
+		Bad(BadDrawable, q->drawable, X_PolyText8,"_");
 		
 	} else if (!gc) {
-		Bad(GC, q->drawable, PolyText8,);
+		Bad(BadGC, q->drawable, X_PolyText8,"_");
 	
 	} else if (gc->ClipNum >= 0) {
 		DEBUG (PolyText8," %c:%lX G:%lX (%i,%i)",
@@ -964,10 +964,10 @@ RQ_PolyText16 (CLIENT * clnt, xPolyTextReq * q)
 	p_GC       gc   = GcntFind (q->gc);
 	
 	if (!draw.p) {
-		Bad(Drawable, q->drawable, PolyText16,);
+		Bad(BadDrawable, q->drawable, X_PolyText16,"_");
 		
 	} else if (!gc) {
-		Bad(GC, q->drawable, PolyText16,);
+		Bad(BadGC, q->drawable, X_PolyText16,"_");
 	
 	} else if (gc->ClipNum >= 0) {
 		DEBUG (PolyText16," %c:%lX G:%lX (%i,%i)",

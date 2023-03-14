@@ -75,10 +75,10 @@ RQ_SetSelectionOwner (CLIENT * clnt, xSetSelectionOwnerReq * q)
 	WINDOW * wind = NULL;
 	
 	if (!AtomValid(q->selection)) {
-		Bad(Atom, q->selection, SetSelectionOwner,"(W:%lX)", q->window);
+		Bad(BadAtom, q->selection, X_SetSelectionOwner,"_(W:%lX)", q->window);
 	
 	} else if (q->window != None  &&  !(wind = WindFind(q->window))) {
-		Bad(Window, q->window, SetSelectionOwner,"():\n          not %s.", 
+		Bad(BadWindow, q->window, X_SetSelectionOwner,"_():\n          not %s.", 
 		                       (DBG_XRSC_TypeError ? "a window" : "found"));
 		
 	} else { //..................................................................
@@ -87,7 +87,7 @@ RQ_SetSelectionOwner (CLIENT * clnt, xSetSelectionOwnerReq * q)
 		ATOM * atom = ATOM_Table[q->selection];
 		
 		if (time < atom->SelTime  || time > MAIN_TimeStamp) {
-			PRINT (SetSelectionOwner," of '%s' to W:%lX\n"
+			PRINT (X_SetSelectionOwner," of '%s' to W:%lX\n"
 			       "          ignored :T:%lu %s T:%lu.",
 			       atom->Name, q->window, time,
 			       (time > MAIN_TimeStamp ? "> server time" : "< last change"),
@@ -129,11 +129,11 @@ RQ_GetSelectionOwner (CLIENT * clnt, xGetSelectionOwnerReq * q)
 	//...........................................................................
 	
 	if (!AtomValid(q->id)) {
-		Bad(Atom, q->id, GetSelectionOwner,);
+		Bad(BadAtom, q->id, X_GetSelectionOwner,"_");
 	
 	} else { //..................................................................
 		
-		ClntReplyPtr (GetSelectionOwner, r,);
+		ClntReplyPtr (GetSelectionOwner, r,0);
 		ATOM * atom = ATOM_Table[q->id];
 		
 		DEBUG (GetSelectionOwner," of '%s' (W:%lX)",
@@ -141,7 +141,7 @@ RQ_GetSelectionOwner (CLIENT * clnt, xGetSelectionOwnerReq * q)
 		
 		r->owner = (atom->SelWind ? atom->SelWind->Id : None);
 		
-		ClntReply (GetSelectionOwner,, "w");
+		ClntReply (GetSelectionOwner,0, "w");
 	}
 }
 
@@ -161,20 +161,20 @@ RQ_ConvertSelection (CLIENT * clnt, xConvertSelectionReq * q)//, WINDOW * wind)
 	WINDOW * wind = WindFind (q->requestor);
 	
 	if (!wind) {
-		Bad(Window, q->requestor, ConvertSelection,"():\n          not %s.",
+		Bad(BadWindow, q->requestor, X_ConvertSelection,"_():\n          not %s.",
 		                          (DBG_XRSC_TypeError ? "a window" : "found"));
 		
 	} else if (!AtomValid(q->selection)) {
-		Bad(Atom, q->selection, ConvertSelection,"(W:%lX):\n"
+		Bad(BadAtom, q->selection, X_ConvertSelection,"_(W:%lX):\n"
 		                        "          invalid selection.", q->requestor);
 		
 	} else if (!AtomValid(q->target)) {
-		Bad(Atom, q->target, ConvertSelection,"(W:%lX,'%s'):\n"
+		Bad(BadAtom, q->target, X_ConvertSelection,"_(W:%lX,'%s'):\n"
 		                     "          invalid target.",
 		                     q->requestor, ATOM_Table[q->selection]->Name);
 		
 	} else if (q->property != None  && !AtomValid(q->property)) {
-		Bad(Atom, q->property, ConvertSelection,"(W:%lX,'%s','%s'):\n"
+		Bad(BadAtom, q->property, X_ConvertSelection,"_(W:%lX,'%s','%s'):\n"
 		                       "          invalid property.", q->requestor,
 		                       ATOM_Table[q->selection]->Name,
 		                       ATOM_Table[q->target]->Name);

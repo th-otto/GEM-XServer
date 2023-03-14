@@ -400,7 +400,7 @@ RQ_Bell (CLIENT * clnt, xBellReq * q)
 void
 RQ_QueryExtension (CLIENT * clnt, xQueryExtensionReq * q)
 {
-	ClntReplyPtr (QueryExtension, r,);
+	ClntReplyPtr (QueryExtension, r,0);
 	
 	PRINT (- X_QueryExtension," '%.*s'", q->nbytes, (char*)(q +1));
 	
@@ -409,7 +409,7 @@ RQ_QueryExtension (CLIENT * clnt, xQueryExtensionReq * q)
 	r->first_event  = 0;
 	r->first_error  = 0;
 	
-	ClntReply (QueryExtension,, NULL);
+	ClntReply (QueryExtension,0, NULL);
 }
 
 //------------------------------------------------------------------------------

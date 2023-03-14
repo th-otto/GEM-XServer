@@ -40,7 +40,7 @@ CARD16   CLNT_BaseNum    = 0;
 
 CLIENT         * CLNT_Requestor = NULL;
 jmp_buf          CLNT_Error;
-XRSCPOOL(CLIENT, CLNT_Pool, 4);
+CLNT_POOL CLNT_Pool;
 
 
 static void FT_Clnt_reply_MSB (p_CLIENT , CARD32 size, const char * form);
@@ -74,7 +74,7 @@ static FUNCTABL
 static void
 _Clnt_EvalAuth (CLIENT * clnt, xConnClientPrefix * q)
 {
-	PRINT (,"ByteOrder = %s, Version = X%i.%i",
+	PRINT (0,"ByteOrder = %s, Version = X%i.%i",
 	       (clnt->DoSwap ? "IntelCrap" : "MSB"),
 	       q->majorVersion, q->minorVersion);
 	
@@ -89,7 +89,7 @@ _Clnt_EvalAuth (CLIENT * clnt, xConnClientPrefix * q)
 		printf ("\n");
 	
 	} else {
-		PRINT (,"Authorization: <none>");
+		PRINT (0,"Authorization: <none>");
 	}
 	/* do some auth stuff */
 	if (0) {
@@ -135,11 +135,11 @@ _Clnt_EvalInit (CLIENT * clnt, xConnClientPrefix * q)
          q->nbytesAuthString = Swap16(q->nbytesAuthString);
 			break;
 		default:
-			PRINT (,"Invalid byte order value '%02x'.\n", q->byteOrder);
+			PRINT (0,"Invalid byte order value '%02x'.\n", q->byteOrder);
 			longjmp (CLNT_Error, 2);
 	}
 	if (q->majorVersion != X_PROTOCOL) {
-		PRINT (,"Invalid version %i.%i.\n", q->majorVersion, q->minorVersion);
+		PRINT (0,"Invalid version %i.%i.\n", q->majorVersion, q->minorVersion);
 		longjmp (CLNT_Error, 2);
 	}
 	clnt->iBuf.Left = Align(q->nbytesAuthProto) + Align(q->nbytesAuthString);
@@ -302,7 +302,7 @@ ClntDelete (CLIENT * clnt)
 	if (clnt->Fd >= 0) {
 		const char * f = (clnt->Id > 0 ? "Connection %s:%i closed."
 		                               : "Connection closed.");
-		PRINT (,f, clnt->Addr, clnt->Port);
+		PRINT (0,f, clnt->Addr, clnt->Port);
 		SrvrConnRemove ((p_CONNECTION)clnt);
 		if (CLNT_Base) {
 			CLIENT ** base = &CLNT_Base;
@@ -442,7 +442,7 @@ static void
 FT_Clnt_error_MSB (p_CLIENT clnt,
                    CARD8 code, CARD8 majOp, CARD16 minOp, CARD32 val)
 {
-	ClntReplyPtr (Error, e,);
+	ClntReplyPtr (Error, e,0);
 	
 	e->type           = X_Error;
 	e->errorCode      = code;
@@ -459,7 +459,7 @@ static void
 FT_Clnt_error_LSB (p_CLIENT clnt,
                    CARD8 code, CARD8 majOp, CARD16 minOp, CARD32 val)
 {
-	ClntReplyPtr (Error, e,);
+	ClntReplyPtr (Error, e,0);
 	
 	e->type           = X_Error;
 	e->errorCode      = code;
@@ -528,7 +528,7 @@ ClntError (CLIENT * clnt, int err, CARD32 val, int req, const char * add, ...)
 		CASE(BadLength, NULL); CASE(BadImplementation,NULL);
 	#	undef CASE
 	}
-	PRINT (,"-\33pERROR %s\33q", text);
+	PRINT (0,"-\33pERROR %s\33q", text);
 	if (v) {
 		if      (!*v)       printf (" %li", val);
 		else if (*v == ' ') printf (" %lX", val);
@@ -543,7 +543,7 @@ ClntError (CLIENT * clnt, int err, CARD32 val, int req, const char * add, ...)
 	}
 	printf("\n");
 	
-	clnt->Fnct->error (clnt, err, req, 0, val);
+	clnt->Fnct->clnt_error (clnt, err, req, 0, val);
 }
 
 
@@ -560,7 +560,7 @@ RQ_KillClient (CLIENT * clnt, xKillClientReq * q)
 	if (q->id == AllTemporary) {
 		int i;
 		
-		PRINT (KillClient, "(AllTemporary)");
+		PRINT (X_KillClient, "(AllTemporary)");
 		
 		for (i = 0; i < XrscPOOLSIZE (CLNT_Pool); ++i) {
 			p_CLIENT c = XrscPOOLITEM (CLNT_Pool, i);
@@ -579,7 +579,7 @@ RQ_KillClient (CLIENT * clnt, xKillClientReq * q)
 		int owner = -1;
 		if (!(q->id & 0x8000) ||
 		    ((owner = wind_get_one (q->id & 0x7FFF, WF_OWNER)) < 0)) {
-			Bad(Value, q->id, KillClient,);
+			Bad(BadValue, q->id, X_KillClient,"_");
 		
 		} else {
 			short msg[8] = { WM_CLOSED, gl_apid, 0, q->id & 0x7FFF, 0,0,0,0 };
@@ -595,7 +595,7 @@ RQ_KillClient (CLIENT * clnt, xKillClientReq * q)
 			ClntDelete (kill);
 		
 		} else {
-			Bad(Value, q->id, KillClient,);
+			Bad(BadValue, q->id, X_KillClient,"_");
 		}
 	}
 }
@@ -610,11 +610,11 @@ RQ_SetCloseDownMode (CLIENT * clnt, xSetCloseDownModeReq * q)
 	//...........................................................................
 	
 	if (q->mode > 2) {
-		Bad(Value, q->mode, SetCloseDownMode,);
+		Bad(BadValue, q->mode, X_SetCloseDownMode,"_");
 	
 	} else { //..................................................................
 		
-		PRINT (SetCloseDownMode," '%s'",
+		PRINT (X_SetCloseDownMode," '%s'",
 		       (q->mode == DestroyAll      ? "DestroyAll" :
 		        q->mode == RetainPermanent ? "RetainPermanent" :
 		                                     "RetainTemporary"));

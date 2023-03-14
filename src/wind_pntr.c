@@ -410,11 +410,11 @@ RQ_QueryPointer (CLIENT * clnt, xQueryPointerReq * q)
 	GRECT    work;
 	
 	if (!(wind = WindFind(q->id)) && !wind_get_work (q->id & 0x7FFF, &work)) {
-		Bad(Window, q->id, QueryPointer,);
+		Bad(BadWindow, q->id, X_QueryPointer,"_");
 	
 	} else { //..................................................................
 		
-		ClntReplyPtr (QueryPointer, r,);
+		ClntReplyPtr (QueryPointer, r,0);
 		PXY pos = WindPointerPos (NULL);
 		
 		DEBUG (QueryPointer," W:%lX", q->id);
@@ -463,7 +463,7 @@ RQ_QueryPointer (CLIENT * clnt, xQueryPointerReq * q)
 			r->winX = pos.p_x;
 			r->winY = pos.p_y;
 		}
-		ClntReply (QueryPointer,, "wwPP.");
+		ClntReply (QueryPointer,0, "wwPP.");
 	}
 }
 
@@ -500,7 +500,7 @@ RQ_TranslateCoords (CLIENT * clnt, xTranslateCoordsReq * q)
 		}
 	}
 	if (!ok) {
-		Bad(Window, q->srcWid, TranslateCoords,"(): source not found.");
+		Bad(BadWindow, q->srcWid, X_TranslateCoords,"_(): source not found.");
 	
 	} else if (q->dstWid & ~RID_MASK) {
 		if ((ok = ((wdst = WindFind(q->dstWid)) != NULL))) {
@@ -514,11 +514,11 @@ RQ_TranslateCoords (CLIENT * clnt, xTranslateCoordsReq * q)
 		}
 	}
 	if (!ok) {
-		Bad(Window, q->dstWid, TranslateCoords,"(): destination not found.");
+		Bad(BadWindow, q->dstWid, X_TranslateCoords,"_(): destination not found.");
 	
 	} else { //..................................................................
 		
-		ClntReplyPtr (TranslateCoords, r,);
+		ClntReplyPtr (TranslateCoords, r,0);
 		
 		DEBUG (TranslateCoords," %i/%i for W:%lX on W:%lX",
 		       q->srcX, q->srcY, q->dstWid, q->srcWid);
@@ -550,7 +550,7 @@ RQ_TranslateCoords (CLIENT * clnt, xTranslateCoordsReq * q)
 				} while ((wdst = wdst->PrevSibl));
 			}
 		}
-		ClntReply (TranslateCoords,, "wP");
+		ClntReply (TranslateCoords,0, "wP");
 	}
 }
 

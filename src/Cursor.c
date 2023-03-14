@@ -175,39 +175,39 @@ RQ_CreateCursor (CLIENT * clnt, xCreateCursorReq * q)
 	PIXMAP * bgnd = NULL;
 	
 	if (!RID_Match (clnt->Id, q->cid)) {
-		Bad(IDChoice, q->cid, CreateCursor,"(): doesn't match ID base.");
+		Bad(BadIDChoice, q->cid, X_CreateCursor,"_(): doesn't match ID base.");
 	
 	} else if (_Crsr_Find (q->cid)) {
-		Bad(IDChoice, q->cid, CreateCursor,);
+		Bad(BadIDChoice, q->cid, X_CreateCursor,"_");
 	
 	} else if (!fgnd) {
-		Bad(Pixmap, q->source, CreateCursor,"(C:%lX):\n"
+		Bad(BadPixmap, q->source, X_CreateCursor,"_(C:%lX):\n"
 		                       "          invalid sorce.", q->cid);
 	
 	} else if (fgnd->Depth != 1) {
-		Bad(Match,, CreateCursor,"(C:%lX):\n"
+		Bad(BadMatch,0, X_CreateCursor,"_(C:%lX):\n"
 		            "          source depth is %i.", q->cid, fgnd->Depth);
 	
 	} else if (q->x >= fgnd->W  ||  q->y >= fgnd->H) {
-		Bad(Match,, CreateCursor,"(C:%lX):\n"
+		Bad(BadMatch,0, X_CreateCursor,"_(C:%lX):\n"
 		            "          hotspot %i,%i outside of source %i,%i.",
 		            q->cid, q->x,q->y, fgnd->W,fgnd->H);
 	
 	} else if (q->mask != None  &&  !(bgnd = PmapFind(q->mask))) {
-		Bad(Pixmap, q->mask, CreateCursor,"(C:%lX):\n"
+		Bad(BadPixmap, q->mask, X_CreateCursor,"_(C:%lX):\n"
 		                     "          invalid mask.", q->cid);
 	
 	} else if (bgnd  &&  bgnd->Depth != 1) {
-		Bad(Match,, CreateCursor,"(C:%lX):\n"
+		Bad(BadMatch,0, X_CreateCursor,"_(C:%lX):\n"
 		            "          mask depth is %i.", q->cid, bgnd->Depth);
 	
 	} else if (bgnd && (bgnd->W != fgnd->W  ||  bgnd->H != fgnd->H)) {
-		Bad(Match,, CreateCursor,"(C:%lX):\n"
+		Bad(BadMatch,0, X_CreateCursor,"_(C:%lX):\n"
 		            "          mask size %i,%i differes from source %i,%i.",
 		            q->cid, bgnd->W,bgnd->H, fgnd->W,fgnd->H);
 	
 	} else if (!(crsr = XrscCreate (CURSOR, q->cid, clnt->Cursors,))) {
-		Bad(Alloc,, CreateCursor,"(C:%lX)", q->cid);
+		Bad(BadAlloc,0, X_CreateCursor,"_(C:%lX)", q->cid);
 	
 	} else { //..................................................................
 		
@@ -255,17 +255,17 @@ RQ_CreateGlyphCursor (CLIENT * clnt, xCreateGlyphCursorReq * q)
 	
 	
 	if (!RID_Match (clnt->Id, q->cid)) {
-		Bad(IDChoice, q->cid, CreateGlyphCursor,"(): doesn't match ID base.");
+		Bad(BadIDChoice, q->cid, X_CreateGlyphCursor,"_(): doesn't match ID base.");
 	
 	} else if (_Crsr_Find (q->cid)) {
-		Bad(IDChoice, q->cid, CreateGlyphCursor,);
+		Bad(BadIDChoice, q->cid, X_CreateGlyphCursor,"_");
 	
 	} else if (q->sourceChar > _CRSR_LastGlyph) {
-		Bad(Value, q->sourceChar,CreateGlyphCursor,"(C:%lX):\n"
+		Bad(BadValue, q->sourceChar,X_CreateGlyphCursor,"_(C:%lX):\n"
 		           "          source glyph not defined.", q->cid);
 	
 	} else if (!(crsr = XrscCreate (CURSOR, q->cid, clnt->Cursors,))) {
-		Bad(Alloc,, CreateGlyphCursor,"(C:%lX).", q->cid);
+		Bad(BadAlloc,0, X_CreateGlyphCursor,"_(C:%lX).", q->cid);
 	
 	} else { //..................................................................
 	
@@ -290,7 +290,7 @@ RQ_FreeCursor (CLIENT * clnt, xFreeCursorReq * q)
 	CURSOR * crsr = _Crsr_Find (q->id);
 	
 	if (!crsr) {
-		Bad(Cursor, q->id, FreeCursor,);
+		Bad(BadCursor, q->id, X_FreeCursor,"_");
 	
 	} else { //..................................................................
 		
@@ -314,7 +314,7 @@ RQ_RecolorCursor (CLIENT * clnt, xRecolorCursorReq * q)
 	CURSOR * crsr = _Crsr_Find (q->cursor);
 	
 	if (!crsr) {
-		Bad(Cursor, q->cursor, RecolorCursor,);
+		Bad(BadCursor, q->cursor, X_RecolorCursor,"_");
 	
 	} else { //..................................................................
 		

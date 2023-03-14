@@ -89,31 +89,31 @@ RQ_ChangeProperty (CLIENT * clnt, xChangePropertyReq * q)
 	              q->format == 32 ? 4 : 0);
 	
 	if (!wind) {
-		Bad(Window, q->window, ChangeProperty,"():\n          not %s.",
+		Bad(BadWindow, q->window, X_ChangeProperty,"_():\n          not %s.",
 		                       (DBG_XRSC_TypeError ? "a window" : "found"));
 		
 	} else if (!AtomValid(q->property)) {
-		Bad(Atom, q->property, ChangeProperty,"(W:%lX):\n"
+		Bad(BadAtom, q->property, X_ChangeProperty,"_(W:%lX):\n"
 		                        "          invalid property.", q->window);
 	
 	} else if (!AtomValid(q->type)) {
-		Bad(Atom, q->type, ChangeProperty,"(W:%lX,'%s'):\n"
+		Bad(BadAtom, q->type, X_ChangeProperty,"_(W:%lX,'%s'):\n"
 		                   "          undefined type.",
 		                   q->window, ATOM_Table[q->property]->Name);
 	
 	} else if (!factor) {
-		Bad(Value, q->format, ChangeProperty,"(W:%lX,'%s'):\n"
+		Bad(BadValue, q->format, X_ChangeProperty,"_(W:%lX,'%s'):\n"
 		                      "          illegal format.",
 		                      q->window, ATOM_Table[q->property]->Name);
 	
 	} else if (!wind->Properties && !(pool = malloc (sizeof (PROPERTIES)))) {
-		Bad(Alloc,, ChangeProperty,"(W:%lX,A:%lu): pool struct.",
+		Bad(BadAlloc,0, X_ChangeProperty,"_(W:%lX,A:%lu): pool struct.",
 		            q->window, q->property);
 		
 	} else if ((have = _Prop_Find (wind->Properties, q->property)) &&
 	            q->mode != PropModeReplace                         &&
 	           (q->type != have->Type  ||  q->format != have->Format)) {
-		Bad(Match,, ChangeProperty,"(W:%lX,'%s'):\n"
+		Bad(BadMatch,0, X_ChangeProperty,"_(W:%lX,'%s'):\n"
 		            "          type = A:%lu/A:%lu, format = %i/%i.",
 		            q->window, ATOM_Table[q->property]->Name,
 		            q->type, have->Type, q->format, have->Format);
@@ -162,7 +162,7 @@ RQ_ChangeProperty (CLIENT * clnt, xChangePropertyReq * q)
 		
 		prop = XrscCreate (PROPERTY, q->property, pool->Pool, need_size + xtra);
 		if (!prop) {
-			Bad(Alloc,, ChangeProperty,"(W:%lX,A:%lX):\n"
+			Bad(BadAlloc,0, X_ChangeProperty,"_(W:%lX,A:%lX):\n"
 			            "          %lu bytes.", q->window, q->property, need_size);
 			if (have) {
 				XrscInsert (pool->Pool, have);
@@ -234,11 +234,11 @@ RQ_DeleteProperty (CLIENT * clnt, xDeletePropertyReq * q)
 	WINDOW * wind = WindFind (q->window);
 	
 	if (!wind) {
-		Bad(Window, q->window, DeleteProperty,"():\n          not %s.",
+		Bad(BadWindow, q->window, X_DeleteProperty,"_():\n          not %s.",
 		                       (DBG_XRSC_TypeError ? "a window" : "found"));
 		
 	} else if (!AtomValid(q->property)) {
-		Bad(Atom, q->property, DeleteProperty,"(W:%lX)", q->window);
+		Bad(BadAtom, q->property, X_DeleteProperty,"_(W:%lX)", q->window);
 	
 	} else { //..................................................................
 		
@@ -286,21 +286,21 @@ RQ_GetProperty (CLIENT * clnt, xGetPropertyReq * q)
 	PROPERTY * prop;
 	
 	if (!wind) {
-		Bad(Window, q->window, GetProperty,"():\n          not %s.",
+		Bad(BadWindow, q->window, X_GetProperty,"_():\n          not %s.",
 			                    (DBG_XRSC_TypeError ? "a window" : "found"));
 		
 	} else if (!AtomValid(q->property)) {
-		Bad(Atom, q->property ,GetProperty,"(W:%lX)", q->window);
+		Bad(BadAtom, q->property ,X_GetProperty,"_(W:%lX)", q->window);
 	
 	} else if ((prop = _Prop_Find (wind->Properties, q->property)) &&
 	           offs > prop->Length) {
-		Bad(Value, q->longOffset, GetProperty,"(W:%lX,A:%lu)\n"
+		Bad(BadValue, q->longOffset, X_GetProperty,"_(W:%lX,A:%lu)\n"
 		                          "          offset %lu > property length %u.",
 		                          q->window, q->property, offs, prop->Length);
 	
 	} else { //..................................................................
 		
-		ClntReplyPtr (GetProperty, r,);
+		ClntReplyPtr (GetProperty, r,0);
 		size_t len  = 0;
 		
 		if (!prop) {
@@ -388,12 +388,12 @@ RQ_ListProperties (CLIENT * clnt, xListPropertiesReq * q)
 	WINDOW * wind = WindFind (q->id);
 	
 	if (!wind) {
-		Bad(Window, q->id, ListProperties,"():\n          not %s.",
+		Bad(BadWindow, q->id, X_ListProperties,"_():\n          not %s.",
 		                   (DBG_XRSC_TypeError ? "a window" : "found"));
 	
 	} else { //..................................................................
 		
-		ClntReplyPtr (ListProperties, r,);
+		ClntReplyPtr (ListProperties, r,0);
 		PROPERTIES * pool = wind->Properties;
 		Atom       * atom = (Atom*)(r +1);
 		CARD16       num  = 0;
@@ -449,7 +449,7 @@ RQ_RotateProperties (CLIENT * clnt, xRotatePropertiesReq * q)
 	CARD16   delta = q->nPositions % num;
 	
 	if (!wind) {
-		Bad(Window, q->window, RotateProperties,"():\n          not %s.",
+		Bad(BadWindow, q->window, X_RotateProperties,"_():\n          not %s.",
 		                       (DBG_XRSC_TypeError ? "a window" : "found"));
 	
 	} else if (q->nAtoms) { //...................................................
@@ -465,12 +465,12 @@ RQ_RotateProperties (CLIENT * clnt, xRotatePropertiesReq * q)
 		}
 		for (i = 0; i < num; i++) {
 			if (!AtomValid (name[i])) {
-				Bad(Atom, name[i], RotateProperties,"(W:%lX)", q->window);
+				Bad(BadAtom, name[i], X_RotateProperties,"_(W:%lX)", q->window);
 				ok = xFalse;
 				break;
 	
 			} else if (!(prop[(i + delta) % num] = _Prop_Find (pool, name[i]))) {
-				Bad(Match,, RotateProperties,"(W:%lX):\n"
+				Bad(BadMatch,0, X_RotateProperties,"_(W:%lX):\n"
 				            "          property A:%lX not found.",
 				            q->window, name[i]);
 				ok = xFalse;
@@ -478,7 +478,7 @@ RQ_RotateProperties (CLIENT * clnt, xRotatePropertiesReq * q)
 			
 			} else for (j = 0; j < i; ++j) {
 				if (name[j] == name[i]) {
-					Bad(Match,, RotateProperties,"(W:%lX):\n"
+					Bad(BadMatch,0, X_RotateProperties,"_(W:%lX):\n"
 					            "          property A:%lX occured more than once.",
 					            q->window, name[i]);
 					ok = xFalse;
