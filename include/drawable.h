@@ -29,6 +29,7 @@ typedef struct s_DRAWABLE
 	/* fd_r[3]      _res[3] */
 } DRAWABLE;
 
+extern struct s_WINDOW WIND_Root;
 
 void DrawDelete(p_DRAWABLE, p_CLIENT);
 
@@ -43,8 +44,6 @@ static inline p_DRAWABLE DrawFind(CARD32 id)
 		draw = (clnt ? Xrsc(DRAWABLE, id, clnt->Drawables) : NULL);
 	} else if (id == ROOT_WINDOW)
 	{
-		extern struct s_WINDOW WIND_Root;
-
 		draw = (DRAWABLE *) &WIND_Root;
 	} else
 	{

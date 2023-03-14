@@ -794,13 +794,14 @@ _Image_Text (p_DRAWABLE draw, GC * gc,
 	}
 	if (nClp) {
 		BOOL    bg_draw = (gc->Background != G_WHITE);
-		short * arr;
+		const short * arr;
+		short *tmp;
 		if (is8N16) {
-			arr = alloca (sizeof(short) * len);
-			arr = FontTrans_C (arr, text, len, gc->FontFace);
+			tmp = alloca (sizeof(short) * len);
+			arr = FontTrans_C (tmp, text, len, gc->FontFace);
 		} else {
-			arr = text;
-			arr = FontTrans_W (arr, text, len, gc->FontFace);
+			tmp = text;
+			arr = FontTrans_W (tmp, text, len, gc->FontFace);
 		}
 		if (!bg_draw) {
 			vswr_mode (hdl, MD_REPLACE);
@@ -912,13 +913,14 @@ _Poly_Text (p_DRAWABLE draw, GC * gc, BOOL is8N16, xTextElt * t, PXY * pos)
 			hdl  = PmapVdi (draw.Pixmap, gc, xTrue);
 		}
 		if (nClp) {
-			short * arr;
+			const short * arr;
+			short *tmp;
 			if (is8N16) {
-				arr = alloca (sizeof(short) * t->len);
-				arr = FontTrans_C (arr, (char*)(t +1), t->len, gc->FontFace);
+				tmp = alloca (sizeof(short) * t->len);
+				arr = FontTrans_C (tmp, (char*)(t +1), t->len, gc->FontFace);
 			} else {
-				arr = (short*)(t +1);
-				arr = FontTrans_W (arr, arr, t->len, gc->FontFace);
+				tmp = (short*)(t +1);
+				arr = FontTrans_W (tmp, tmp, t->len, gc->FontFace);
 			}
 			vswr_mode (hdl, MD_TRANS);
 			do {
