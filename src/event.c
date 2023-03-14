@@ -10,6 +10,7 @@
 //
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "main.h"
 #include "tools.h"
@@ -320,12 +321,12 @@ EvntClientMsg (CLIENT * clnt, Window id, Atom type, BYTE format, void * data)
 		}
 		if (format == 32) {
 			CARD32 * src = data;
-			CARD32 * dst = &evn->u.clientMessage.u.l.longs0;
+			INT32 * dst = &evn->u.clientMessage.u.l.longs0;
 			int      num = 5;
 			do { *(dst++) = Swap32(*(src++)); } while (--num);
 		} else if (format == 16) {
 			CARD16 * src = data;
-			CARD16 * dst = &evn->u.clientMessage.u.s.shorts0;
+			INT16 * dst = &evn->u.clientMessage.u.s.shorts0;
 			int      num = 10;
 			do { *(dst++) = Swap16(*(src++)); } while (--num);
 		} else {

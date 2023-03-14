@@ -9,6 +9,7 @@
 //==============================================================================
 //
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "clnt_P.h"
 #include "x_mint.h"

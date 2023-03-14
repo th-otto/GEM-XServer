@@ -12,6 +12,7 @@
 //==============================================================================
 //
 #include <stdlib.h>
+#include <string.h>
 
 #include "Property_P.h"
 #include "tools.h"
@@ -137,7 +138,7 @@ RQ_ChangeProperty (CLIENT * clnt, xChangePropertyReq * q)
 			} else {
 				PRINT (,"+");
 			}
-		#	endif TRACE
+		#	endif
 		
 		if (pool) {
 			XrscPoolInit (pool->Pool);

@@ -9,6 +9,7 @@
 //==============================================================================
 //
 #include <stdio.h>
+#include <alloca.h>
 
 #include "main.h"
 #include "tools.h"
@@ -43,14 +44,13 @@ DrawDelete (p_DRAWABLE draw, p_CLIENT clnt)
 
 //------------------------------------------------------------------------------
 static inline CARD16
-SizeToPXY (PRECT * dst, const short * src)
+SizeToPXY (PRECT * dst, const CARD16 * src)
 {
-	__asm__ volatile ("
-		moveq.l	#0, d0;
-		move.l	(%0), d1;
-		sub.l		#0x00010001, d1;
-		movem.l	d0/d1, (%1);
-		"
+	__asm__ volatile (
+		"\tmoveq.l	#0, d0\n"
+		"\tmove.l	(%0), d1\n"
+		"\tsub.l		#0x00010001, d1\n"
+		"\tmovem.l	d0/d1, (%1)\n"
 		:                   // output
 		: "a"(src),"a"(dst) // input
 		: "d0","d1"         // clobbered
@@ -60,7 +60,7 @@ SizeToPXY (PRECT * dst, const short * src)
 
 //------------------------------------------------------------------------------
 static inline CARD16
-SizeToLst (PRECT * dst, GRECT * clip, CARD16 nClp, const short * src)
+SizeToLst (PRECT * dst, GRECT * clip, CARD16 nClp, const CARD16 * src)
 {
 	CARD16 cnt = 0;
 	PRECT  size;

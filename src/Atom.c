@@ -113,7 +113,7 @@ AtomInit (BOOL initNreset)
 		if ((i = ATOM_Count - LAST_PREDEF_ATOM) > 0) {
 			printf ("  remove %i Atom%s.\n", i, (i == 1 ? "" : "s"));
 		}
-	#	endif TRACE
+	#endif
 	}
 	
 	// always clear all empty table entries
