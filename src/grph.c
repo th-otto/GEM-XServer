@@ -269,16 +269,16 @@ int GrphSetup(void *format_arr)
 	}
 
 	x_printf("  AES id #%i at VDI #%i:%i [%i/%i] (%i*%i mm) %i plane%s\n",
-		   gl_apid, GRPH_Handle, GRPH_Vdi, WIND_Root.Rect.g_w, WIND_Root.Rect.g_h,
-		   root->mmWidth, root->mmHeight, GRPH_Depth, (GRPH_Depth == 1 ? "" : "s"));
+			gl_apid, GRPH_Handle, GRPH_Vdi, WIND_Root.Rect.g_w, WIND_Root.Rect.g_h,
+			root->mmWidth, root->mmHeight, GRPH_Depth, (GRPH_Depth == 1 ? "" : "s"));
 	x_printf("  screen format");
 	if (EdDI)
 		x_printf(" (EdDI %X.%02X)", EdDI >> 8, EdDI & 0xFF);
 	x_printf(" is %s \n",
-		   GRPH_Format == SCRN_Interleaved ? "interleaved planes" :
-		   GRPH_Format == SCRN_Standard ? "standard format" :
-		   GRPH_Format == SCRN_PackedPixel ? "packed pixels" :
-		   GRPH_Format == SCRN_FalconHigh ? "falcon truecolor" : "<unknown>");
+		GRPH_Format == SCRN_Interleaved ? "interleaved planes" :
+		GRPH_Format == SCRN_Standard ? "standard format" :
+		GRPH_Format == SCRN_PackedPixel ? "packed pixels" :
+		GRPH_Format == SCRN_FalconHigh ? "falcon truecolor" : "<unknown>");
 
 	GRPH_Fonts &= 0x7FFF;
 	if (vq_gdos())
@@ -534,7 +534,7 @@ static BOOL _r_put_I8(MFDB *mfdb, CARD16 width, CARD16 height)
 
 	mfdb->fd_addr = dst;
 
-	__asm__ volatile (
+	__asm__ volatile(
 		"\tmovea.l	%0, a0\n" /* src */
 		"\tmovea.l	%1, a1\n" /* dst */
 		"\tlea		%3, a2\n" /* height */

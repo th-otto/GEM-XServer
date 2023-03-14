@@ -54,7 +54,7 @@ short        _WMGR_FocusHolder = 0;
 static short _WMGR_HasFocus    = 0;
 static short _WMGR_WidgetColor[3] = { W_NAME, };
 
-#include "intro.c"
+#include "intro.xbm"
 static MFDB  _WMGR_Logo = { x_bits, x_width,x_height, (x_width +15) /16, 0, 1 };
 static MFDB  _WMGR_Qbuf = { NULL,   x_width,x_height, (x_width +15) /16, 0, 0 };
 static short _WMGR_P[8] = { 0,0, x_width -1, x_height -1 };
