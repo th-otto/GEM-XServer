@@ -1,0 +1,42 @@
+!!!
+!!!  fonts.alias  - example configuration file
+!!!
+!!! Edit this file for your own purpose and place it at  /etc/X11/fonts.alias
+!!! See the README file for more infomations.
+!!!
+!!! Lines starting with a '!' are comment lines.
+
+
+!!! Edit and uncomment the following lines to define _field_patterns_ to be
+!!! substituted.  Be aware of the ':' behind the pattern!
+
+!-adobe-:     -*-              ! replace that foundry to wildcard
+!-times-:     -Life-           ! use a font with serifes
+!-helvetica-: -Gothic720-      ! and a font without serifes
+!-courier-:   -Courier10Pitch- ! replace that to the full qualified family name
+!-o-:         -I-              ! allways use Italic instead of Oblique
+
+! With the examples above, a request for '-adobe-times-*-*-*-*-*-*-*-*-*-*-*-*'
+! would be tanslated to                  '-*-Life-*-*-*-*-*-*-*-*-*-*-*-*'
+! and a request for     '-adobe-foobar-*-*-*-*-*-*-*-*-*-*-*-*'
+! would be tanslated to '-*-foobar-*-*-*-*-*-*-*-*-*-*-*-*'
+
+
+!!! Edit and uncomment the following lines to define _complete_lines_ to be
+!!! substituted.  Be aware that there is _no_ ':' behind the pattern!
+
+! The following both lines should always be defined because most X programs
+! needs it:
+
+!fixed    -Bitstream-Courier10Pitch-Medium-R-Normal-Serif-17-100-0-0-C-80-ISO8859-1
+!variable -Bitstream-Charter-Medium-R-Normal-Serif-17-100-0-0-P-73-ISO8859-1
+
+
+! Some more definitions may follow, like:
+
+!-misc-fixed-*-*-*-*-*-*-*-*-*-*-iso8859-1  -Bitstream-Courier10Pitch-Medium-R-Normal-Serif-*-*-*-*-C-*-ISO8859-1
+
+
+! It's always a good idea to reduce the number of '*'s at the _right_ side of
+! the line (the substitution) because that speeds up the server's algorithm to
+! find matching fonts.

@@ -1,0 +1,38 @@
+!!! Example file to be used with xmodmap
+!!!
+!!! Move this this file to  /etc/X11/Xmodmap  if you want it to be
+!!! performed automatically at server start.
+
+
+! The lines below will map greek characters to the keyboard.  These can be
+! reached while pressing the Alt modifier (AltGr for pc keyboards).
+!
+! The pattern of the lines is:
+!    keysym <old> = <subst1> [<subst2> [<subst3> [<subst4>]]]
+! where <old> is the key to be replaced with new key <subst1> for the use
+! without any modifier key and optional <subst2> for use with Shift,
+! <subst3> with Alt/AltGr and <subst4> with Shift + Alt/AltGr.
+
+keysym a = a A Greek_alpha A
+keysym b = b B Greek_beta  B
+keysym g = g G g           Greek_GAMMA
+keysym d = d D Greek_delta D
+keysym q = q Q q           Greek_THETA
+keysym m = m M Greek_mu    M
+keysym p = p P Greek_pi    P
+keysym s = s S Greek_sigma Greek_SIGMA
+keysym t = t T Greek_tau   T
+keysym f = f F Greek_phi   Greek_PHI
+keysym o = o O o           Greek_OMEGA
+
+
+! By default the server interpretes button pressed with a 2-button mouse
+! as follows:
+!    left button  = button 1
+!    right button = button 2
+!    both buttons = button 3
+! corresponding to  "pointer = 1 3 2".  If you want the server to
+! interprete both buttons pressed as button 2 and right button pressed
+! as button 3, uncomment the line below.
+
+! pointer = 1 2 3

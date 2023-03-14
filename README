@@ -1,0 +1,272 @@
+
+                        \\   /
+                         \\ / Version 11 Rel. 6.4
+                         / \\
+                        /   \\  Server for MiNT/GEM
+                      ===============================
+                               Sep 05, 2001
+
+
+Contents
+========
+
+	1. Requirements
+	
+	2. Installation
+	   2.1. Preparing Environment
+	   2.2. Preparing Directories
+	
+	3. Fonts
+	   3.1. Handling of GEM-Fonts
+	   3.2. Font-Aliasing
+	
+	4. Using The X Server
+	   4.1. Menu Bar Items
+	   4.2. Keyboard Input
+	   4.3. Mouse Actions
+
+
+1. Requirements
+===============
+
+To get the server running with a useable speed, a machine with a 68030 and
+10 MByte of Ram is needed at least.  Absolutely vital installed and working
+system programs are: FreeMiNT >= 1.15.6, NVDI >= 4.1, N.AES or XaAES or
+AES 4.1.
+
+If you haven't MiNTnet installed you need a very small package (I call it
+'tiny-sock') from X11.freemint.de installed instead.
+    
+Screen size (width*height) isn't restricted, but ST-High (640*400) is the
+minimum to get it useable.  Nearly all color depths are supported, expect
+of 2 planes (4 colors) and 15 bit PC format.
+
+The latest binary version can be downloaded from the homepage at
+   http://X11.freemint.de ,
+there is also a source snapshot.  The very latest sources are accessible
+from the FreeMiNT CVS Repository at
+   http://wh58-508.st.uni-magdeburg.de/cgi-bin/cvsweb/xg/
+Bug reports should be mailed to <AltF4@freemint.de>.
+
+
+2. Installation
+===============
+
+Copy the server's files to some location on your filesystem; there is no
+requirement of a fixed path for the server.  A usefull place might be
+/usr/X11R6/bin/ but everything else works as well.
+
+The next step is to make a directory /var/lib/Xapp/ for the server.  If the
+server is startet by root at the first time, or the directory is writeable
+by the server, it will do the following steps by itself.  Else do the
+following (as root user):
+	cd /var/lib ; mkdir Xapp ; chmod 777 Xapp
+
+2.1. Preparing Environment
+--------------------------
+
+There are a few things necessary for X-clients to be able to work.
+
+If a client starts, it first parses the environment variable DISPLAY to
+find out at which IP number the server should be connected.  So it's
+possible to start clients from connected machines, having their X-Windows
+opend on your local machine.  The value of DISPLAY has to be of the form
+"<server-IP>:0.0".  For clients running at a local machine, DISPLAY
+contains simply the value "0:0.0", where the first "0" is simply a shortcut
+for the local IP or even "localhost".  For clients started on a remote
+machine connected to an Atari with e.g. the IP 123.234.34.56, DISPLAY at
+the remote machine must be then "123.234.34.56:0.0".
+
+Most comfortable for the user is, to have somewhere in mint.cnf the line
+	setenv DISPLAY 0:0.0
+so the setting it can't be forgotten.  Otherway it would be necessary to
+set it by hand in a shell window and start every client from that shell.
+
+2.2. Preparing Directories
+--------------------------
+
+The following isn't necessary for the server itself but should be done for
+client programs to have a common directory hirachy.
+
+First there should be a directory /etc/X11/app-defaults/ which will later
+contain default configuration files for several client programs.  These
+configuration files are such with the suffix ".ad" in packages and needs to
+be renamed without the suffix while copying to the app-defaults e.g.
+"Xcalc.ad" to only "Xcalc".  Also the X server will search for optional
+configuration fileas at /etc/X11/.
+
+Next, a directory /usr/X11R6/ should be created as being the "XTOPDIR" and
+a link /usr/X11 pointing to this directory as well, for historical reasons:
+   cd /usr ; ln -s X11R6 X11
+Furthermore, some clients are looking for their configuration files not at
+/etc/X11/app-defaults/, but at /usr/X11R6/lib/X11/app-defaults/ (or at
+/usr/X11/lib/X11/app-defaults/, therefor the link) instead, so there should
+be placed a link pointing to /etc/X11/app-defaults/:
+   cd /usr/X11R6/lib/X11 ; ln -s /etc/X11/app-defaults
+
+After carrying out all the previous steps, the system should have these
+directories and links:
+   /var/lib/Xapp/
+   /etc/X11/app-defaults/
+   /usr/X11R6/lib/X11/app-defaults -> /etc/X11/app-defaults/
+   /usr/X11                        -> X11R6/
+
+
+3. Fonts
+========
+
+In X, fonts are named following the XLFD ('X Logical Font Description').
+These font names are in fact a set of descriptive fields with '-' as
+delimiters.  The format is as following:
+
+   -fndry-fmly-wght-slnt-sWd-adStl-pxSz-ptSz-resx-resy-spc-avgWd-rgstry-enc
+
+with the field meanings:
+
+fndry:     Foundry is the name of the organization that supplied or last
+           modified the font, e.g. Adobe, Bitstream.
+fmly:      FamilyName of the font, e.g. Courier, Gothic, Helvetica
+wght:      WeightName, e.g. Bold, Medim, Black
+slnt:      Slant, a code-string with tha encoding: "R"=Roman, "I"=Italic,
+           "O"=Oblique, aso.
+sWd:       SetWidth, e.g. Normal, Condensed, Narrow
+adStl:     AddStyle, e.g. Sans, Serif,
+pxSz:      PixelSize of the body of the font, similar to the character cell
+           in VDI
+ptSz:      PointSize in decipoint, that is 1/10th point
+resx,resy:   horizontal/vertical resolution for which the font was designed
+spc:       Spacing, code-string to indicate the escapement, that is "P" for
+           proportional and "M" or "C" for monospaced
+avgWd:     AverageWidth of all characters in 1/20th pixels
+rgstry,enc:   CharsetRegistry/Encoding, e.g. ISO8859-1
+
+All of these fields my contain wildcards (a '*').  For example, often
+clients requests a font named '-*-*-*-*-*-*-*-120-*-*-*-*-ISO8859-1' which
+means some font of 12 point height and that charset encoding is needed, no
+matter of which family or style and so on.  The server will than take the
+first font where both criteria matches.
+
+3.1. Handling of GEM-Fonts
+--------------------------
+
+At startup, the server parses all fonts provided by the VDI and translates
+the available information to XLFD strings.  These are stored in the hash
+file /var/lib/Xapp/fonts.db to accelerate further startups.
+
+3.2. Font-Aliasing
+------------------
+
+If there exists a file /etc/X11/fonts.alias it will be read at server
+startup and later be used to substitute font names from client requests to
+fonts the server provides.  Have a look at the server's font hash file at
+/var/lib/Xapp/fonts.db to see which fonts are provided by your system.
+There is also an example configuration 'fonts.alias.EXMPL' coming along
+with this file.
+
+The format of the fonts.alias file is very simple, lines starting with a
+'!' are comment lines and will be ignored.  The relevant lines are formed
+the way "foo: bar" and "foo bar" and means in both cases: "find 'foo' and
+replace it with 'bar'", but in different ways.  The first form (with the
+colon) is used to substitute a _part_ of the font name and the second form
+(without colon) is used to substitute the _whole_ font name.
+
+The "foo: bar" form is usefull to replace particular fields of the font
+name, for example the lines
+   -adobe-:   -*-
+   -courier-: -Courier10Pitch-
+would cause that a request for '-adobe-courier-*-*-*-*-*-*-*-*-*-*-*-*'
+would be translated to '-*-Courier10Pitch-*-*-*-*-*-*-*-*-*-*-*-*' which
+matches the speedo font from the NVDI package.  The field delimeters '-'
+should always be used (even if not forced) to avoid wrong results.
+
+The "foo: bar" form is to substitute the whole font name and will be done
+_AFTER_ the part substitution.
+
+There are two often requested pseudo-fonts which should always be aliased:
+
+fixed: A monospaced font that fits best the system capabilities, e.g. the
+       font used the AES, or some other monospaced font of your choice.
+
+variable: Some proportional font which should be of the same height as the
+          font used for fixed.
+
+To use the fonts from the NVDI package, it could looks like
+
+fixed   -Bitstream-Courier10Pitch-Medium-I-Normal-Serif-16-90-0-0-C-70-ISO8859-1
+variable -Bitstream-Life-Medium-R-Normal-Serif-16-90-0-0-P-68-ISO8859-1
+
+The font to be substituted can also be a pattern, like
+
+-adobe-times-*-*-*-*-*-*-*-*-*-*-iso8859-1 \
+                                     -*-times*-medium-*-*-*-*-*-*-*-*-*-*-*
+-*-Helvetica-Medium-R-Normal--*-120-*-*-*-*-*-*	\
+                                  -*-gothic*-medium-r-*-*-*-120-*-*-*-*-*-*
+
+Please pay attention that the '\' isn't allowed in the font.alias file;
+it's only used here for better readability!  Instead both parts have to be
+in one line, with spaces or tabs between.
+
+There are other oftern used font names of the form '9x15', '6x13' and so
+on, which means monospaced fonts of <width> * <height> pixel size.  If an
+request of such a font name appeares and the server can't find it in its
+XLFD list nor in the alias list, it takes a scalable font which can scaled
+best to that geometry and creates a generic XLFD entry.
+
+
+4. Using The X Server
+=====================
+
+After been started the X server checks if  /dev/xconout2  isn't locked by
+some other program and if  /usr/X11/bin/xconsole  exists.  In this case the
+latter on is started acts as a replacement for TosWin2's console window.
+TosWin2 mustn't be terminated for having xconsole started, only closing its
+console window is enough.  Note that also for xconsole the xconout2.xdd
+must be installed.
+
+The next step after this is checking if either  /etc/X11/Xmodmap  and 
+/usr/X11/bin/xmodmap are existing.  In this case it will be started to
+apply user defined keyboard and/or mouse button mappings.  For more
+information see the example file 'Xmodmap.EXMPL' and the xmodmap manpage.
+
+4.1. Menu Bar Items
+-------------------
+
+X11-Server:
+	About:   Views version information.
+
+File:
+	gwm:   Enables/disables the built-in window manager.  In fact, this
+		option controls if X windows have GEM windgets and decor, or not.
+	Quit:   Quits the X server.  If some clients are connected, a
+		confirmation dialog will apear first.
+
+Clients:   Views a list of all client connections.  Selecting one of the
+	entries while the Control key is held down, closes down immediately the
+	corresponding connection.
+
+4.2. Keyboard Input
+-------------------
+
+In opposite to GEM apllications, every X window gets keyboard events always
+and only if it contains the mouse pointer, independent of the fact which is
+the top window.  This means that even if some GEM application has some of
+its wimdows the top window but the mouse pointer is over an X window, all
+keyboard inout will be sent to the latter.  On the other hand, if the
+X server has one of its windows the top window but the mouse pointer is
+somewhere else than over an X window, all keyboard inputs will be
+discarded.
+
+Normaly the X server does no interpretition of any kyeboard input.  There
+is one exception:  The combination Control-Alt-Backspace causes an
+immediate server shutdown and is meant as a "Panic Key".
+
+4.3. Mouse Actions
+------------------
+
+X windows can be resized by clicking on the frame around and dragging to
+the new size.  Some windows may be set to be not resizeable, this can be
+overridden by holding down the Control key.  A short mouseclick onto the
+frame tops/bottoms the window.
+
+Holding down the Alt key while clicking somewhere inside a window allows to
+move it around.

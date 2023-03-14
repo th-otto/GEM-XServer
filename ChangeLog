@@ -1,0 +1,335 @@
+2001-09-21: 0.14
+   - if the server can't load its RSC file the normal way, it also
+     searches in /usr/X11/bin/ now.
+   - added output buffer boundary check to event generating functions
+     too, if lots of events happend the server was still crashing.
+   - corrected calculation of output stream buffer, was taken too big.
+   - some internal code tidy ups.
+2001-09-18: 0.13.3
+   - heaviely reworked handling of output stream buffer to avoid
+     crashes due to buffer overflows, especially in GetImage and
+     ListFonts request.
+   - speeded up Get/PutImage request for color depth >= 16bit.
+   - corrected drawing of window decor (border).
+2001-09-13: 0.13.2
+   - closed a memory leakage in GetImage request.
+   - added a workaround for xoring monochrome bitmaps to a bitmap of
+     >= 16bit color depth, to go round a bug in NVDI.
+   - corrected return pixel values of 8bit packed pixel bitmaps.
+2001-09-08: 0.13.1
+   - implemented GetImage request.  now xmag (screen magnifier) and
+     the 'AutoGrab Window' function of xv are working.
+   - corrected RGB return values of QueryColors request, only the
+     first value was set before.
+   - changed colormap return value of GetWindowAttributes request to
+     the default colormap, workaround for xv's 'AutoGrab Window'
+     function.
+
+2001-09-05: 0.13
+   - implemented support for 16/24/32 bits color depth graphic modes.
+   - fixed a tricky bug which was responsible for white drawings over
+     white background on graphic depths >= 16 bits.
+   - fixed a bug which crashes the AES if a client tryes to change the
+     root window (desktop) background.
+2001-09-02: 0.12.4
+   - implemented support for Falcon HighColor graphic mode.
+   - uses now a static VDI color map to speed up some color related
+     requests and colormap changing.
+   - always unload fonts of closed offscreen bitmaps if necessary, was
+     sometimes forgotten before.
+2001-08-27: 0.12.3
+   - corrected handling of ServerUngrab request.
+   - fixed a bug which caused the server hanging in an infinite loop
+     while working off a WM_ONTOP event.
+   - reset mouse pointer to normal GEM form if last X window is
+     closed.
+   - corrected handling of SIGCHLD in connection with xconsole.
+2001-08-24: 0.12.2
+   - fixed a bug which caused crashes after activating the built-in
+     window manager.
+   - avoid processes started by the server from becoming zombies after
+     termination.
+   - some smaller speed improvements.
+2001-08-22: 0.12.1
+   - fixed a bug in the calculation of clipping rectangels (clip-by-
+     children mode) which was responsible for occasional undrawn
+     window parts.
+   - moved some spezialized AES/VDI call functions to the gemlib to
+     use the optimized trap interfaces.  code adapted to the new
+     gemlib version 0.42.
+
+2001-07-31: 0.12
+   - updated and expanded README and Xg.hyp files.  The Xg.hyp now
+     contains also the manpages for xconsole and xmodmap.
+   - if the built-in window manager get activated manually after a
+     server reset or automatically at startup, xmodmap will be tried
+     to be started to apply user defined keyboard and/or mouse button
+     mappings (see Xmodmap.EXMPL file).
+   - improved performing of server reset with respect to the built-in
+     window manager (pseudo client).
+   - implemented ChangeKeyboardMapping request and MappingNotify
+     event.  this makes it possible to change the keyboard mapping
+     for user's purpose, normally done with the 'xmodmap' tool.
+   - implemented QueryKeymap request.
+   - implemented UnmapSubwindows request, was simply forgotten in
+     prior releases.
+2001-07-27: 0.11.2
+   - implemented GetKeyboardControl request for clients that want to
+     know which keys has auto repeat enabled, like xkeycaps does.
+   - improved handling of ALT+numblock inputs, nearly all characters
+     defined in the Atari font can be typed in this way now.
+   - completely reworked keyboard mapping (again), should be working
+     now correctly with milan keyboards also, finally.
+2001-07-16: 0.11.1
+   - implemented GrabServer/UngrabServer requests.
+   - reworked socket stream handling.  using an unified call interface
+     for both accept and normal io events reduces the cpu usage of the
+     server by aprox. 10% in standby.
+   - changed gemlib trap interface to asm inline (not completed yet).
+     this improves very little the binary size and gem calling speed
+     but wasn't really worth the effort.
+
+2001-07-13: 0.11
+   - if the server starts up and founds that there is no console installed (or
+     opened) it tryes to start xconsole instead.  this works only in case that
+     the xconout2.xdd is installed.
+   - created another latin 1 gdos-font '6x10' (in gdos-X-fonts-03.tgz), as
+     beloved by xconsole and xterm.
+   - implemented AV_START message handling to allow client programms to be
+     started with corrected command lines.
+   - implemented command line conversion from tos to unix path convention for
+     client execution.  this makes it possible to start client programs simply
+     from the desktop, where file parameters for the client are always given
+     in dos convention.
+2001-07-08: 0.10.3
+   - fixed a stupid bug from last release which stopped window resizing due to
+     not taking over the mouse control.
+   - improved arguments for executing of client processes.  therefor windows are
+     named correctly now, even if clients are started from desktop.
+2001-07-07: 0.10.2
+   - completely reworked keyboard mapping, should now work correctly with
+     different keyboard layouts, also for french and swedish.  Additional,
+     mostly can be made use of inputs done by ALT+numblock.
+   - improved KeyRelease events timing, will simply be generated after the
+     keyboard's initial repeat time expired.
+   - re-activated Ctrl+Alt+Backspace for imediate server shutdown, was removed
+     by accident.
+   - fix a bug which caused the AES to freeze if one mouse button was pressed
+     while another was still down.
+2001-07-05: 0.10.1
+   - corrected calculation of mouse pointer watching rectangle to avoid errors
+     on occluded window regions.  this gets rid of problems with knews's sliders
+     and xv's load/save box.
+
+2001-07-04: 0.10
+   - added new control:  holding down the ALT key and pressing the left mouse
+     button somewhere inside a X window allows to move this window, same as is
+     handled by other X servers.  Additional there is a "magnetic snap" at the
+     desktop borders while moving this way to make window positioning easier.
+     a short mouse click into a window instead tops/bottoms this.
+   - changed window decoration to view if a window is normally resizeable or
+     not.
+   - improved window (un)topping, should now always react as expected.
+2001-07-01: 0.09.4
+   - activated the 'About' box (as wished by lp_ and other :-) ) to display the
+     version number.
+   - heavyly reworked management of window properties to make the built-in
+     window manager's accesses to ICCC values easier and speeds it up a bit.
+   - adapted to gemlib 0.41.
+2001-06-23: 0.09.3
+   - fixed ReparentWindow() handling for setting to root parent.
+   - implemented wmgr notification for WM_HINTS properties changes to allow
+     clients to update the bitmap of a iconifyed window (as xv does while
+     working).  same done for icon window names.
+   - decreased debug output a bit.
+2001-06-23: 0.09.2
+   - improved a bit the detection of gray scale colors for better matching the
+     client's ideas of colors using the 4x8x4 color model.
+   - release pointer grab if the grab window becomes unmapped, not doing so may
+     freeze the system.
+   - corrected handling for (un)iconifying windows and several internal changes.
+2001-05-21: 0.09.1
+   - improved keyboard focus tracking, now apart from iconified windows.
+
+2001-05-18: 0.09
+   - changed handling of keyboard focus, X programs should now behave exactely
+     as the X core protocol defines as default.
+2001-05-17: 0.08.4
+   - fixed an ugly bug which caused random crashes after a window has been
+     backdropped due to messing up list pointers.
+   - change BV_EVENT flag while un/iconifying windows to allow topping by user
+     of iconifyed windows also.
+2001-05-15: 0.08.3
+   - fixed bug in calculating of clipping rectangles by child windows.
+2001-05-10: 0.08.2
+   - added clip-by-children mode to draw functions to prevent from errorneous
+     drawing of obscured window regions.
+   - corrected calculation of window's outer border (was 2 pixel too wide), this
+     avoids some unnecessary redraws.
+2001-05-08: 0.08.1
+   - implemented icon hints to allow clients to set bitmaps for iconified
+     windows.
+   - few code cleanups.
+
+2001-05-06: 0.08
+   - implemented mapping for milan pc-keyboards.
+   - fixed a bug in parsing of fonts.db file.
+2001-05-05: 0.07.4
+   - changed discovering of modifier keys, CapsLock is working now.
+   - fixed wrong keycodes in return of GetModifierMapping() request.
+   - disabled some more debug output.
+2001-04-16: 0.07.3
+   - corrected values of returned VisualIDs, to avoid several tweaks and
+     glitches of gtk+-linked clients.
+2001-04-12: 0.07.2
+   - implemented improvised reply for GetFontPath() request.
+   - workarounds for wrongly gtk+ requests:
+     - ignore negative sized rectangles (generates EvntNoExposure event),
+     - accept illegal copy requests for source and destination with different
+       color depth.
+2001-04-02: 0.07.1
+   - fixed bug in parsing of fonts.db file, which was responsible for the
+     anoying useless slowly server start.
+
+2001-03-30: 0.07
+   - compiled with new gcc 2.95.3 and mintlib 0.56.1.
+   - completed function for event data swapping and SendEvent().
+2001-03-27: 0.06.6
+   - fixed SendEvent() request, cut&paste between clients is working now.
+   - corrected coordinates for KeyPress/Release and ButtonPress/Release events.
+   - bugfix in font handling which could cause crashes by stack damaging.
+   - several parts of the code cleaned up.
+2001-03-25: 0.06.5
+   - improved handling of mouse buttons, doubleclicks are working now also if an
+     automatic button grab appears.
+   - corrected replies for QueryPointer() and TranslateCoordinates() requests.
+   - replaced linear array search for color names and atoms by faster binary
+     search, that slightly speeds up client start.
+2001-03-20: 0.06.4
+   - fixed wrong offset for pixmap to window copy of CopyArea() request.
+   - corrected Y coordinate for text drawing.
+2001-03-19: 0.06.3
+   - improved font handling: Ascent, Descent and Halfline should now be correct
+     for Speedo and TrueType fonts also.
+   - supplied some more Latin-1 encoded fonts.
+2001-03-11: 0.06.2
+   - implemented real scrolling for CopyArea() request to reduce redraws.
+   - fixed a bug that caused the PolyFillRectangle() request to perform only the
+     first draw of the rectangle list.
+   - several minor bugfixes.
+2001-03-01: 0.06.1
+   - implemented save-under screen buffering, which avoids a lot of redraw
+     events for popup windows.
+   - fixed wrong mapping of generic <w>x<h> fonts.
+
+2001-02-28: 0.06
+   - added support for GEM-fonts with completed ISO Latin-1 character set, also
+     supply the both most often fonts 6x13 and 9x15 as separate package.
+   - improved handling for separate real ascent and descent of font glyphs by
+     using a heuristic.
+   - repaired the "transparente window" failure.
+   - updated to new gem-lib binding.
+2001-02-22: 0.05.4
+   - implemented GraphicsExpose event, window scrolling by CopyArea() request
+     works now.
+   - window border corner decoration drawing corrected.
+   - shift mouse click at the sizer frame allows now always resizing of the
+     windows corner.
+2001-02-18: 0.05.3
+   - implemented passive and automatic button grabs, so all aspects of button
+     grabs handling should be completed now.
+   - implemented Grab/UngrabButton() request.
+2001-02-15: 0.05.2
+   - darned memory leakage: remove properties of deleted windows.
+   - implemented ChangeActivePointerGrab() request.
+   - corrected two times too often referenced cursors by pointer grabs.
+2001-02-14: 0.05.1
+   - corrected ClearArea() handling of pixmap backgrounds.
+   - bugfix in exposure events generating while drawing window contents.
+
+2001-02-12: 0.05
+   - made the background of the root window (desktop) changeable too.
+   - supplemented window functions to draw also background pixmaps.
+2001-02-10: 0.04.6
+   - completely rewritten window drawing functions to speedup a bit.
+   - refined decoration of reparented top-windows.
+2001-02-06: 0.04.5
+   - slightly speed improvements for draw and fill requests.
+   - correted calculations for begin and end angles of arcs.
+2001-02-03: 0.04.4
+   - added handling of clipping rectangle list, not only single rectangles; also
+     implemented clipping lists for pixmaps.
+   - code restructured and cleaned up.
+   - implemented arc drawing for offscreen pixmaps.
+2001-02-01: 0.04.3
+   - implemented clipping rectangles from GC for window drawings, that should
+     cure most of the redraw problems with gtk-lib linked clients.
+   - fixed ConfigureWindow() to avoid redraws of unmapped subwindows.
+2001-01-31: 0.04.2
+   - changed color palette to get it much more closer to the NVDI5 default
+     palette.
+   - implemented internal pseudo mouse-font, previous queries for the font
+     'cursor' caused crashes.
+2001-01-30: 0.04.1
+   - changed syntax and location of the fonts.alias file to get it more
+     flexible and handy.  See the README file for details.
+   - added Panic Key: Ctrl-Alt-Backspace quits the server immediately without
+     any further inquiry.
+   - improved user resizing of windows.
+
+2001-01-28: 0.04
+   - added changes by R.Mannigel:
+     - wind_set_proc() to set window title icons.
+     - shel_write (SWM_BROADCAST, ...) to notify other applications about color
+       palette changed.
+     - receive COLORS_CHANGED broadcast message.
+   - implemented SetClosedownMode() to avoid removing of client resources which
+     want to retain after disconnecting.  This allowes Motif applications like
+     netscape to install their nifty refference windows.
+   - improved cleanup after client abort to avoid memory leaks.
+   - added forgotten byte-swapping for pixmap line coordinates.
+   - typo fixed which caused wrong BadMatch replies for some CreateCursor()
+     request.
+2001-01-22: 0.03.3
+   - several code cleanups.
+   - implemented pointer grab cursors and corrected handling of parent-relative
+     window cursors.
+   - corrected ChangeWindowAttributes() with respect to OverrideRedirect-flag,
+     this cures wrongly decorated menu-windows.
+2001-01-17: 0.03.2
+   - improved leave/enter event generating for window delete.
+   - fixed: quitting of clients with iconified windows caused server crashes.
+2001-01-12: 0.03.1
+   - corrected child-parameter for grabbed button events, this fixes most
+     problems with gtk-menues.
+
+2001-01-07: 0.03
+   - Grabbed pointer event propagation corrected.
+   - README supplemented.
+2001-01-03: 0.02.4
+   - [Un]GrabPointer() requests implemented.
+   - bugfix: KillClient() couldn't detemine a windows owner.
+2000-12-28: 0.02.3
+   - bugfix: workaround for monochrome PolyFillRect, seems to cause crashes.
+2000-12-26: 0.02.2
+   - First section in README file.
+   - ClipRectangles added to Graphical context.
+2000-12-21: 0.02.1
+   - bugfix: huge replies where cutted down to short values.
+
+2000-12-20: 0.02
+   - NoExpose event added, needed by Copy...() requests
+   - QueryFont() extended to provide font-property 'FONT'.
+2000-12-19: 0.01.03
+   - short click at its sizer-frame tops an window now.
+   - fixed setting to ParentRelative background, still not correct yet, but
+     proper workaround..
+2000-12-18: 0.01.02
+   - CloseFont() request completed.
+   - Font-aliasing implemented (/usr/X11/lib/X11/fonts.alias).
+   - Even more improved handling of '<W>x<H>' font names.
+2000-12-17: 0.01.01
+   - Improved handling of '<W>x<H>' font names.
+
+2000-12-15: 0.01
+   - Initial version of public beta.
