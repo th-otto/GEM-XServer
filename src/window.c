@@ -866,7 +866,7 @@ RQ_CreateWindow (CLIENT * clnt, xCreateWindowReq * q)
 	/* check visual */
 	/* check depth */
 	
-	} else if (!(wind = XrscCreate(WINDOW, q->wid, clnt->Drawables,))) {
+	} else if (!(wind = XrscCreate(WINDOW, q->wid, clnt->Drawables,0))) {
 		Bad(BadAlloc,0, X_CreateWindow,"_(W:%lX)", q->wid);
 	
 	} else {

@@ -12,6 +12,8 @@
 #ifndef __WMGR_H__
 #define __WMGR_H__
 
+extern OBJECT WMGR_Desktop;
+
 void WmgrIntro(BOOL onNoff);
 BOOL WmgrInit(BOOL initNreset);
 void WmgrActivate(BOOL onNoff);
@@ -21,7 +23,7 @@ void WmgrClntInsert(p_CLIENT client);
 void WmgrClntUpdate(p_CLIENT client, const char *text);
 void WmgrClntRemove(p_CLIENT client);
 
-void WmgrCalcBorder(GRECT * curr, p_WINDOW wind);
+void WmgrCalcBorder(GRECT *curr, p_WINDOW wind);
 BOOL WmgrWindHandle(p_WINDOW wind);
 BOOL WmgrWindMap(p_WINDOW wind, GRECT *);
 BOOL WmgrWindUnmap(p_WINDOW wind, BOOL destroy);
@@ -32,7 +34,7 @@ void WmgrCursorOff(p_CURSOR new_crsr);
 
 void WmgrSetDesktop(BOOL onNoff);
 
-void WmgrDrawDeco(p_WINDOW, p_PRECT work, p_PRECT area, p_PRECT sect, int num);
+void WmgrDrawDeco(p_WINDOW, PRECT *work, PRECT *area, PRECT *sect, int num);
 void WmgrDrawIcon(p_WINDOW, GRECT *clip);
 
 void WmgrSetFocus(short focus);

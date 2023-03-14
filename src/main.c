@@ -154,7 +154,7 @@ main (int argc, char * argv[])
 				short  msg[8];
 				BOOL   reset = xFalse;
 				short  event = evnt_multi_fast (&ev_i, msg, &ev_o);
-				CARD8  meta  = (*kb_shift & (K_RSHIFT|K_LSHIFT|K_LOCK|K_CTRL|K_ALT))
+				CARD8  meta  = (*kb_shift & (K_RSHIFT|K_LSHIFT|K_CAPSLOCK|K_CTRL|K_ALT))
 				             | (*kb_shift & K_ALTGR ? 0x20 : 0);
 				short  chng;
 				MAIN_TimeStamp = (clock() * (1000 / CLOCKS_PER_SEC) - t_start);
@@ -198,7 +198,7 @@ main (int argc, char * argv[])
 							WindMctrl (xFalse);
 						}
 						MAIN_But_Mask = PntrMap(ev_o.emo_mbutton) >>8;
-						meta = (*kb_shift & (K_RSHIFT|K_LSHIFT|K_LOCK|K_CTRL|K_ALT))
+						meta = (*kb_shift & (K_RSHIFT|K_LSHIFT|K_CAPSLOCK|K_CTRL|K_ALT))
 				           | (*kb_shift & K_ALTGR ? 0x20 : 0);
 						if (meta != KYBD_PrvMeta
 						    && (chng = KybdEvent (0, meta) & (K_ALT|K_CTRL))

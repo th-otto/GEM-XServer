@@ -296,7 +296,7 @@ ClntInit (BOOL initNreset)
 int
 ClntCreate (int fd, const char * name, const char * addr, int port)
 {
-	CLIENT * clnt = XrscCreate(CLIENT, ++_CLNT_RidCounter, CLNT_Pool,);
+	CLIENT * clnt = XrscCreate(CLIENT, ++_CLNT_RidCounter, CLNT_Pool,0);
 	
  	printf ("[%s:%i] Request from %s (at %i)\n", addr, port, name, fd);
 	

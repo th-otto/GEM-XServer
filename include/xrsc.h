@@ -49,7 +49,7 @@ typedef struct_XRSCPOOL(s_XRSCPOOL, XRSC, 0) *p_XRSCPOOL;
 
 #define CastXRSC(r)   ((p_XRSC)&r->NextXRSC)
 
-#define XrscCreate( T, id, pool, size...) ((T*)_xrsc_create (&(pool).xrsc,id, sizeof(T) + (size+0)))
+#define XrscCreate( T, id, pool, size...) ((T*)_xrsc_create (&(pool).xrsc,id, sizeof(T) + (size)))
 #define Xrsc(       T, id, pool )  ((T*)_xrsc_search (&(pool).xrsc,id))
 #define XrscInsert( pool, r )            _xrsc_insert(&(pool).xrsc,CastXRSC(r))
 #define XrscRemove( pool, r )            _xrsc_remove(&(pool).xrsc,CastXRSC(r))

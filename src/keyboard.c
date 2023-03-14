@@ -600,7 +600,7 @@ KybdEvent (CARD16 scan, CARD8 meta)
 	
 	} else {
 		MAIN_Key_Mask = (meta & (K_LSHIFT|K_RSHIFT) ? ShiftMask   : 0)
-		              | (meta &  K_LOCK             ? LockMask    : 0)
+		              | (meta &  K_CAPSLOCK         ? LockMask    : 0)
 		              | (meta &  K_CTRL             ? ControlMask : 0)
 		              | (meta &  K_ALT              ? Mod1Mask    : 0)
 		              | (meta &  K_ALTGR            ? Mod2Mask    : 0);

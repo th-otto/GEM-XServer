@@ -15,7 +15,6 @@
 #include <gem.h>
 #include "types.h"
 
-#define K_LOCK    0x10					// bitmask returned by Kbshift()
 #define K_ALTGR   0x80					/* bitmask returned by Kbshift() */
 #define K_XALTGR  0x20			/* bitmask used internally */
 

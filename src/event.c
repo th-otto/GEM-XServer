@@ -689,8 +689,6 @@ RQ_SendEvent (CLIENT * clnt, xSendEventReq * q)
 	// xEvent event
 	//...........................................................................
 	
-	extern WINDOW * _WIND_PointerRoot;
-	
 	WINDOW * wind = NULL;
 	
 	if (q->event.u.u.type < 2 || q->event.u.u.type >= LASTEvent) {

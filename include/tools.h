@@ -76,12 +76,12 @@ static inline void SwapRCT(GRECT * dst, const GRECT * src)
 
 static inline BOOL PXYinRect(const PXY *p, const GRECT *r)
 {
-	return (p->p_x >= r->g_x && p->p_y >= r->g_y && p->p_x < r->g_x + r->g_w && p->p_y < r->g_y + r->g_h);
+	return p->p_x >= r->g_x && p->p_y >= r->g_y && p->p_x < r->g_x + r->g_w && p->p_y < r->g_y + r->g_h;
 }
 
 static inline BOOL RectIntersect(const GRECT *a, const GRECT *b)
 {
-	return (a->g_x < b->g_x + b->g_w && a->g_y < b->g_y + b->g_h && b->g_x < a->g_x + a->g_w && b->g_y < a->g_y + a->g_h);
+	return a->g_x < b->g_x + b->g_w && a->g_y < b->g_y + b->g_h && b->g_x < a->g_x + a->g_w && b->g_y < a->g_y + a->g_h;
 }
 
 
