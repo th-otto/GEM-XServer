@@ -1079,7 +1079,7 @@ WmgrMessage (short * msg)
 			break;
 		
 		case 0x4711: if (!*(char**)(msg +3)) {
-			printf ("\33pIgnored\33q empty AV_START from #%i.\n", msg[1]);
+			x_printf ("\033pIgnored\033q empty AV_START from #%i.\n", msg[1]);
 			
 		} else {
 			signal (SIGBUS,  _Wmgr_SigAVptr);
@@ -1102,7 +1102,7 @@ WmgrMessage (short * msg)
 				         msg[1], name, *(char**)(msg +3));
 				form_alert (1, buf);
 
-				printf ("\33pBUMMER\33q"
+				x_printf ("\033pBUMMER\033q"
 				        " Application #%i sent illegal pointer %p in AV_START.\n",
 				        msg[1], *(char**)(msg +3));
 			} else {
@@ -1121,7 +1121,7 @@ WmgrMessage (short * msg)
 					((char*)memcpy (argv[argc++], str, len))[len] = '\0';
 				}
 				
-				printf ("VA_START '%s'\n", *(char**)(msg +3));
+				x_printf ("VA_START '%s'\n", *(char**)(msg +3));
 				msg[0] = 0x4738; // AV_STARTED
 				appl_write (msg[1], 16, msg);
 				
@@ -1131,7 +1131,7 @@ WmgrMessage (short * msg)
 		}	break;
 		
 		default:
-			printf ("event #%i(%X) by #%i = %i/%X, %04X,%04X,%04X,%04X \n",
+			x_printf ("event #%i(%X) by #%i = %i/%X, %04X,%04X,%04X,%04X \n",
 			        msg[0], MAIN_KeyButMask, msg[1],
 			        msg[3],msg[3], msg[4],msg[5],msg[6],msg[7]);
 	}

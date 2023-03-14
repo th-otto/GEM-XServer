@@ -83,7 +83,7 @@ SrvrInit (int port)
 	SRVR_Conn.Port = port;
 	SRVR_Conn.Fd   = socket (AF_INET, SOCK_STREAM, 0);   // get socket descriptor
 	if (SRVR_Conn.Fd < 0) {
-		printf ("Can't open stream socket.\n");
+		x_printf ("Can't open stream socket.\n");
 		return -1;
 	}
 	i = 1;
@@ -98,20 +98,20 @@ SrvrInit (int port)
 	server.sin_addr.s_addr = htons (INADDR_ANY);
 	
 	if (bind (SRVR_Conn.Fd, (struct sockaddr*)&server, sizeof(server)) < 0) {
-		printf ("Can't bind stream socket.\n");
+		x_printf ("Can't bind stream socket.\n");
 		return -1;
 	}
 	for (i = SRVR_Conn.Fd; i < 32; i++) {
 		if (i != SRVR_Conn.Fd  &&  Finstat(i) < 0) max_conn++;
 	}
 	if (listen (SRVR_Conn.Fd, max_conn) < 0) {
-		printf ("Can't listen to stream socket.\n");
+		x_printf ("Can't listen to stream socket.\n");
 		return -1;
 	}
 	
 	/***** Now connection is up *****/
 	
-	printf ("  using port %i (fd %i) for maximum of %i connections,\n",
+	x_printf ("  using port %i (fd %i) for maximum of %i connections,\n",
 	        port, SRVR_Conn.Fd, max_conn);
 	
 	memset (SRVR_ConnTable, 0, sizeof(SRVR_ConnTable));
@@ -136,7 +136,7 @@ SrvrInit (int port)
 	
 	if (i  &&  WmgrInit (xTrue)) {
 		CrsrInit (xTrue);
-		printf("... ready\n\n");
+		x_printf("... ready\n\n");
 	
 	} else {
 		close (SRVR_Conn.Fd);
@@ -148,7 +148,7 @@ SrvrInit (int port)
 
 //==============================================================================
 void
-SrvrReset()
+SrvrReset(void)
 {
 	ClntInit (xFalse);
 	WindInit (xFalse);
@@ -158,7 +158,7 @@ SrvrReset()
 	AtomInit (xFalse);
 	PntrInit (xFalse);
 	WmgrInit (xFalse);
-	printf("... ready\n\n");
+	x_printf("... ready\n\n");
 }
 
 
@@ -192,7 +192,7 @@ _Srvr_Accept (p_CONNECTION conn, BOOL rd, BOOL wr)
 	
 	int fd  = accept (SRVR_Conn.Fd, (struct sockaddr*)&sock_in, &s_len);
 	if (fd < 0) {
-		printf ("accept failed.\n");
+		x_printf ("accept failed.\n");
 		return xFalse;
 	}
 	fcntl (fd, F_SETFL, O_NONBLOCK);
@@ -259,7 +259,7 @@ void
 SrvrConnInsert (p_CONNECTION conn)
 {
 	if (conn.p->FdSet || SRVR_ConnTable[conn.p->Fd].p) {
-		printf ("\33pError\33q SrvrConnInsert() \n");
+		x_printf ("\033pError\033q SrvrConnInsert() \n");
 	
 	} else {
 		conn.p->FdSet              = 1ul << conn.p->Fd;
@@ -274,7 +274,7 @@ void
 SrvrConnRemove (p_CONNECTION conn)
 {
 	if (!conn.p->FdSet || !SRVR_ConnTable[conn.p->Fd].p) {
-		printf ("\33pError\33q SrvrConnRemove() \n");
+		x_printf ("\033pError\033q SrvrConnRemove() \n");
 	
 	} else {
 		SrvrUngrab (conn.Client);
@@ -328,7 +328,7 @@ SrvrSetup (void* buf, CARD16 maxreqlen, int DoSwap, long rid)
 	fclose (f);
 }***/
 	if (_SRVR_SetupBytes > maxreqlen) {
-		printf ("FATAL: setup length > maxreqlen (%li/%u)!\n",
+		x_printf ("FATAL: setup length > maxreqlen (%li/%u)!\n",
 		        _SRVR_SetupBytes, maxreqlen);
 		exit (1);
 	}

@@ -13,6 +13,7 @@
 #define __PIXMAP_H__
 
 #include "drawable.h"
+#include "x_printf.h"
 
 
 typedef struct s_PIXMAP
@@ -47,7 +48,7 @@ static inline void WATCH_PMAP(const char *f, PIXMAP *p)
 			p->__magic = mgx;
 		} else if (p->__magic != mgx)
 		{
-			printf("\n\nDAMAGED in '%s' !!!\n\n\n", f);
+			x_printf("\n\nDAMAGED in '%s' !!!\n\n\n", f);
 		}
 	}
 }

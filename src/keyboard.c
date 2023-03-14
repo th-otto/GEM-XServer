@@ -20,6 +20,7 @@
 #include "x_gem.h"
 #include "x_mint.h"
 #include "wmgr.h" // for debugging only
+#include "x_printf.h"
 
 #include <X11/Xproto.h>
 
@@ -177,7 +178,7 @@ set_map (SCANTAB * tab, size_t num)
 	while (num--) {
 		KeySym * k = &KYBD_Symbol[tab->scan][tab->col];
 		if (*k  &&  *k != XK_VoidSymbol) {
-			printf ("    * can't map code %i:%i to %04lX '%.1s', is %04lX \n",
+			x_printf ("    * can't map code %i:%i to %04lX '%.1s', is %04lX \n",
 			        tab->scan, tab->col, tab->sym,
 			        (tab->chr >= ' ' ? (char*)&tab->chr : ""), *k);
 		} else {
@@ -199,13 +200,13 @@ ins_map (const char * set)
 	
 	while ((asc = *(set++))) {
 		if (KYBD_Set[asc]) {
-			printf ("    * '%c'(%04lX) already mapped to keycode %i \n",
+			x_printf ("    * '%c'(%04lX) already mapped to keycode %i \n",
 			        asc, Tos2Iso[asc], KYBD_Set[asc]);
 			if (*set) set++;
 			continue;
 		}
 		do if (++scan > KYBD_CodeMax - KEYSYM_OFFS) {
-			printf ("    * no space to map keycode%s for '%c%s'\n",
+			x_printf ("    * no space to map keycode%s for '%c%s'\n",
 			        (*set ? "s" : ""), asc, set);
 			return num;
 		} while (KYBD_Symbol[scan][0] != XK_VoidSymbol);
@@ -213,13 +214,13 @@ ins_map (const char * set)
 		KYBD_Set[asc]        = scan;
 		KYBD_Symbol[scan][0] = Tos2Iso[asc];
 		num++;
-	//	printf ("    mapped '%c'(%04lX) to keycode %i[0] \n",
+	//	x_printf ("    mapped '%c'(%04lX) to keycode %i[0] \n",
 	//	        asc, Tos2Iso[asc], scan);
 		if (*set  &&  (asc = *(set++)) != ' ') {
 			KYBD_Set[asc]        = scan;
 			KYBD_Symbol[scan][1] = Tos2Iso[asc];
 			num++;
-		//	printf ("    mapped '%c'(%04lX) to keycode %i[1] \n",
+		//	x_printf ("    mapped '%c'(%04lX) to keycode %i[1] \n",
 		//	        asc, Tos2Iso[asc], scan);
 		}
 	}
@@ -288,7 +289,7 @@ analyse_ktbl (const char * tbl, int shift)
 				
 			} else if (asc) {
 				WmgrIntro (xFalse);
-				printf ("    * duplicate scancode for 0x%02X '%.1s' (0x%02X):"
+				x_printf ("    * duplicate scancode for 0x%02X '%.1s' (0x%02X):"
 				               " 0x%02X %s \n",
 				        asc, (asc >= ' ' ? (char*)&asc : ""), KYBD_Set[asc],
 				        scan, (shift == 0 ? "unshift" : "shift"));
@@ -314,7 +315,7 @@ analyse_xtbl (const KEYPAIR * tbl, int shift)
 		CARD8 asc = tbl->asc;
 		if (scan > numberof(KYBD_Symbol)) {
 			WmgrIntro (xFalse);
-			printf ("    * ignored scancode 0x%02X for 0x%02X '%.1s'\n",
+			x_printf ("    * ignored scancode 0x%02X for 0x%02X '%.1s'\n",
 			        scan, asc, (asc >= ' ' ? (char*)&asc : ""));
 		
 		} else if (!KYBD_Set[asc]) {
@@ -323,7 +324,7 @@ analyse_xtbl (const KEYPAIR * tbl, int shift)
 		
 		} else {
 			WmgrIntro (xFalse);
-			printf ("    * duplicate scancode for 0x%02X '%.1s' (0x%02X):"
+			x_printf ("    * duplicate scancode for 0x%02X '%.1s' (0x%02X):"
 			               " 0x%02X alt/%s \n",
 			        asc, (asc >= ' ' ? (char*)&asc : ""), KYBD_Set[asc],
 			        scan, (shift == 0 ? "unshift" : "shift"));
@@ -353,21 +354,21 @@ KybdInit (void)
 		KYBD_Table   = Keytbl ((void*)-1, (void*)-1, (void*)-1);
 		KYBD_CodeMax = KYBD_CodeMin + numberof(KYBD_Symbol) -1;
 		
-		printf ("  Keyboard diagnostics: (TOS %i.%02i) \n",
+		x_printf ("  Keyboard diagnostics: (TOS %i.%02i) \n",
 		        os_ver >> 8, os_ver & 0x00FF);
-/*
-		printf ("    rom-tos ranges 0x%0lX..0x%0lX\n", os_beg, os_end);
-		printf ("    unShift = %p   Shift   = %p   CapsLck = %p \n",
+#if 0
+		x_printf ("    rom-tos ranges 0x%0lX..0x%0lX\n", os_beg, os_end);
+		x_printf ("    unShift = %p   Shift   = %p   CapsLck = %p \n",
 		        KYBD_Table->unShift, KYBD_Table->Shift, KYBD_Table->CapsLck);
-		printf ("    Alt     = %p   AltShft = %p   AltCaps = %p \n",
+		x_printf ("    Alt     = %p   AltShft = %p   AltCaps = %p \n",
 		        KYBD_Table->Alt, KYBD_Table->AltShft, KYBD_Table->AltCaps);
-		printf ("    AltGr   = %p \n", KYBD_Table->AltGr);
+		x_printf ("    AltGr   = %p \n", KYBD_Table->AltGr);
 		
 		//	Hades Keyboard diagnostics: TOS 3.06 (0x7fe00000..0x7fe08316)
 		//	  unShift = 0x7fe3673c   Shift   = 0x7fe367bc   CapsLck = 0x7fe3683c
 		//	  Alt     = 0x80b0101    AltShft = 0x10070000   AltCaps = (nil)
 		//	  AltGr   = (nil)
-*/		
+#endif
 		memset (KYBD_Set, 0, sizeof(KYBD_Set));
 		for (i = 0; i < numberof(KYBD_Symbol); i++) {
 			KYBD_Symbol[i][0] = KYBD_Symbol[i][1] = 
@@ -515,19 +516,19 @@ KybdInit (void)
 		if (KYBD_Atari) KYBD_ModMap[3][1] = KEYCODE(KC_ALTGR);
 		else            KYBD_ModMap[4][0] = KEYCODE(KC_ALTGR);
 		
-		printf ("    got keycodes: %i unShift, %i Shift",   n_usf, n_sft);
-		if (n_alt || n_asf) printf (", %i Alt, %i AltShft", n_alt, n_asf);
-		if (n_agr)          printf (", %i AltGr",           n_agr);
+		x_printf ("    got keycodes: %i unShift, %i Shift",   n_usf, n_sft);
+		if (n_alt || n_asf) x_printf (", %i Alt, %i AltShft", n_alt, n_asf);
+		if (n_agr)          x_printf (", %i AltGr",           n_agr);
 		for (i = 1; i < sizeof(KYBD_Set); n_gap += (KYBD_Set[i++] ? 0 : 1));
-		printf (", %i gap%s\n", n_gap, (n_gap == 1 ? "" : "s"));
+		x_printf (", %i gap%s\n", n_gap, (n_gap == 1 ? "" : "s"));
 		if (n_xtr) {
-			printf ("    mapped %i extra keycode%s, ",
+			x_printf ("    mapped %i extra keycode%s, ",
 			        n_xtr, (n_xtr == 1 ? "" : "s"));
 		} else {
-			printf ("    ");
+			x_printf ("    ");
 		}
-		printf ("keycode range: [%i .. %i] \n", KYBD_CodeMin, KYBD_CodeMax);
-		printf ("    assume layout '%s/%s' %s, repeat %ums\n",
+		x_printf ("keycode range: [%i .. %i] \n", KYBD_CodeMin, KYBD_CodeMax);
+		x_printf ("    assume layout '%s/%s' %s, repeat %ums\n",
 		        (KYBD_Atari ? "Atari" : "PC"), type,
 		        (KYBD_Lang == K_GERMAN ?  "german"  :
 		         KYBD_Lang == K_FRENCH ?  "french"  :
@@ -549,7 +550,7 @@ KybdEvent (CARD16 scan, CARD8 meta)
 		else if (code >= 120) code -= 118;
 		
 		if (KYBD_Symbol[code][0] == XK_VoidSymbol) {
-			printf ("*** unknown scan code %02X:%02X ***\n", code, scan & 0xFF);
+			x_printf ("*** unknown scan code %02X:%02X ***\n", code, scan & 0xFF);
 		}
 	}
 	

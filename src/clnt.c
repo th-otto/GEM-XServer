@@ -26,6 +26,7 @@
 #include "xrsc.h"
 #include "x_gem.h"
 #include "x_mint.h"
+#include "x_printf.h"
 #include "Request.h"
 
 
@@ -82,11 +83,11 @@ _Clnt_EvalAuth (CLIENT * clnt, xConnClientPrefix * q)
 		int     i;
 		char  * p = (char*)&q[1];
 		CARD8 * s = (CARD8 *)p + Align(q->nbytesAuthProto);
-		printf ("[%s:%i] Authorization: '%*s' = ",
+		x_printf ("[%s:%i] Authorization: '%*s' = ",
 		        clnt->Addr, clnt->Port,
 		        q->nbytesAuthProto, p);
-		for (i = 0; i < q->nbytesAuthString; printf ("%02x", s[i++]));
-		printf ("\n");
+		for (i = 0; i < q->nbytesAuthString; x_printf ("%02x", s[i++]));
+		x_printf ("\n");
 	
 	} else {
 		PRINT (0,"Authorization: <none>");
@@ -214,7 +215,7 @@ _Clnt_ConnRW (p_CONNECTION conn, BOOL rd, BOOL wr)
 	CLNT_Requestor = conn.Client;
 	
 	if ((left = setjmp (CLNT_Error))) {
-		printf("aborted at #%i \n", left);
+		x_printf("aborted at #%i \n", left);
 		ClntDelete (CLNT_Requestor);
 	
 	} else {
@@ -237,7 +238,7 @@ _Clnt_ConnRW (p_CONNECTION conn, BOOL rd, BOOL wr)
 		if (CLNT_Requestor->oBuf.Left + CLNT_Requestor->oBuf.Done
 		                                                        > _CLNT_MaxObuf) {
 			_CLNT_MaxObuf = CLNT_Requestor->oBuf.Left + CLNT_Requestor->oBuf.Done;
-			printf ("## oBuf 0x%X -> %lu \n", CLNT_Requestor->Id, _CLNT_MaxObuf);
+			x_printf ("## oBuf 0x%X -> %lu \n", CLNT_Requestor->Id, _CLNT_MaxObuf);
 		}
 		if (wr) {
 			long n = Foutstat (fd);
@@ -298,7 +299,7 @@ ClntCreate (int fd, const char * name, const char * addr, int port)
 {
 	CLIENT * clnt = XrscCreate(CLIENT, ++_CLNT_RidCounter, CLNT_Pool,0);
 	
- 	printf ("[%s:%i] Request from %s (at %i)\n", addr, port, name, fd);
+ 	x_printf ("[%s:%i] Request from %s (at %i)\n", addr, port, name, fd);
 	
 	if (clnt) {
 		clnt->Next = CLNT_Base;
@@ -338,7 +339,7 @@ ClntCreate (int fd, const char * name, const char * addr, int port)
 		}
 	}
 	if (!clnt) {
-		printf ("[%s:%i] \33pERROR\33q Memory exhausted.\n", addr, port);
+		x_printf ("[%s:%i] \033pERROR\033q Memory exhausted.\n", addr, port);
 		if (fd >= 0) close (fd);
 		return xFalse;
 	}
@@ -387,8 +388,8 @@ ClntDelete (CLIENT * clnt)
 	if (clnt->EventReffs) {
 		WindCleanup (clnt);
 		if (clnt->EventReffs) {
-		//	printf ("\33pFATAL\33q clnt 0x%X holds still %lu event%s!\n",
-			printf ("\33pERROR\33q clnt 0x%X holds still %lu event%s!\n",
+		//	x_printf ("\033pFATAL\033q clnt 0x%X holds still %lu event%s!\n",
+			x_printf ("\033pERROR\033q clnt 0x%X holds still %lu event%s!\n",
 			        clnt->Id, clnt->EventReffs,
 			        (clnt->EventReffs == 1 ? "" : "s"));
 		//	exit (1);
@@ -442,14 +443,14 @@ ClntOutBuffer (O_BUFF * buf, size_t need, size_t copy_n, BOOL refuse)
 		} else if (refuse) {
 			CLIENT * clnt = (CLIENT*)((char*)buf - offsetof (CLIENT, oBuf));
 			ClntPrint (clnt, 0,
-			           "\33pERROR:\33q memory exhausted in output buffer (%li).",
+			           "\033pERROR:\033q memory exhausted in output buffer (%li).",
 			           buf->Size + need);
 			longjmp (CLNT_Error, 3);
 			
 		} else {
 			CLIENT * clnt = (CLIENT*)((char*)buf - offsetof (CLIENT, oBuf));
 			ClntPrint (clnt, 0,
-			           "\33pWARNING:\33q memory exhausted in output buffer (%li).",
+			           "\033pWARNING:\033q memory exhausted in output buffer (%li).",
 			           buf->Size + need);
 		}
 	}
@@ -544,23 +545,23 @@ ClntPrint (CLIENT * clnt, int req, const char * form, ...)
 			clnt = CLNT_Requestor;
 		}
 		if (!clnt) {
-			printf ("---#----: ");
+			x_printf ("---#----: ");
 		} else if (clnt->Id > 0) {
-			printf ("%03X#%04X: ",
+			x_printf ("%03X#%04X: ",
 			        clnt->Id << (RID_MASK_BITS & 3), clnt->SeqNum);
 		} else if (clnt->Port > 0) {
-			printf ("[%s:%i] ",  clnt->Addr, clnt->Port);
+			x_printf ("[%s:%i] ",  clnt->Addr, clnt->Port);
 		} else {
-			printf ("[wm]%04X: ", clnt->SeqNum);
+			x_printf ("[wm]%04X: ", clnt->SeqNum);
 		}
-		if      (req > 0) printf (RequestTable[req].Name);
-		else if (req < 0) printf ("{%s}", RequestTable[-req].Name);
+		if      (req > 0) x_printf (RequestTable[req].Name);
+		else if (req < 0) x_printf ("{%s}", RequestTable[-req].Name);
 	}
 	va_start (vlst, form);
 	/*vprintf*/ (*pr_out) (form, vlst);
 	va_end (vlst);
 	
-	if (!crlf) printf("\n");
+	if (!crlf) x_printf("\n");
 }
 
 //==============================================================================
@@ -580,20 +581,20 @@ ClntError (CLIENT * clnt, int err, CARD32 val, int req, const char * add, ...)
 		CASE(BadLength, NULL); CASE(BadImplementation,NULL);
 	#	undef CASE
 	}
-	PRINT (0,"-\33pERROR %s\33q", text);
+	PRINT (0,"-\033pERROR %s\033q", text);
 	if (v) {
-		if      (!*v)       printf (" %li", val);
-		else if (*v == ' ') printf (" %lX", val);
-		else                printf (" %c:%lX", *v, val);
+		if      (!*v)       x_printf (" %li", val);
+		else if (*v == ' ') x_printf (" %lX", val);
+		else                x_printf (" %c:%lX", *v, val);
 	}
-	printf (" in %s", RequestTable[req].Name);
+	x_printf (" in %s", RequestTable[req].Name);
 	if (add[1]) {
 		va_list vlst;
 		va_start (vlst, add);
 		/*vprintf*/ (*pr_out) (add +1, vlst);
 		va_end (vlst);
 	}
-	printf("\n");
+	x_printf("\n");
 	
 	clnt->Fnct->clnt_error (clnt, err, req, 0, val);
 }

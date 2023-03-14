@@ -13,6 +13,7 @@
 
 #include "clnt_P.h"
 #include "x_mint.h"
+#include "x_printf.h"
 
 #include <X11/Xproto.h>
 
@@ -49,23 +50,23 @@ _Clnt__EvalSelect (CLIENT * clnt, xReq * q)
 	
 	if (q->reqType >= FirstExtensionError) {
 		PRINT (0,"Invalid extension request '%0x'.", q->reqType);
-	printf("!!! %p %p \n", q, clnt->iBuf.Mem);
+	x_printf("!!! %p %p \n", q, clnt->iBuf.Mem);
 	exit(1);
 		longjmp (CLNT_Error, 2);
 	}
 	if (q->length > CNFG_MaxReqLength || !q->length) {
-		PRINT (0,"\33pError\33q Bad request length %u/%lu in '%s'.",
+		PRINT (0,"\033pError\033q Bad request length %u/%lu in '%s'.",
 		       q->length, CNFG_MaxReqLength, RequestTable[q->reqType].Name);
 		longjmp (CLNT_Error, 2);
 	}
 
 #if 0
 if (q->reqType != X_GetInputFocus) {
-	printf("==> %s \n", RequestTable[q->reqType].Name);
+	x_printf("==> %s \n", RequestTable[q->reqType].Name);
 }
 # if 0
 if (!ClntFind(clnt->Id << RID_MASK_BITS)) {
-	printf("\n CLNT not found !!! \n\n");
+	x_printf("\n CLNT not found !!! \n\n");
 	exit(1);
 } else {
 	Xrsc(void, 11, clnt->Drawables);

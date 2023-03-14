@@ -48,13 +48,13 @@ CrsrInit (BOOL initNreset)
 		for (i = 0; i < XrscPOOLSIZE (_CRSR_Orphaned); ++i) {
 			p_CURSOR crsr;
 			while ((crsr = XrscPOOLITEM (_CRSR_Orphaned, i))) {
-				if (!n) printf ("  delete orphaned Cursor(s)");
-				printf (" [%p]:0x%X(%lu)", crsr, crsr->Id, crsr->Reffs);
+				if (!n) x_printf ("  delete orphaned Cursor(s)");
+				x_printf (" [%p]:0x%X(%lu)", crsr, crsr->Id, crsr->Reffs);
 				XrscDelete (_CRSR_Orphaned, crsr);
 				n++;
 			}
 		}
-		if (n) printf ("  (%i)\n", n);
+		if (n) x_printf ("  (%i)\n", n);
 	}
 }
 
@@ -98,7 +98,7 @@ CrsrFree (p_CURSOR crsr, p_CLIENT clnt)
 			XrscDelete (clnt->Cursors, crsr);
 		}
 	} else if (!--crsr->Reffs && !XrscDelete (_CRSR_Orphaned, crsr)) {
-		printf ("\33pWARNING\33q: Stale cursor C:%X!\n", crsr->Id);
+		x_printf ("\033pWARNING\033q: Stale cursor C:%X!\n", crsr->Id);
 	}
 }
 

@@ -40,13 +40,13 @@ PmapInit (BOOL initNreset)
 		for (i = 0; i < XrscPOOLSIZE (_PMAP_Orphaned); ++i) {
 			p_PIXMAP pmap;
 			while ((pmap = XrscPOOLITEM (_PMAP_Orphaned, i))) {
-				if (!n) printf ("  delete orphaned Pixmap(s)");
-				printf (" 0x%X(%u)", pmap->Id, pmap->Reffs);
+				if (!n) x_printf ("  delete orphaned Pixmap(s)");
+				x_printf (" 0x%X(%u)", pmap->Id, pmap->Reffs);
 				XrscDelete (_PMAP_Orphaned, pmap);
 				n++;
 			}
 		}
-		if (n) printf ("  (%i)\n", n);
+		if (n) x_printf ("  (%i)\n", n);
 	}
 }
 
@@ -84,7 +84,7 @@ PmapFree (PIXMAP * pmap, p_CLIENT clnt)
 			XrscDelete (clnt->Drawables, pmap);
 		}
 	} else if (!--pmap->Reffs && !XrscDelete (_PMAP_Orphaned, pmap)) {
-		printf ("\33pWARNING\33q: Stale pixmap P:%X!\n", pmap->Id);
+		x_printf ("\033pWARNING\033q: Stale pixmap P:%X!\n", pmap->Id);
 	}
 }
 
@@ -107,7 +107,7 @@ PmapVdi (p_PIXMAP pmap, p_GC gc, BOOL fonts)
 			extern CLIENT * CLNT_Requestor;
 			extern jmp_buf  CLNT_Error;
 			CARD8 t = ((xReq*)(CLNT_Requestor->iBuf.Mem))->reqType & 0x7F;
-			printf ("\33pError\33q"
+			x_printf ("\033pError\033q"
 			        " Can't initialize VDI offscreen bitmap for P:%X (%s)!\n",
 			        pmap->Id, RequestTable[t].Name);
 			longjmp (CLNT_Error, 4);
@@ -123,7 +123,7 @@ PmapVdi (p_PIXMAP pmap, p_GC gc, BOOL fonts)
 		pmap->TabIdx     = _PMAP_Offs_Count;
 		_PMAP_Offs_Count = (_PMAP_Offs_Count +1) & 0x000F;
 		
-	//	printf ("owk -> #%i \n", pmap->Vdi);
+	//	x_printf ("owk -> #%i \n", pmap->Vdi);
 	
 	}
 	

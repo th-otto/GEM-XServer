@@ -25,6 +25,7 @@
 #include "gcontext.h"
 #include "x_gem.h"
 #include "gemx.h"
+#include "x_printf.h"
 
 #include <X11/Xprotostr.h>
 
@@ -84,7 +85,7 @@ BOOL GrphInit(void)
 		v_opnvwk(work_in, &GRPH_Vdi, w_out);
 		if (GRPH_Vdi <= 0)
 		{
-			printf("\33pFATAL\33q can't initialize VDI for #%i: %i!\n", GRPH_Handle, GRPH_Vdi);
+			x_printf("\033pFATAL\033q can't initialize VDI for #%i: %i!\n", GRPH_Handle, GRPH_Vdi);
 			return xFalse;
 		}
 		GRPH_ScreenW = w_out[0];
@@ -267,13 +268,13 @@ int GrphSetup(void *format_arr)
 		ClntSwap(&GRPH_DepthLSB[i]->visl, "v2:lll");
 	}
 
-	printf("  AES id #%i at VDI #%i:%i [%i/%i] (%i*%i mm) %i plane%s\n",
+	x_printf("  AES id #%i at VDI #%i:%i [%i/%i] (%i*%i mm) %i plane%s\n",
 		   gl_apid, GRPH_Handle, GRPH_Vdi, WIND_Root.Rect.g_w, WIND_Root.Rect.g_h,
 		   root->mmWidth, root->mmHeight, GRPH_Depth, (GRPH_Depth == 1 ? "" : "s"));
-	printf("  screen format");
+	x_printf("  screen format");
 	if (EdDI)
-		printf(" (EdDI %X.%02X)", EdDI >> 8, EdDI & 0xFF);
-	printf(" is %s \n",
+		x_printf(" (EdDI %X.%02X)", EdDI >> 8, EdDI & 0xFF);
+	x_printf(" is %s \n",
 		   GRPH_Format == SCRN_Interleaved ? "interleaved planes" :
 		   GRPH_Format == SCRN_Standard ? "standard format" :
 		   GRPH_Format == SCRN_PackedPixel ? "packed pixels" :

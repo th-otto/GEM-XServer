@@ -38,252 +38,159 @@ void EvntGraphExp(p_CLIENT, p_DRAWABLE, CARD16 major, short len, const GRECT *re
 void EvntMappingNotify(CARD8 request, CARD8 first, CARD8 count);
 
 
-#define _Void   static inline void
-#define CLT    p_CLIENT clnt			/* the client the event is sent to */
-#define WND    p_WINDOW wind			/* the window the event is sent to */
-#define MSK    Mask     mask			/* event mask */
-#define EVN    BYTE     evnt			/* event */
-#define WID    Window   w_id			/* window id the event is about */
-#define AID    Window   a_id			/* above-sibling id */
-#define CID    Window   c_id			/* child id */
-#define PID    Window   p_id			/* parent id */
-#define REQ    Window   rqst			/* requestor id */
-#define DID    Drawable d_id			/* drawable id */
-#define TIM    Time     tmst			/* time stamp */
-#define DTL    char     detl			/* byte detail */
-#define TYP    Atom     type			/* */
-#define SEL    Atom     slct			/* selection */
-#define PRP    Atom     prop			/* property */
-#define TRG    Atom     trgt			/* target */
-#define FRM    CARD8    frmt			/* */
-#define RCT    GRECT  * rect			/* */
-#define WXY    PXY      w_xy			/* window x/y */
-#define RXY    PXY      r_xy			/* root x/y */
-#define EXY    PXY      e_xy			/* event x/y */
-#define BRD    CARD16   brdr			/* border-width */
-#define OVR    BOOL     ovrd			/* override-redirect */
-#define CFG    BOOL     cnfg			/* from-configure */
-#define MOD    BYTE     mode			/* place/state */
-#define FOC    CARD8    focs			/* */
-#define OPC    CARD16   opcd			/* major-opcode */
+/*
+ * p_CLIENT clnt:            the client the event is sent to
+ * p_WINDOW wind:            the window the event is sent to
+ * Mask event_mask:          event mask
+ * BYTE evnt:			     event type
+ * Window w_id:              window id the event is about
+ * Window a_id:              above-sibling id
+ * Window c_id:              child id
+ * Window p_id:              parent id
+ * Window rqst:			     requestor id
+ * Drawable d_id:			 drawable id
+ * Time timestamp:           time stamp
+ * BYTE detl:			     byte detail
+ * Atom type:                data type
+ * Atom slct:                selection
+ * Atom property:	         property
+ * Atom target:	         	 target
+ * GRECT *rect:			     rect
+ * PXY w_xy:			     window x/y
+ * PXY r_xy:			     root x/y
+ * PXY e_xy:			     event x/y
+ * CARD16 border_width:		 border-width
+ * BOOL override_redirect:   override-redirect
+ * BOOL cnfg:                from-configure
+ * BYTE mode:			     place/state
+ * CARD8 focus:              focus
+ */
 
-_Void EvntCirculateNotify(WND, WID, DTL);
-_Void EvntCirculateRequest(WND, WID, DTL);
-void EvntClientMsg(CLT, WID, TYP, FRM, void *);
-_Void EvntConfigureNotify(WND, WID, AID, RCT, BRD, OVR);
-_Void EvntCreateNotify(WND, WID, RCT, BRD, OVR);
-_Void EvntDestroyNotify(WND, WID);
-_Void EvntEnterNotify(WND, WID, CID, RXY, EXY, MOD, FOC, DTL);
-void EvntExpose(WND, short len, const GRECT *rect);
-_Void EvntFocusIn(WND, MOD, DTL);
-_Void EvntFocusOut(WND, MOD, DTL);
-_Void EvntGravityNotify(WND, WID, WXY);
-_Void EvntKeyButMotion(CLT, EVN, WID, CID, RXY, EXY, DTL);
-_Void EvntLeaveNotify(WND, WID, CID, RXY, EXY, MOD, FOC, DTL);
-_Void EvntMapNotify(WND, WID, OVR);
-_Void EvntMapRequest(WND, WID);
-_Void EvntMotionNotify(WND, MSK, WID, CID, RXY, EXY);
-_Void EvntNoExposure(CLT, DID, OPC);
-_Void EvntPropertyNotify(WND, TYP, MOD);
-_Void EvntReparentNotify(WND, MSK, WID, PID, WXY, OVR);
-_Void EvntSelectionClear(CLT, WID, SEL);
-_Void EvntSelectionNotify(CLT, TIM, WID, SEL, TRG, PRP);
-_Void EvntSelectionRequest(CLT, TIM, WID, REQ, SEL, TRG, PRP);
-_Void EvntUnmapNotify(WND, WID, CFG);
-_Void EvntVisibilityNotify(WND, MOD);
+void EvntClientMsg(p_CLIENT clnt, Window w_id, Atom type, CARD8 format, void *data);
+void EvntExpose(p_WINDOW wind, short len, const GRECT *rect);
 
-/*___________to_do_ */
-/*KeymapNotify */
-/*ConfigureRequest */
-/*ResizeRequest */
-/*ColormapNotify */
+/* ___________to_do_ */
+/* KeymapNotify */
+/* ConfigureRequest */
+/* ResizeRequest */
+/* ColormapNotify */
 
 
-/*___Inline_Funktions__________ */
+/* ___Inline_Funktions__________ */
 
-_Void EvntCirculateNotify(WND, WID, DTL)
+void _Evnt_Struct(p_WINDOW wind, CARD16 event_type, ...);
+void _Evnt_Window(p_WINDOW wind, CARD32 event_mask, CARD16 event_type, ...);
+void _Evnt_Client(p_CLIENT, CARD16, ...);
+
+static inline void EvntCirculateNotify(p_WINDOW wind, Window w_id, BYTE detail)
 {
-	extern void _Evnt_Struct(p_WINDOW, CARD16, ...);
-
-	_Evnt_Struct(wind, CirculateNotify, w_id, detl);
+	_Evnt_Struct(wind, CirculateNotify, w_id, detail);
 }
 
-_Void EvntCirculateRequest(WND, WID, DTL)
+static inline void EvntCirculateRequest(p_WINDOW wind, Window w_id, BYTE detail)
 {
-	extern void _Evnt_Window(p_WINDOW, CARD32, CARD16, ...);
-
-	_Evnt_Window(wind, SubstructureRedirectMask, CirculateRequest, w_id, detl);
+	_Evnt_Window(wind, SubstructureRedirectMask, CirculateRequest, w_id, detail);
 }
 
-_Void EvntConfigureNotify(WND, WID, AID, RCT, BRD, OVR)
+static inline void EvntConfigureNotify(p_WINDOW wind, Window w_id, Window a_id, const GRECT *rect, CARD16 border_width, BOOL override_redirect)
 {
-	extern void _Evnt_Struct(p_WINDOW, CARD16, ...);
-
-	_Evnt_Struct(wind, ConfigureNotify, w_id, a_id, rect, brdr, ovrd);
+	_Evnt_Struct(wind, ConfigureNotify, w_id, a_id, rect, border_width, override_redirect);
 }
 
-_Void EvntCreateNotify(WND, WID, RCT, BRD, OVR)
+static inline void EvntCreateNotify(p_WINDOW wind, Window w_id, const GRECT *rect, CARD16 border_width, BOOL override_redirect)
 {
-	extern void _Evnt_Window(p_WINDOW, CARD32, CARD16, ...);
-
-	_Evnt_Window(wind, SubstructureNotifyMask, CreateNotify, w_id, rect, brdr, ovrd);
+	_Evnt_Window(wind, SubstructureNotifyMask, CreateNotify, w_id, rect, border_width, override_redirect);
 }
 
-_Void EvntDestroyNotify(WND, WID)
+static inline void EvntDestroyNotify(p_WINDOW wind, Window w_id)
 {
-	extern void _Evnt_Struct(p_WINDOW, CARD16, ...);
-
 	_Evnt_Struct(wind, DestroyNotify, w_id);
 }
 
-_Void EvntEnterNotify(WND, WID, CID, RXY, EXY, MOD, FOC, DTL)
+static inline void EvntEnterNotify(p_WINDOW wind, Window w_id, Window c_id, PXY r_xy, PXY e_xy, BYTE mode, CARD8 focus, BYTE detail)
 {
-	extern void _Evnt_Window(p_WINDOW, CARD32, CARD16, ...);
-
-	_Evnt_Window(wind, EnterWindowMask, EnterNotify, w_id, c_id, r_xy, e_xy, mode, focs, detl);
+	_Evnt_Window(wind, EnterWindowMask, EnterNotify, w_id, c_id, r_xy, e_xy, mode, focus, detail);
 }
 
-_Void EvntFocusIn(WND, MOD, DTL)
+static inline void EvntFocusIn(p_WINDOW wind, BYTE mode, BYTE detail)
 {
-	extern void _Evnt_Window(p_WINDOW, CARD32, CARD16, ...);
-
-	_Evnt_Window(wind, FocusChangeMask, FocusIn, mode, detl);
+	_Evnt_Window(wind, FocusChangeMask, FocusIn, mode, detail);
 }
 
-_Void EvntFocusOut(WND, MOD, DTL)
+static inline void EvntFocusOut(p_WINDOW wind, BYTE mode, BYTE detail)
 {
-	extern void _Evnt_Window(p_WINDOW, CARD32, CARD16, ...);
-
-	_Evnt_Window(wind, FocusChangeMask, FocusOut, mode, detl);
+	_Evnt_Window(wind, FocusChangeMask, FocusOut, mode, detail);
 }
 
-_Void EvntGravityNotify(WND, WID, WXY)
+static inline void EvntGravityNotify(p_WINDOW wind, Window w_id, PXY w_xy)
 {
-	extern void _Evnt_Struct(p_WINDOW, CARD16, ...);
-
 	_Evnt_Struct(wind, MapNotify, w_id, w_xy);
 }
 
-_Void EvntKeyButMotion(CLT, EVN, WID, CID, RXY, EXY, DTL)
+static inline void EvntKeyButMotion(p_CLIENT clnt, BYTE evnt_type, Window w_id, Window c_id, PXY r_xy, PXY e_xy, BYTE detail)
 {
-	extern void _Evnt_Client(p_CLIENT, CARD16, ...);
-
-	_Evnt_Client(clnt, evnt, w_id, c_id, r_xy, e_xy, detl);
+	_Evnt_Client(clnt, evnt_type, w_id, c_id, r_xy, e_xy, detail);
 }
 
-_Void EvntLeaveNotify(WND, WID, CID, RXY, EXY, MOD, FOC, DTL)
+static inline void EvntLeaveNotify(p_WINDOW wind, Window w_id, Window c_id, PXY r_xy, PXY e_xy, BYTE mode, CARD8 focus, BYTE detail)
 {
-	extern void _Evnt_Window(p_WINDOW, CARD32, CARD16, ...);
-
-	_Evnt_Window(wind, LeaveWindowMask, LeaveNotify, w_id, c_id, r_xy, e_xy, mode, focs, detl);
+	_Evnt_Window(wind, LeaveWindowMask, LeaveNotify, w_id, c_id, r_xy, e_xy, mode, focus, detail);
 }
 
-_Void EvntMapNotify(WND, WID, OVR)
+static inline void EvntMapNotify(p_WINDOW wind, Window w_id, BOOL override_redirect)
 {
-	extern void _Evnt_Struct(p_WINDOW, CARD16, ...);
-
-	_Evnt_Struct(wind, MapNotify, w_id, ovrd);
+	_Evnt_Struct(wind, MapNotify, w_id, override_redirect);
 }
 
-_Void EvntMapRequest(WND, WID)
+static inline void EvntMapRequest(p_WINDOW wind, Window w_id)
 {
-	extern void _Evnt_Window(p_WINDOW, CARD32, CARD16, ...);
-
 	_Evnt_Window(wind, SubstructureRedirectMask, MapRequest, w_id);
 }
 
-_Void EvntMotionNotify(WND, MSK, WID, CID, RXY, EXY)
+static inline void EvntMotionNotify(p_WINDOW wind, Mask event_mask, Window w_id, Window c_id, PXY r_xy, PXY e_xy, BYTE detail)
 {
-	extern void _Evnt_Window(p_WINDOW, CARD32, CARD16, ...);
-
-	_Evnt_Window(wind, mask, MotionNotify, w_id, c_id, r_xy, e_xy);
+	_Evnt_Window(wind, event_mask, MotionNotify, w_id, c_id, r_xy, e_xy, detail);
 }
 
-_Void EvntNoExposure(CLT, DID, OPC)
+static inline void EvntNoExposure(p_CLIENT clnt, Drawable d_id, CARD16 major_opcode)
 {
-	extern void _Evnt_Client(p_CLIENT, CARD16, ...);
-
-	_Evnt_Client(clnt, NoExpose, d_id, (CARD16) 0, opcd);
+	_Evnt_Client(clnt, NoExpose, d_id, (CARD16) 0, major_opcode);
 }
 
-_Void EvntPropertyNotify(WND, TYP, MOD)
+static inline void EvntPropertyNotify(p_WINDOW wind, Atom type, BYTE mode)
 {
-	extern void _Evnt_Window(p_WINDOW, CARD32, CARD16, ...);
-
 	_Evnt_Window(wind, PropertyChangeMask, PropertyNotify, type, mode);
 }
 
-_Void EvntReparentNotify(WND, MSK, WID, PID, WXY, OVR)
+static inline void EvntReparentNotify(p_WINDOW wind, Mask event_mask, Window w_id, Window p_id, PXY w_xy, BOOL override_redirect)
 {
-	extern void _Evnt_Window(p_WINDOW, CARD32, CARD16, ...);
-
-	_Evnt_Window(wind, mask, ReparentNotify, w_id, p_id, w_xy, ovrd);
+	_Evnt_Window(wind, event_mask, ReparentNotify, w_id, p_id, w_xy, override_redirect);
 }
 
-_Void EvntSelectionClear(CLT, WID, SEL)
+static inline void EvntSelectionClear(p_CLIENT clnt, Window w_id, Atom selection)
 {
-	extern void _Evnt_Client(p_CLIENT, CARD16, ...);
-
-	_Evnt_Client(clnt, SelectionClear, w_id, slct);
+	_Evnt_Client(clnt, SelectionClear, w_id, selection);
 }
 
-_Void EvntSelectionNotify(CLT, TIM, WID, SEL, TRG, PRP)
+static inline void EvntSelectionNotify(p_CLIENT clnt, Time timestamp, Window w_id, Atom selection, Atom target, Atom property)
 {
-	extern void _Evnt_Client(p_CLIENT, CARD16, ...);
-
-	_Evnt_Client(clnt, SelectionNotify, tmst, w_id, slct, trgt, prop);
+	_Evnt_Client(clnt, SelectionNotify, timestamp, w_id, selection, target, property);
 }
 
-_Void EvntSelectionRequest(CLT, TIM, WID, REQ, SEL, TRG, PRP)
+static inline void EvntSelectionRequest(p_CLIENT clnt, Time timestamp, Window w_id, Window rqst, Atom selection, Atom target, Atom property)
 {
-	extern void _Evnt_Client(p_CLIENT, CARD16, ...);
-
-	_Evnt_Client(clnt, SelectionRequest, tmst, w_id, rqst, slct, trgt, prop);
+	_Evnt_Client(clnt, SelectionRequest, timestamp, w_id, rqst, selection, target, property);
 }
 
-_Void EvntUnmapNotify(WND, WID, CFG)
+static inline void EvntUnmapNotify(p_WINDOW wind, Window w_id, BOOL cnfg)
 {
-	extern void _Evnt_Struct(p_WINDOW, CARD16, ...);
-
 	_Evnt_Struct(wind, UnmapNotify, w_id, cnfg);
 }
 
-_Void EvntVisibilityNotify(WND, MOD)
+static inline void EvntVisibilityNotify(p_WINDOW wind, BYTE mode)
 {
-	extern void _Evnt_Window(p_WINDOW, CARD32, CARD16, ...);
-
 	_Evnt_Window(wind, VisibilityChangeMask, VisibilityNotify, mode);
 }
-
-#undef _Void
-#undef CLT
-#undef WND
-#undef MSK
-#undef EVN
-#undef WID
-#undef AID
-#undef CID
-#undef PID
-#undef REQ
-#undef DID
-#undef TIM
-#undef DTL
-#undef TYP
-#undef SEL
-#undef PRP
-#undef TRG
-#undef FRM
-#undef RCT
-#undef WXY
-#undef RXY
-#undef EXY
-#undef BRD
-#undef OVR
-#undef CFG
-#undef MOD
-#undef FOC
-#undef OPC
-
 
 void FT_Evnt_send_MSB(p_CLIENT, p_WINDOW, CARD16 evnt, va_list);
 void FT_Evnt_send_LSB(p_CLIENT, p_WINDOW, CARD16 evnt, va_list);

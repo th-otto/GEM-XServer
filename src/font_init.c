@@ -18,6 +18,7 @@
 #include "font_P.h"
 #include "wmgr.h"
 #include "version.h"
+#include "x_printf.h"
 
 typedef struct {
 	char           fh_fmver[8];
@@ -304,7 +305,7 @@ FontInit (short count)
 	    || (!access (PATH_FontsDb, F_OK) &&
 	        (   access (PATH_FontsDb, W_OK)
 	         || !(f_db = fopen (PATH_FontsDb, "r"))))) {
-		printf ("  \33pERROR\33q: Can't acess /var/lib/.\n");
+		x_printf ("  \033pERROR\033q: Can't acess /var/lib/.\n");
 		return;
 		
 	} else {
@@ -328,10 +329,10 @@ FontInit (short count)
 			            &i, &type, &isSymbol, &isMono, &c,&j) == 5  &&  c == ' ') {
 				struct FONT_DB * db;
 				if (face) {
-					printf ("A\n");
+					x_printf ("A\n");
 					break;
 				} else if (!(db = malloc (sizeof(struct FONT_DB) + len - j))) {
-					printf ("a\n");
+					x_printf ("a\n");
 					break;
 				}
 				db->next = font_db;
@@ -347,21 +348,21 @@ FontInit (short count)
 				font_db = db;
 			
 			} else if (!font_db) {
-				printf ("B\n");
+				x_printf ("B\n");
 				break;
 			
 			} else if (buf[0] == '-') {
 				if (face) {
-					printf ("C\n");
+					x_printf ("C\n");
 					break;
 				} else if (!(face = _Font_Create (buf, len,
 				                                  type, isSymbol, isMono))) {
-					printf ("c\n");
+					x_printf ("c\n");
 					break;
 				}
 			
 			} else if (!face) {
-				printf ("D\n");
+				x_printf ("D\n");
 				break;
 			
 			} else if (sscanf (buf, "%i, %hi,%hi, %hi  %hi,%hi %hi,%hi"
@@ -385,7 +386,7 @@ FontInit (short count)
 			} else {
 				if (face) free (face);
 				face = NULL;
-				printf ("d\n");
+				x_printf ("d\n");
 				break;
 			}
 		}
@@ -398,7 +399,7 @@ FontInit (short count)
 	if ((f_db = fopen (PATH_FontsDb, "w"))) {
 		fprintf (f_db, "# fonts.db; %s\n", GLBL_Version);
 	}
-	printf ("  loaded %i font%s\n", count, (count == 1 ? "" : "s"));
+	x_printf ("  loaded %i font%s\n", count, (count == 1 ? "" : "s"));
 	for (i = 1; i <= count; i++) {
 		struct FONT_DB * db = font_db;
 		char          _tmp[1000];

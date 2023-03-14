@@ -17,6 +17,7 @@
 #include "tools.h"
 #include "Atom.h"
 #include "clnt.h"
+#include "x_printf.h"
 
 #include <X11/X.h>
 #include <X11/Xatom.h>
@@ -149,7 +150,7 @@ void AtomInit(BOOL initNreset)
 	{
 		if (numberof(_ATOM_Order) != LAST_PREDEF_ATOM)
 		{
-			printf("pFATALq Internal failure in AtomInit():\n"
+			x_printf("\033pFATAL\033q Internal failure in AtomInit():\n"
 				   "      order list = %li, count = %li\n", numberof(_ATOM_Order), LAST_PREDEF_ATOM);
 			exit(1);
 		}
@@ -169,7 +170,7 @@ void AtomInit(BOOL initNreset)
 #	ifdef TRACE
 		if ((i = ATOM_Count - LAST_PREDEF_ATOM) > 0)
 		{
-			printf("  remove %i Atom%s.\n", i, (i == 1 ? "" : "s"));
+			x_printf("  remove %i Atom%s.\n", i, (i == 1 ? "" : "s"));
 		}
 #	endif
 	}

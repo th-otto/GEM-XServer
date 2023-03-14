@@ -15,6 +15,7 @@
 #include "main.h"
 #include "tools.h"
 #include "clnt.h"
+#include "x_printf.h"
 
 #include <X11/Xproto.h>
 
@@ -51,7 +52,7 @@ ClntSwap (void * buf, const char * form)
 			break;
 		
 		default:
-			printf ("ERROR: Invalid '%c' in format '%s'.\n", f, form);
+			x_printf ("ERROR: Invalid '%c' in format '%s'.\n", f, form);
 			exit(1);
 	}
 	return buf;

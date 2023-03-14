@@ -27,6 +27,7 @@
 #include "wmgr.h"
 #include "x_gem.h"
 #include "x_mint.h"
+#include "x_printf.h"
 #include "version.h"
 
 #include <X11/X.h>
@@ -71,13 +72,13 @@ main (int argc, char * argv[])
 	int rtn  = 1;
 	
 	if (appl_init() < 0) {
-		printf ("ERROR: Can't initialize AES.\n");
+		x_printf ("ERROR: Can't initialize AES.\n");
 	
 	} else {
 		short xcon  = Fopen ("/dev/xconout2", 0x80);
 		short redir = _app;
 		
-		printf ("\33H");
+		x_printf ("\033H");
 		signal (SIGCHLD, sig_child);
 		
 		if (xcon >= 0) {
@@ -128,7 +129,7 @@ main (int argc, char * argv[])
 			}
 		}
 		
-		printf ("X Server %s [%s] starting ...\n", GLBL_Version, GLBL_Build);
+		x_printf ("X Server %s [%s] starting ...\n", GLBL_Version, GLBL_Build);
 		
 		menu_register (gl_apid, (char*)"  X");
 		
@@ -145,7 +146,7 @@ main (int argc, char * argv[])
 				if (!access (argv[1], X_OK)) {
 					WmgrLaunch (argv[1], argc -2, (const char **)(argv +2));
 				}
-				for (i = 2; i < argc; i++) printf("  |%s|\n", argv[i]);
+				for (i = 2; i < argc; i++) x_printf("  |%s|\n", argv[i]);
 			}
 			
 			rtn = 0;
@@ -162,10 +163,10 @@ main (int argc, char * argv[])
 				if (event & MU_KEYBD) {
 					if (meta == (K_CTRL|K_ALT)  &&  ev_o.emo_kreturn == 0x0E08) {
 						if (_app) {
-							fputs ("\33p   X Server Shutdown forced   \33q\n", stderr);
+							fputs ("\033p   X Server Shutdown forced   \033q\n", stderr);
 							exit (1);
 						} else {
-							printf ("\33p   X Server Reset forced   \33q\n");
+							x_printf ("\033p   X Server Reset forced   \033q\n");
 							reset = xTrue;
 						}
 					}
@@ -233,7 +234,7 @@ main (int argc, char * argv[])
 				else if (event & MU_M2) WindPointerMove  (NULL);
 				
 				if (reset || SrvrSelect (_MAIN_Xcons)) {
-					printf ("\nLast client left, server reset ...\n");
+					x_printf ("\nLast client left, server reset ...\n");
 					if (_MAIN_Mctrl) {
 						puts("*BOING*");
 						while (_MAIN_Mctrl > 0) {
@@ -248,7 +249,7 @@ main (int argc, char * argv[])
 				} else if (_MAIN_Xcons && WIND_ChngTrigger) {
 					SrvrUngrab (NULL);
 					set_printf (xFalse);
-					printf ("-------------------END-BUFFERED-------------------\n");
+					x_printf ("-------------------END-BUFFERED-------------------\n");
 					_MAIN_Xcons = 0;
 				}
 			} 
@@ -266,7 +267,7 @@ sig_child (int sig)
 	if (_MAIN_Xcons && Pkill (0, _MAIN_Xcons)) {
 		SrvrUngrab (NULL);
 		set_printf (xFalse);
-		printf ("%s","");
+		x_printf ("%s","");
 		_MAIN_Xcons = 0;
 	}
 	Pwaitpid (-1, 0, &rusage);
@@ -284,7 +285,7 @@ shutdown (void)
 	}
 	WmgrExit();
 	appl_exit();
-	printf ("\nbye ...\n");
+	x_printf ("\nbye ...\n");
 }
 
 

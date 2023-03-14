@@ -17,6 +17,7 @@
 #include "Cursor.h"
 #include "wmgr.h"
 #include "x_gem.h"
+#include "x_printf.h"
 
 #include <X11/Xproto.h>
 
@@ -57,7 +58,7 @@ _M2STR (CARD8 mode)
 	return inval;
 }
 
-# define TRACEF(w,el,m) printf ("W:%X " el " %s \n", w->Id, _M2STR(m))
+# define TRACEF(w,el,m) x_printf ("W:%X " el " %s \n", w->Id, _M2STR(m))
 
 #else
 # define TRACEF(w,el,m)
@@ -117,7 +118,7 @@ WindPointerWatch (BOOL movedNreorg)
 			if (WMGR_OpenCounter) {
 				WINDOW * w = WIND_Root.StackTop;
 				if (!w) {
-					printf ("\n\33pPANIC\33q"
+					x_printf ("\n\033pPANIC\033q"
 					        " Inconsistency in window tree hirachy! (%i)\n",
 					        WMGR_OpenCounter);
 					exit (1);
@@ -366,9 +367,9 @@ WindPointerMove (const PXY *pointer_xy)
 	
 	do {
 		if (msk & wind->u.List.AllMasks) {
-			EvntMotionNotify (wind, msk, r_id, r_id, r_xy, e_xy);
+			EvntMotionNotify (wind, msk, r_id, r_id, r_xy, e_xy, NotifyNormal);
 		#	ifdef _TRACE_POINTER
-			printf ("moved on W:%X [%i,%i] \n", wind->Id, e_xy.p_x, e_xy.p_y);
+			x_printf ("moved on W:%X [%i,%i] \n", wind->Id, e_xy.p_x, e_xy.p_y);
 		#	endif
 			msk &= !wind->u.List.AllMasks;
 		}

@@ -56,37 +56,37 @@ WindInit (BOOL initNreset)
 	} else {
 		if (WIND_Root.StackBot) {
 			WINDOW * w = WIND_Root.StackBot;
-			printf ("\33pFATAL\33q root window has still children!\n");
+			x_printf ("\033pFATAL\033q root window has still children!\n");
 			while (w) {
 				char w_f[16] = "(-)", w_l[16] = "(-)";
 				if (w->StackBot) sprintf (w_f, "W:%X", w->StackBot->Id);
 				if (w->StackTop) sprintf (w_l, "W:%X", w->StackTop->Id);
-				printf ("  W:%X -> %s .. %s %s\n",
+				x_printf ("  W:%X -> %s .. %s %s\n",
 				        w->Id, w_f, w_l, (w == WIND_Root.StackTop ? "= Last" : ""));
 				w = w->NextSibl;
 			}
 			exit (1);
 		}
 		if (WIND_Root.u.List.AllMasks) {
-			printf ("\33pFATAL\33q root window event list not empty!\n");
+			x_printf ("\033pFATAL\033q root window event list not empty!\n");
 			exit (1);
 		}
 		if (WIND_Root.Properties) {
 				PropDelete (&WIND_Root.Properties);
-			/*
-			printf ("  remove Propert%s:",
+#if 0
+			x_printf ("  remove Propert%s:",
 			        (WIND_Root.Properties->Next ? "ies" : "y"));
 			while (WIND_Root.Properties) {
-				printf (" '%s'(%s)",
+				x_printf (" '%s'(%s)",
 				        ATOM_Table[WIND_Root.Properties->Name]->Name,
 				        ATOM_Table[WIND_Root.Properties->Type]->Name);
 				if (WIND_Root.Properties->Type == XA_STRING) {
-					printf ("='%s'", WIND_Root.Properties->Data);
+					x_printf ("='%s'", WIND_Root.Properties->Data);
 				}
 				PropDelete (&WIND_Root.Properties);
 			}
-			printf (",\n");
-			*/
+			x_printf (",\n");
+#endif
 		}
 		if (WIND_Root.Cursor) {
 			CrsrFree (WIND_Root.Cursor, NULL);
@@ -166,28 +166,28 @@ WindButton (CARD16 prev_mask, int count)
 	//
 	if ((MAIN_KeyButMask & K_ALT) && (MAIN_KeyButMask & Button2Mask) && wind) {
 		short dmy;
-		printf ("\nW:%X 0x%lX #%i [%i,%i/%i,%i/%i] * %i \n",
+		x_printf ("\nW:%X 0x%lX #%i [%i,%i/%i,%i/%i] * %i \n",
 		        wind->Id, wind->u.Event.Mask, wind->Handle,
 		        wind->Rect.g_x, wind->Rect.g_y, wind->Rect.g_w, wind->Rect.g_h,
 		        wind->BorderWidth, wind->Depth);
 		if (wind->hasBorder || wind->hasBackGnd) {
 			if (wind->hasBorder) {
-				printf ("border = %li   ", wind->BorderPixel);
+				x_printf ("border = %li   ", wind->BorderPixel);
 			}
 			if (wind->hasBackPix) {
-				printf ("backgnd: P:%X [%i,%i] * %i", wind->Back.Pixmap->Id,
+				x_printf ("backgnd: P:%X [%i,%i] * %i", wind->Back.Pixmap->Id,
 				        wind->Back.Pixmap->W, wind->Back.Pixmap->H,
 				        wind->Back.Pixmap->Depth);
 			} else if (wind->hasBackGnd) {
-				printf ("backgnd: %li", wind->Back.Pixel);
+				x_printf ("backgnd: %li", wind->Back.Pixel);
 			}
-			printf ("\n");
+			x_printf ("\n");
 		}
 		if (wind->Parent) {
-			printf("parent: W:%X", wind->Parent->Id);
-			if (wind->PrevSibl) printf ("   prev: W:%X", wind->PrevSibl->Id);
-			if (wind->NextSibl) printf ("   next: W:%X", wind->NextSibl->Id);
-			printf ("\n");
+			x_printf("parent: W:%X", wind->Parent->Id);
+			if (wind->PrevSibl) x_printf ("   prev: W:%X", wind->PrevSibl->Id);
+			if (wind->NextSibl) x_printf ("   next: W:%X", wind->NextSibl->Id);
+			x_printf ("\n");
 		}
 		evnt_button (1, 2, 0, &dmy, &dmy, &dmy, &dmy);
 		return xTrue;
@@ -624,12 +624,12 @@ WindDelete (WINDOW * wind, CLIENT * clnt)
 		// excluded from deleting
 		
 		if (clnt && !RID_Match (clnt->Id, wind->Id)) {
-			printf ("\33pPANIC\33q wind_destroy()"
+			x_printf ("\033pPANIC\033q wind_destroy()"
 			        " W:%X must be excluded from deleting!\n", wind->Id);
 			exit(1);
 		}
 		if (wind->StackBot || wind->StackTop) {
-			printf ("\33pPANIC\33q wind_destroy()"
+			x_printf ("\033pPANIC\033q wind_destroy()"
 			        " W:%X has still children: bot=W:%X top=W:%X!\n",
 			        wind->Id, (wind->StackBot ? wind->StackBot->Id : 0),
 			        (wind->StackTop ? wind->StackTop->Id : 0));
@@ -956,7 +956,7 @@ RQ_MapWindow (CLIENT * clnt, xMapWindowReq * q)
 	
 	} else if (wind == &WIND_Root) {
 	#	ifndef NODEBUG
-		PRINT (0,"\33pWARNING\33q MapWindow(W:%lX) ignored.", ROOT_WINDOW);
+		PRINT (0,"\033pWARNING\033q MapWindow(W:%lX) ignored.", ROOT_WINDOW);
 	#	endif NODEBUG
 		
 	} else if (!wind->isMapped) {
@@ -995,7 +995,7 @@ RQ_MapSubwindows (CLIENT * clnt, xMapSubwindowsReq * q)
 	
 	} else if (wind == &WIND_Root) {
 	#	ifndef NODEBUG
-		PRINT (0,"\33pWARNING\33q MapSubwindows(W:%lX) ignored.", ROOT_WINDOW);
+		PRINT (0,"\033pWARNING\033q MapSubwindows(W:%lX) ignored.", ROOT_WINDOW);
 	#	endif NODEBUG
 		
 	} else if (wind->StackTop) {
@@ -1034,7 +1034,7 @@ RQ_UnmapWindow (CLIENT * clnt, xUnmapWindowReq * q)
 	
 	} else if (wind == &WIND_Root) {
 	#	ifndef NODEBUG
-		PRINT (0,"\33pWARNING\33q UnmapWindow(W:%lX) ignored.", ROOT_WINDOW);
+		PRINT (0,"\033pWARNING\033q UnmapWindow(W:%lX) ignored.", ROOT_WINDOW);
 	#	endif NODEBUG
 		
 	} else if (wind->isMapped) { //..............................................
@@ -1372,7 +1372,7 @@ RQ_ReparentWindow (CLIENT * clnt, xReparentWindowReq * q)
 	
 	} else if (wind->Parent == pwnd) {
 	#	ifndef NODEBUG
-		PRINT (0,"\33pIGNORED\33q ReparentWindow() with same parent.");
+		PRINT (0,"\033pIGNORED\033q ReparentWindow() with same parent.");
 	#	endif NODEBUG
 		
 	} else {

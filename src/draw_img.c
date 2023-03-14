@@ -95,7 +95,7 @@ RQ_PutImage (CLIENT * clnt, xPutImageReq * q)
 				       r[0].g_x,r[0].g_y,r[0].g_w,r[0].g_h, r[1].g_x,r[1].g_y,r[1].g_w,r[1].g_h);
 				
 			} else if (!GrphRasterPut (&mfdb, q->width, q->height)) {
-				printf ("PutImage: Can't allocate buffer.\n");
+				x_printf ("PutImage: Can't allocate buffer.\n");
 				
 			} else { // q->format == ZPixmap
 				
@@ -217,7 +217,7 @@ RQ_GetImage (CLIENT * clnt, xGetImageReq * q)
 				vro_cpyfm (GRPH_Vdi, S_ONLY, (short*)rec, src, &dst);
 				
 			} else if (!GrphRasterGet (&dst, rec, src)) {
-				printf ("GetImage: Can't allocate buffer.\n");
+				x_printf ("GetImage: Can't allocate buffer.\n");
 			
 			} else {
 				if (dst.fd_addr != (q +1)) free (dst.fd_addr);

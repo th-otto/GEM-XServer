@@ -17,6 +17,7 @@
 #include "clnt.h"
 #include "event.h"
 #include "window.h"
+#include "x_printf.h"
 
 #include <X11/Xproto.h>
 
@@ -48,7 +49,7 @@ _M2STR (CARD8 mode)
 	return inval;
 }
 
-# define TRACEP(w,el,m,p,id,r) printf ("W:%X " el " %s [%i,%i] W:%lX [%i,%i] \n", \
+# define TRACEP(w,el,m,p,id,r) x_printf ("W:%X " el " %s [%i,%i] W:%lX [%i,%i] \n", \
                                        w->Id, _M2STR(m), p.p_x, p.p_y, id, r.p_x, r.p_y)
 
 #else
@@ -467,17 +468,17 @@ _Evnt_Window (WINDOW * wind, CARD32 mask, CARD16 evnt, ...)
 	WINDEVNT * lst = (num > 1 ? wind->u.List.p->Event : &wind->u.Event);
 
 	if (evnt < 2 || evnt >= LASTEvent) {
-		printf ("\33pERROR\33q invalid event value %u for W:%X.\n",
+		x_printf ("\033pERROR\033q invalid event value %u for W:%X.\n",
 		        evnt, wind->Id);
 		return;
 	}
 	if (!_EVNT_Form[evnt]) {
-		printf ("\33pERROR\33q undefined event set at %u for W:%X.\n",
+		x_printf ("\033pERROR\033q undefined event set at %u for W:%X.\n",
 		        evnt, wind->Id);
 		return;
 	}
 	if (mask & ~AllEventMask) {
-		printf ("\33pWARNING\33q invalid event mask %lX for W:%X.\n",
+		x_printf ("\033pWARNING\033q invalid event mask %lX for W:%X.\n",
 		        mask, wind->Id);
 		mask &= AllEventMask;
 	}
@@ -498,12 +499,12 @@ void
 _Evnt_Struct (WINDOW * wind, CARD16 evnt, ...)
 {
 	if (evnt < 2 || evnt >= LASTEvent) {
-		printf ("\33pERROR\33q invalid event value %u for W:%X.\n",
+		x_printf ("\033pERROR\033q invalid event value %u for W:%X.\n",
 		        evnt, wind->Id);
 		return;
 	}
 	if (!_EVNT_Form[evnt]) {
-		printf ("\33pERROR\33q undefined event set at %u for W:%X.\n",
+		x_printf ("\033pERROR\033q undefined event set at %u for W:%X.\n",
 		        evnt, wind->Id);
 		return;
 	}
@@ -542,10 +543,10 @@ void
 _Evnt_Client (CLIENT * clnt, CARD16 evnt, ...)
 {
 	if (evnt < 2 || evnt >= LASTEvent) {
-		printf ("\33pERROR\33q invalid event value %u.\n", evnt);
+		x_printf ("\033pERROR\033q invalid event value %u.\n", evnt);
 		
 	} else if (!_EVNT_Form[evnt]) {
-		printf ("\33pERROR\33q undefined event set at %u.\n", evnt);
+		x_printf ("\033pERROR\033q undefined event set at %u.\n", evnt);
 		
 	} else {
 		va_list   vap;
