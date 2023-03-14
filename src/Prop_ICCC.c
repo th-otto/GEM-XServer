@@ -106,15 +106,15 @@ _Prop_ICCC (WINDOW * wind, PROPERTY * prop, BOOL changed)
 				SizeHints * hints  = (SizeHints*)prop->Data;
 				if ((hints->flags & PBaseSize)
 				    && CONTAINS (prop, SizeHints, base_height)) {
-					pool->Base.Size.x = hints->base_width;
-					pool->Base.Size.y = hints->base_height;
+					pool->Base.Size.p_x = hints->base_width;
+					pool->Base.Size.p_y = hints->base_height;
 				} else {
 					pool->Base.valid  = xFalse;
 				}
 				if ((hints->flags & PMinSize)
 				    && CONTAINS (prop, SizeHints, min_height)) {
-					pool->Min.Size.x = hints->min_width;
-					pool->Min.Size.y = hints->min_height;
+					pool->Min.Size.p_x = hints->min_width;
+					pool->Min.Size.p_y = hints->min_height;
 					pool->FixedSize  = xTrue;
 				} else {
 					pool->Min.valid  = xFalse;
@@ -122,16 +122,16 @@ _Prop_ICCC (WINDOW * wind, PROPERTY * prop, BOOL changed)
 				}
 				if ((hints->flags & PMaxSize)
 				    && CONTAINS (prop, SizeHints, max_height)) {
-					pool->Max.Size.x = hints->max_width;
-					pool->Max.Size.y = hints->max_height;
+					pool->Max.Size.p_x = hints->max_width;
+					pool->Max.Size.p_y = hints->max_height;
 				} else {
 					pool->Max. valid = xFalse;
 					pool->FixedSize  = xFalse;
 				}
 				if ((hints->flags & PResizeInc)
 				    && CONTAINS (prop, SizeHints, inc_height)) {
-					pool->Inc.Step.x = hints->inc_width;
-					pool->Inc.Step.y = hints->inc_height;
+					pool->Inc.Step.p_x = hints->inc_width;
+					pool->Inc.Step.p_y = hints->inc_height;
 				} else {
 					pool->Inc.valid  = xFalse;
 				}

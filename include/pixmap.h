@@ -81,10 +81,10 @@ static inline p_PIXMAP PmapGet(CARD32 id)
 
 short PmapVdi(p_PIXMAP, p_GC, BOOL fonts);
 
-void PmapPutMono(p_PIXMAP, p_GC, p_GRECT src_dst, p_MFDB src);
-void PmapPutColor(p_PIXMAP, p_GC, p_GRECT src_dst, p_MFDB src);
-void PmapDrawPoints(p_PIXMAP, p_GC, p_PXY, int num);
-void PmapDrawRects(p_PIXMAP, p_GC, p_GRECT, int num);
-void PmapFillRects(p_PIXMAP, p_GC, p_GRECT, int num);
+void PmapPutMono(p_PIXMAP, p_GC, GRECT * src_dst, MFDB *src);
+void PmapPutColor(p_PIXMAP, p_GC, GRECT * src_dst, MFDB *src);
+void PmapDrawPoints(p_PIXMAP, p_GC, PXY *, int num);
+void PmapDrawRects(p_PIXMAP, p_GC, GRECT *, int num);
+void PmapFillRects(p_PIXMAP, p_GC, GRECT *, int num);
 
 #endif /* __PIXMAP_H__ */

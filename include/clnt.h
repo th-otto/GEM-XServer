@@ -52,9 +52,9 @@ typedef struct
 	void (*reply)(p_CLIENT, CARD32 size, const char *form);
 	void (*error)(p_CLIENT, CARD8 code, CARD8 majOp, CARD16 minOp, CARD32 val);
 	void (*event)(p_CLIENT, p_WINDOW, CARD16 evnt, va_list);
-	void (*shift_arc)(const p_PXY origin, p_xArc arc, size_t num, short mode);
-	void (*shift_pnt)(const p_PXY origin, p_PXY pxy, size_t num, short mode);
-	void (*shift_r2p)(const p_PXY origin, p_GRECT rct, size_t num);
+	void (*shift_arc)(const PXY *origin, p_xArc arc, size_t num, short mode);
+	void (*shift_pnt)(const PXY *origin, PXY *pxy, size_t num, short mode);
+	void (*shift_r2p)(const PXY *origin, GRECT *rct, size_t num);
 } FUNCTABL;
 
 

@@ -55,21 +55,21 @@ RQ_PutImage (CLIENT * clnt, xPutImageReq * q)
 	} else {
 		GRECT r[2] = { {0, 0, q->width, q->height} };
 		
-		if (q->dstX < 0) { r[1].x = 0; r[0].w -= r[0].x = -q->dstX; }
-		else             { r[1].x = q->dstX; }
-		if (q->dstY < 0) { r[1].y = 0; r[0].h -= r[0].y = -q->dstY; }
-		else             { r[1].y = q->dstY; }
-		if (r[0].x + r[0].w > draw.p->W) r[0].w = draw.p->W - r[0].x;
-		if (r[0].y + r[0].h > draw.p->H) r[0].h = draw.p->H - r[0].y;
+		if (q->dstX < 0) { r[1].g_x = 0; r[0].g_w -= r[0].g_x = -q->dstX; }
+		else             { r[1].g_x = q->dstX; }
+		if (q->dstY < 0) { r[1].g_y = 0; r[0].g_h -= r[0].g_y = -q->dstY; }
+		else             { r[1].g_y = q->dstY; }
+		if (r[0].g_x + r[0].g_w > draw.p->W) r[0].g_w = draw.p->W - r[0].g_x;
+		if (r[0].g_y + r[0].g_h > draw.p->H) r[0].g_h = draw.p->H - r[0].g_y;
 		
-		if (r[0].w > 0  &&  r[0].h > 0) {
+		if (r[0].g_w > 0  &&  r[0].g_h > 0) {
 			MFDB mfdb = { (q +1), q->width, q->height,
 			              (q->width + q->leftPad + PADD_BITS -1) /16,
 			              0, q->depth, 0,0,0 };
 			
-			r[0].x += q->leftPad;
-			r[1].w =  r[0].w;
-			r[1].h =  r[0].h;
+			r[0].g_x += q->leftPad;
+			r[1].g_w =  r[0].g_w;
+			r[1].g_h =  r[0].g_h;
 			
 			if (q->depth == 1) {   // all possible formats are matching
 				
@@ -81,7 +81,7 @@ RQ_PutImage (CLIENT * clnt, xPutImageReq * q)
 				       (draw.p->isWind ? 'W' : 'P'), q->drawable, q->gc,
 				       q->dstX, q->leftPad, q->dstY, q->width, q->height, q->depth,
 				       (q->length *4) - sizeof (xPutImageReq),
-				       r[0].x,r[0].y,r[0].w,r[0].h, r[1].x,r[1].y,r[1].w,r[1].h);
+				       r[0].g_x,r[0].g_y,r[0].g_w,r[0].g_h, r[1].g_x,r[1].g_y,r[1].g_w,r[1].g_h);
 				
 				if (draw.p->isWind) WindPutMono (draw.Window, gc, r, &mfdb);
 				else                PmapPutMono (draw.Pixmap, gc, r, &mfdb);
@@ -93,7 +93,7 @@ RQ_PutImage (CLIENT * clnt, xPutImageReq * q)
 				       "XYPixmap", (draw.p->isWind ? 'W' : 'P'), q->drawable, q->gc,
 				       q->dstX, q->leftPad, q->dstY, q->width, q->height, q->depth,
 				       (q->length *4) - sizeof (xPutImageReq),
-				       r[0].x,r[0].y,r[0].w,r[0].h, r[1].x,r[1].y,r[1].w,r[1].h);
+				       r[0].g_x,r[0].g_y,r[0].g_w,r[0].g_h, r[1].g_x,r[1].g_y,r[1].g_w,r[1].g_h);
 				
 			} else if (!GrphRasterPut (&mfdb, q->width, q->height)) {
 				printf ("PutImage: Can't allocate buffer.\n");
@@ -105,7 +105,7 @@ RQ_PutImage (CLIENT * clnt, xPutImageReq * q)
 				       "ZPixmap", (draw.p->isWind ? 'W' : 'P'), q->drawable, q->gc,
 				       q->dstX, q->leftPad, q->dstY, q->width, q->height, q->depth,
 				       (q->length *4) - sizeof (xPutImageReq),
-				       r[0].x,r[0].y,r[0].w,r[0].h, r[1].x,r[1].y,r[1].w,r[1].h);
+				       r[0].g_x,r[0].g_y,r[0].g_w,r[0].g_h, r[1].g_x,r[1].g_y,r[1].g_w,r[1].g_h);
 				
 				if (draw.p->isWind) WindPutColor (draw.Window, gc, r, &mfdb);
 				else                PmapPutColor (draw.Pixmap, gc, r, &mfdb);
@@ -122,7 +122,7 @@ RQ_PutImage (CLIENT * clnt, xPutImageReq * q)
 			       (draw.p->isWind ? 'W' : 'P'), q->drawable, q->gc,
 			       q->dstX, q->leftPad, q->dstY, q->width, q->height, q->depth,
 			       (q->length *4) - sizeof (xPutImageReq),
-			       r[0].x,r[0].y,r[0].w,r[0].h, r[1].x,r[1].y,r[1].w,r[1].h);
+			       r[0].g_x,r[0].g_y,r[0].g_w,r[0].g_h, r[1].g_x,r[1].g_y,r[1].g_w,r[1].g_h);
 		}
 	}
 }
@@ -166,8 +166,8 @@ RQ_GetImage (CLIENT * clnt, xGetImageReq * q)
 			h  = draw.p->H - xy;
 		} else {
 			xy = -1;
-			w  = rec[1].rd.x;
-			h  = rec[1].rd.y;
+			w  = rec[1].rd.p_x;
+			h  = rec[1].rd.p_y;
 		}
 		if (q->x < xy || q->x + q->width  > w ||
 		    q->y < xy || q->y + q->height > h) {
@@ -199,14 +199,14 @@ RQ_GetImage (CLIENT * clnt, xGetImageReq * q)
 			       q->planeMask, dpth, size);
 			
 			if (!draw.p) {
-				rec[0].rd.x += (rec[0].lu.x += rec[1].lu.x);
-				rec[0].rd.y += (rec[0].lu.y += rec[1].lu.y);
-				rec[1].lu.x = rec[1].lu.y = 0;
+				rec[0].rd.p_x += (rec[0].lu.p_x += rec[1].lu.p_x);
+				rec[0].rd.p_y += (rec[0].lu.p_y += rec[1].lu.p_y);
+				rec[1].lu.p_x = rec[1].lu.p_y = 0;
 			} else if (draw.p->isWind) {
 				PXY pos;
 				pos = WindOrigin (draw.Window);
-				rec[0].rd.x += (rec[0].lu.x += pos.x);
-				rec[0].rd.y += (rec[0].lu.y += pos.y);
+				rec[0].rd.p_x += (rec[0].lu.p_x += pos.p_x);
+				rec[0].rd.p_y += (rec[0].lu.p_y += pos.p_y);
 			} else {
 				src = PmapMFDB(draw.Pixmap);
 			}
@@ -267,15 +267,15 @@ clip_dst (GRECT * r, p_DRAWABLE draw, const short * coord)
 	*(PXY*)&r[0] = *(PXY*)(coord +0); // src
 	*(PXY*)&r[1] = *(PXY*)(coord +2); // dst
 	
-	if (r[1].x     < 0)         { r[0].x -= r[1].x; w += r[1].x;    r[1].x = 0; }
-	if (r[1].x + w > draw.p->W)                     w = draw.p->W - r[1].x;
-	if (r[1].y     < 0)         { r[0].y -= r[1].y; h += r[1].y;    r[1].y = 0; }
-	if (r[1].y + h > draw.p->H)                     h = draw.p->H - r[1].y;
+	if (r[1].g_x     < 0)         { r[0].g_x -= r[1].g_x; w += r[1].g_x;    r[1].g_x = 0; }
+	if (r[1].g_x + w > draw.p->W)                     w = draw.p->W - r[1].g_x;
+	if (r[1].g_y     < 0)         { r[0].g_y -= r[1].g_y; h += r[1].g_y;    r[1].g_y = 0; }
+	if (r[1].g_y + h > draw.p->H)                     h = draw.p->H - r[1].g_y;
 	
 	if (w <= 0  ||  h <= 0) return 0;
 	
-	r[0].w = r[1].w = w;
-	r[0].h = r[1].h = h;
+	r[0].g_w = r[1].g_w = w;
+	r[0].g_h = r[1].g_h = h;
 	
 	return t;
 }
@@ -290,35 +290,35 @@ clip_src (GRECT * r, p_DRAWABLE draw)
 	short   num   = 0;   // -1: no copy, 0: no tiles, 1..4: num of tiles in r
 	GRECT * tile  = r +2;
 	BOOL    below = xFalse;
-	short   x     = r[1].x;
-	short   y     = r[1].y;
-	short   w     = r[1].w;
-	short   h     = r[1].h;
+	short   x     = r[1].g_x;
+	short   y     = r[1].g_y;
+	short   w     = r[1].g_w;
+	short   h     = r[1].g_h;
 	short   d;
 	
-	#define SET(t, _x,_y,_w,_h)   t->x = _x; t->y = _y; t->w = _w; t->h = _h
+	#define SET(t, _x,_y,_w,_h)   t->g_x = _x; t->g_y = _y; t->g_w = _w; t->g_h = _h
 	
-	if (h > (d = draw.p->H - r[0].y)) { // below src
+	if (h > (d = draw.p->H - r[0].g_y)) { // below src
 		below = xTrue;
 		SET ((r +5), x, y + d, w, h - d);
 		h = d;
 		if (h <= 0) return -1;
 	}
-	if (r[0].y < 0) { // above src
-		if ((h += r[0].y) <= 0) return -1;
+	if (r[0].g_y < 0) { // above src
+		if ((h += r[0].g_y) <= 0) return -1;
 		num++;
-		SET (tile, x, y, w, -r[0].y); tile++;
-		y      -= r[0].y;
-		r[0].y =  0;
+		SET (tile, x, y, w, -r[0].g_y); tile++;
+		y      -= r[0].g_y;
+		r[0].g_y =  0;
 	}
-	if (r[0].x < 0) { // left of src
-		if ((w += r[0].x) <= 0) return -1;
+	if (r[0].g_x < 0) { // left of src
+		if ((w += r[0].g_x) <= 0) return -1;
 		num++;
-		SET (tile, x, y, -r[0].x, h); tile++;
-		x      -= r[0].x;
-		r[0].x =  0;
+		SET (tile, x, y, -r[0].g_x, h); tile++;
+		x      -= r[0].g_x;
+		r[0].g_x =  0;
 	}
-	if (w > (d = draw.p->W - r[0].x)) { // right of src
+	if (w > (d = draw.p->W - r[0].g_x)) { // right of src
 		num++;
 		SET (tile, x + d, y, w - d, h); tile++;
 		w = d;
@@ -327,10 +327,10 @@ clip_src (GRECT * r, p_DRAWABLE draw)
 	if (below && (++num < 4)) {
 		*tile = r[5];
 	}
-	r[1].x          = x;
-	r[1].y          = y;
-	r[1].w = r[0].w = w;
-	r[1].h = r[0].h = h;
+	r[1].g_x          = x;
+	r[1].g_y          = y;
+	r[1].g_w = r[0].g_w = w;
+	r[1].g_h = r[0].g_h = h;
 	
 	#undef SET
 	
@@ -411,8 +411,8 @@ return;
 			//
 			// copy inside one window means scroll part(s) of this window
 			//
-			PXY diff = { rect[1].x - rect[0].x, rect[1].y - rect[0].y };
-			if (diff.x || diff.y) {
+			PXY diff = { rect[1].g_x - rect[0].g_x, rect[1].g_y - rect[0].g_y };
+			if (diff.p_x || diff.p_y) {
 				WINDOW * wind = dst_d.Window;
 				PXY      orig;
 				GrphCombine (&rect[0], &rect[1]);
@@ -497,8 +497,8 @@ return;
 						do {
 							PRECT area;
 							int   n;
-							area.rd.x = (area.lu.x = orig.x + exps->x) + exps->w -1;
-							area.rd.y = (area.lu.y = orig.y + exps->y) + exps->h -1;
+							area.rd.p_x = (area.lu.p_x = orig.p_x + exps->g_x) + exps->g_w -1;
+							area.rd.p_y = (area.lu.p_y = orig.p_y + exps->g_y) + exps->g_h -1;
 							n = WindDrawBgnd (wind, orig, &area, sect, nSct, r);
 							if (n && r) {
 								e += n;
@@ -511,8 +511,8 @@ return;
 						PRECT * s = sect;
 						short   n = nSct;
 						do {
-							GRECT a = { s->lu.x - orig.x,     s->lu.y - orig.y,
-							            s->rd.x - s->lu.x +1, s->rd.y - s->lu.y +1 };
+							GRECT a = { s->lu.p_x - orig.p_x,     s->lu.p_y - orig.p_y,
+							            s->rd.p_x - s->lu.p_x +1, s->rd.p_y - s->lu.p_y +1 };
 							e += GrphInterList (r + e, &a, 1, exps, nExp);
 							s++;
 						} while (--n);
@@ -558,8 +558,8 @@ return;
 			       q->srcX, q->srcY, q->width, q->height,
 			       (dst_d.p->isWind ? 'W' : 'P'), q->dstDrawable,
 			       q->dstX, q->dstY,
-				    rect[0].x,rect[0].y,rect[0].w,rect[0].h,
-				    rect[1].x,rect[1].y,rect[1].w,rect[1].h,
+				    rect[0].g_x,rect[0].g_y,rect[0].g_w,rect[0].g_h,
+				    rect[1].g_x,rect[1].g_y,rect[1].g_w,rect[1].g_h,
 				    (gc->GraphExpos ? '*' : '-'), action);
 		}
 	}
@@ -614,10 +614,10 @@ RQ_CopyPlane (CLIENT * clnt, xCopyPlaneReq * q)
 		               {q->dstX, q->dstY, q->width,   q->height} };
 		
 		if (GrphIntersect (&r[0], &r[2]) && GrphIntersect (&r[1], &r[3])) {
-			if (r[0].w > r[1].w) r[0].w = r[1].w;
-			else                 r[1].w = r[0].w;
-			if (r[0].h > r[1].h) r[0].h = r[1].h;
-			else                 r[1].h = r[0].h;
+			if (r[0].g_w > r[1].g_w) r[0].g_w = r[1].g_w;
+			else                 r[1].g_w = r[0].g_w;
+			if (r[0].g_h > r[1].g_h) r[0].g_h = r[1].g_h;
+			else                 r[1].g_h = r[0].g_h;
 			
 			if (src_d.p->isWind) {
 				//

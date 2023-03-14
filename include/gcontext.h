@@ -51,7 +51,7 @@ typedef struct s_GC
 	PXY TileStip;
 	PXY Clip;
 
-	p_GRECT ClipRect;
+	GRECT *ClipRect;
 	short ClipNum;
 } GC;
 

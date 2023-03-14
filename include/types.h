@@ -12,27 +12,12 @@
 #define __TYPES_H__
 
 
-#define __GRECT
-
-typedef struct s_GRECT
-{
-	short x, y;
-	short w, h;
-} GRECT;
-
-#define __PXY
-
-typedef struct s_PXY
-{
-	short x;
-	short y;
-} PXY;
-
 typedef struct s_PRECT
 {
 	PXY lu;								/* upper left corner */
 	PXY rd;								/* bottom right corner */
 } PRECT;
+typedef PRECT *p_PRECT;
 
 
 #endif /* __TYPES_H__ */

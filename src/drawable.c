@@ -68,8 +68,8 @@ SizeToLst (PRECT * dst, GRECT * clip, CARD16 nClp, const short * src)
 	SizeToPXY (&size, src);
 	
 	while (nClp--) {
-		dst->rd.x = (dst->lu.x = clip->x) + clip->w -1;
-		dst->rd.y = (dst->lu.y = clip->y) + clip->h -1;
+		dst->rd.p_x = (dst->lu.p_x = clip->g_x) + clip->g_w -1;
+		dst->rd.p_y = (dst->lu.p_y = clip->g_y) + clip->g_h -1;
 		if (GrphIntersectP (dst, &size)) {
 			dst++;
 			cnt++;
@@ -146,8 +146,8 @@ RQ_GetGeometry (CLIENT * clnt, xGetGeometryReq * q)
 		if (!draw) {
 			wind_get_work (q->id & 0x7FFF, (GRECT*)&r->x);
 			r->depth       = WIND_Root.Depth;
-			r->x          -= WIND_Root.Rect.x +1;
-			r->y          -= WIND_Root.Rect.y +1;
+			r->x          -= WIND_Root.Rect.g_x +1;
+			r->y          -= WIND_Root.Rect.g_y +1;
 			r->borderWidth = 1;
 		
 		} else {
@@ -667,11 +667,11 @@ RQ_PolyRectangle (CLIENT * clnt, xPolyRectangleReq * q)
 				vs_clip_pxy (hdl, (PXY*)(sect++));
 				for (i = 0; i < len; ++i) {
 					PXY p[5];
-					p[0].x = p[3].x = p[4].x = rec[i].x + orig.x;
-					p[1].x = p[2].x = p[0].x + rec[i].w -1;
-					p[0].y = p[1].y          = rec[i].y + orig.y;
-					p[2].y = p[3].y = p[0].y + rec[i].h -1;
-					p[4].y          = p[0].y + d;
+					p[0].p_x = p[3].p_x = p[4].p_x = rec[i].g_x + orig.p_x;
+					p[1].p_x = p[2].p_x = p[0].p_x + rec[i].g_w -1;
+					p[0].p_y = p[1].p_y          = rec[i].g_y + orig.p_y;
+					p[2].p_y = p[3].p_y = p[0].p_y + rec[i].g_h -1;
+					p[4].p_y          = p[0].p_y + d;
 					v_pline (hdl, 5, (short*)p);
 				}
 			} while (--nClp);
@@ -768,8 +768,8 @@ _Image_Text (p_DRAWABLE draw, GC * gc,
 			                  gc->SubwindMode);
 		if (nClp) {
 			short dmy;
-			orig.x += pos->x;
-			orig.y += pos->y;
+			orig.p_x += pos->p_x;
+			orig.p_y += pos->p_y;
 			vst_font    (hdl, gc->FontIndex);
 			vst_effects (hdl, gc->FontEffects);
 			if (gc->FontWidth) {
@@ -884,8 +884,8 @@ _Poly_Text (p_DRAWABLE draw, GC * gc, BOOL is8N16, xTextElt * t, PXY * pos)
 			                     gc->SubwindMode);
 			if (nClp) {
 				short dmy;
-				orig.x += pos->x;
-				orig.y += pos->y;
+				orig.p_x += pos->p_x;
+				orig.p_y += pos->p_y;
 				vst_font    (hdl, gc->FontIndex);
 				vst_color   (hdl, gc->Foreground);
 				vst_effects (hdl, gc->FontEffects);

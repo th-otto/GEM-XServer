@@ -95,17 +95,17 @@ void WindInit(BOOL initNreset);
 void WindCleanup(p_CLIENT clnt);
 
 void WindDelete(p_WINDOW, p_CLIENT);
-CARD16 WindClipLock(p_WINDOW, CARD16 border, const GRECT *clip, short n_clip, p_PXY orig, p_PRECT * pBuf, BOOL clip_chlds);
+CARD16 WindClipLock(p_WINDOW, CARD16 border, const GRECT *clip, short n_clip, PXY *orig, p_PRECT * pBuf, BOOL clip_chlds);
 void WindClipOff(void);
-void WindPutMono(p_WINDOW, p_GC, p_GRECT, p_MFDB src);
-void WindPutColor(p_WINDOW, p_GC, p_GRECT, p_MFDB src);
-void WindPutImg(p_WINDOW, p_GC, p_GRECT, p_MFDB src, PXY orig, p_PRECT sect, CARD16 nSct);
-CARD16 WindScroll(p_WINDOW, p_GC, p_GRECT, PXY diff, PXY orig, PRECT * sect, CARD16 nSct, GRECT * exps);
+void WindPutMono(p_WINDOW, p_GC, GRECT *, MFDB *src);
+void WindPutColor(p_WINDOW, p_GC, GRECT *, MFDB *src);
+void WindPutImg(p_WINDOW, p_GC, GRECT *, MFDB *src, PXY orig, p_PRECT sect, CARD16 nSct);
+CARD16 WindScroll(p_WINDOW, p_GC, GRECT *, PXY diff, PXY orig, PRECT * sect, CARD16 nSct, GRECT * exps);
 void WindDrawSection(p_WINDOW, const GRECT *sect);
 int WindDrawBgnd(p_WINDOW, PXY orig, p_PRECT area, p_PRECT sect, CARD16 nSct, GRECT *exps);
 void WindDrawPmap(p_PIXMAP, PXY orig, p_PRECT sect);
 BOOL WindCirculate(p_WINDOW, CARD8 place);
-void WindResize(p_WINDOW, p_GRECT diff);
+void WindResize(p_WINDOW, GRECT * diff);
 BOOL WindSetMapped(p_WINDOW, BOOL visible);
 void WindClrMapped(p_WINDOW, BOOL by_conf);
 
@@ -119,7 +119,7 @@ void WindSaveFlush(BOOL restore);
 #define  WindHandle(w)  (w->Handle < 0 ? -w->Handle : +w->Handle)
 BOOL WindVisible(p_WINDOW);
 PXY WindOrigin(p_WINDOW);
-short WindGeometry(p_WINDOW, p_GRECT dst, CARD16 border);
+short WindGeometry(p_WINDOW, GRECT *dst, CARD16 border);
 PXY WindPointerPos(p_WINDOW);
 void WindSetHandles(p_WINDOW);
 CARD32 WindChildOf(p_WINDOW, p_WINDOW candid);

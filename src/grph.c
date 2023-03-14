@@ -222,13 +222,13 @@ GrphSetup (void * format_arr)
 	root->whitePixel       = wht_px;
 	root->blackPixel       = blk_px;
 	root->currentInputMask = DFLT_IMSK;
-	root->pixWidth         = WIND_Root.Rect.w;
-	root->pixHeight        = WIND_Root.Rect.h;
+	root->pixWidth         = WIND_Root.Rect.g_w;
+	root->pixHeight        = WIND_Root.Rect.g_h;
 #ifdef _CONST_DPI
 	root->mmWidth
-	    = (((long)WIND_Root.Rect.w * 6502u + (_CONST_DPI /2)) / _CONST_DPI) >> 8;
+	    = (((long)WIND_Root.Rect.g_w * 6502u + (_CONST_DPI /2)) / _CONST_DPI) >> 8;
 	root->mmHeight
-	    = (((long)WIND_Root.Rect.h * 6502u + (_CONST_DPI /2)) / _CONST_DPI) >> 8;
+	    = (((long)WIND_Root.Rect.g_h * 6502u + (_CONST_DPI /2)) / _CONST_DPI) >> 8;
 #else
 	root->mmWidth          = ((long)WIND_Root.Rect.w * GRPH_muWidth +500) /1000;
 	root->mmHeight         = ((long)WIND_Root.Rect.h * GRPH_muHeight +500) /1000;
@@ -249,7 +249,7 @@ GrphSetup (void * format_arr)
 	}
 	
 	printf ("  AES id #%i at VDI #%i:%i [%i/%i] (%i*%i mm) %i plane%s\n",
-	        gl_apid, GRPH_Handle, GRPH_Vdi, WIND_Root.Rect.w, WIND_Root.Rect.h,
+	        gl_apid, GRPH_Handle, GRPH_Vdi, WIND_Root.Rect.g_w, WIND_Root.Rect.g_h,
 	        root->mmWidth,root->mmHeight,
 	        GRPH_Depth, (GRPH_Depth == 1 ? "" : "s"));
 	printf ("  screen format");
@@ -271,7 +271,7 @@ GrphSetup (void * format_arr)
 
 //==============================================================================
 BOOL
-GrphIntersect (p_GRECT dst, const struct s_GRECT * src)
+GrphIntersect (GRECT * dst, const GRECT * src)
 {
 #if 1
 	register BOOL res __asm("d0");
@@ -317,16 +317,16 @@ GrphIntersect (p_GRECT dst, const struct s_GRECT * src)
 	);
 	return res;
 # else
-	short p = dst->x + dst->w -1;
-	short q = src->x + src->w -1;
-	dst->x = (dst->x >= src->x ? dst->x : src->x);
-	dst->w = (p <= q ? p : q) - dst->x +1;
-	p = dst->y + dst->h -1;
-	q = src->y + src->h -1;
-	dst->y = (dst->y >= src->y ? dst->y : src->y);
-	dst->h = (p <= q ? p : q) - dst->y  +1;
+	short p = dst->g_x + dst->g_w -1;
+	short q = src->g_x + src->g_w -1;
+	dst->g_x = (dst->g_x >= src->g_x ? dst->g_x : src->g_x);
+	dst->g_w = (p <= q ? p : q) - dst->g_x +1;
+	p = dst->g_y + dst->g_h -1;
+	q = src->g_y + src->g_h -1;
+	dst->g_y = (dst->g_y >= src->g_y ? dst->g_y : src->g_y);
+	dst->g_h = (p <= q ? p : q) - dst->g_y  +1;
 	
-	return (dst->w > 0  &&  dst->h > 0);
+	return (dst->g_w > 0  &&  dst->g_h > 0);
 # endif
 }
 
@@ -408,19 +408,19 @@ GrphCombine (GRECT * a, const GRECT * b)
 {
 	short d;
 	
-	if ((d = a->x - b->x) > 0) {
-		a->w += d;
-		a->x =  b->x;
-		if (a->w < b->w) a->w = b->w;
-	} else if ((d = (b->x + b->w) - (a->x + a->w)) > 0) {
-		a->w += d;
+	if ((d = a->g_x - b->g_x) > 0) {
+		a->g_w += d;
+		a->g_x =  b->g_x;
+		if (a->g_w < b->g_w) a->g_w = b->g_w;
+	} else if ((d = (b->g_x + b->g_w) - (a->g_x + a->g_w)) > 0) {
+		a->g_w += d;
 	}
-	if ((d = a->y - b->y) > 0) {
-		a->h += d;
-		a->y =  b->y;
-		if (a->h < b->h) a->h = b->h;
-	} else if ((d = (b->y + b->h) - (a->y + a->h)) > 0) {
-		a->h += d;
+	if ((d = a->g_y - b->g_y) > 0) {
+		a->g_h += d;
+		a->g_y =  b->g_y;
+		if (a->g_h < b->g_h) a->g_h = b->g_h;
+	} else if ((d = (b->g_y + b->g_h) - (a->g_y + a->g_h)) > 0) {
+		a->g_h += d;
 	}
 }
 
@@ -699,9 +699,9 @@ _r_get_I4 (MFDB * mfdb, PRECT * pxy, MFDB * ptr)
 	int     x   = 0;
 	
 	if (ptr) {
-		src = (short*)((char*)ptr->fd_addr + (inc * pxy[0].lu.y))
-		    + (pxy[0].lu.x /16);
-		x   = pxy[0].lu.x & 0x0F;
+		src = (short*)((char*)ptr->fd_addr + (inc * pxy[0].lu.p_y))
+		    + (pxy[0].lu.p_x /16);
+		x   = pxy[0].lu.p_x & 0x0F;
 	
 	} else if ((src = malloc (inc * h))) {
 		MFDB scrn = { NULL, };
@@ -719,7 +719,7 @@ _r_get_I4 (MFDB * mfdb, PRECT * pxy, MFDB * ptr)
 		short * s    = src;
 		int     w    = mfdb->fd_w;
 		while (w--) {
-			register char p = 0, c;
+			char p = 0, c;
 			if (s[0] & mask) p |= 0x01;
 			if (s[1] & mask) p |= 0x02;
 			if (s[2] & mask) p |= 0x04;
@@ -778,9 +778,9 @@ _r_get_I8 (MFDB * mfdb, PRECT * pxy, MFDB * ptr)
 	int     x   = 0;
 	
 	if (ptr) {
-		src = (short*)((char*)ptr->fd_addr + (inc * pxy[0].lu.y))
-		    + (pxy[0].lu.x /16);
-		x   = pxy[0].lu.x & 0x0F;
+		src = (short*)((char*)ptr->fd_addr + (inc * pxy[0].lu.p_y))
+		    + (pxy[0].lu.p_x /16);
+		x   = pxy[0].lu.p_x & 0x0F;
 	
 	} else if ((src = malloc (inc * h))) {
 		MFDB scrn = { NULL, };
@@ -823,7 +823,7 @@ _r_get_P8 (MFDB * mfdb, PRECT * pxy, MFDB * ptr)
 	int    h   = mfdb->fd_h;
 	
 	if (ptr) {
-		src = (char*)ptr->fd_addr + (inc * pxy[0].lu.y) + pxy[0].lu.x;
+		src = (char*)ptr->fd_addr + (inc * pxy[0].lu.p_y) + pxy[0].lu.p_x;
 	
 	} else if ((src = malloc (inc * h))) {
 		MFDB scrn = { NULL, };
@@ -865,8 +865,8 @@ _r_get_16 (MFDB * mfdb, PRECT * pxy, MFDB * ptr)
 	int     h   = mfdb->fd_h;
 	
 	if (ptr) {
-		src = (short*)((char*)ptr->fd_addr + (inc * pxy[0].lu.y))
-		    + pxy[0].lu.x;
+		src = (short*)((char*)ptr->fd_addr + (inc * pxy[0].lu.p_y))
+		    + pxy[0].lu.p_x;
 	
 	} else if (!(mfdb->fd_w & 0x000F) || (src = malloc (inc * h))) {
 		MFDB scrn = { NULL, };
@@ -901,8 +901,8 @@ _r_get_24 (MFDB * mfdb, PRECT * pxy, MFDB * ptr)
 	int     h   = mfdb->fd_h;
 	
 	if (ptr) {
-		src = (short*)((char*)ptr->fd_addr + (inc * pxy[0].lu.y))
-		    + pxy[0].lu.x;
+		src = (short*)((char*)ptr->fd_addr + (inc * pxy[0].lu.p_y))
+		    + pxy[0].lu.p_x;
 	
 	} else if (!(mfdb->fd_w & 0x000F) || (src = malloc (inc * h))) {
 		MFDB scrn = { NULL, };
@@ -937,8 +937,8 @@ _r_get_32 (MFDB * mfdb, PRECT * pxy, MFDB * ptr)
 	int    h   = mfdb->fd_h;
 	
 	if (ptr) {
-		src = (long*)((char*)ptr->fd_addr + (inc * pxy[0].lu.y))
-		    + pxy[0].lu.x;
+		src = (long*)((char*)ptr->fd_addr + (inc * pxy[0].lu.p_y))
+		    + pxy[0].lu.p_x;
 	
 	} else if (!(mfdb->fd_w & 0x000F) || (src = malloc (inc * h))) {
 		MFDB scrn = { NULL, };
@@ -970,7 +970,7 @@ _r_get_32 (MFDB * mfdb, PRECT * pxy, MFDB * ptr)
 
 //------------------------------------------------------------------------------
 void
-FT_Grph_ShiftArc_MSB (const p_PXY origin, xArc * arc, size_t num, short mode)
+FT_Grph_ShiftArc_MSB (const PXY *origin, xArc * arc, size_t num, short mode)
 {
 	while (num--) {
 		if (mode == ArcChord) {
@@ -984,14 +984,14 @@ FT_Grph_ShiftArc_MSB (const p_PXY origin, xArc * arc, size_t num, short mode)
 			arc->angle2 = (end > 0 ? (end >=  3600 ? 0    : 3600 -end)
 			                       : (end <= -3600 ? 3600 :      -end));
 		}
-		arc->x += origin->x + (arc->width  /= 2);
-		arc->y += origin->y + (arc->height /= 2);
+		arc->x += origin->p_x + (arc->width  /= 2);
+		arc->y += origin->p_y + (arc->height /= 2);
 		arc++;
 	}
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 void
-FT_Grph_ShiftArc_LSB (const p_PXY origin, xArc * arc, size_t num, short mode)
+FT_Grph_ShiftArc_LSB (const PXY *origin, xArc * arc, size_t num, short mode)
 {
 	while (num--) {
 		if (mode == ArcChord) {
@@ -1007,61 +1007,61 @@ FT_Grph_ShiftArc_LSB (const p_PXY origin, xArc * arc, size_t num, short mode)
 		}
 		arc->width  = Swap16(arc->width)  /2;
 		arc->height = Swap16(arc->height) /2;
-		arc->x = Swap16(arc->x) + origin->x + arc->width;
-		arc->y = Swap16(arc->y) + origin->y + arc->height;
+		arc->x = Swap16(arc->x) + origin->p_x + arc->width;
+		arc->y = Swap16(arc->y) + origin->p_y + arc->height;
 		arc++;
 	}
 }
 
 //------------------------------------------------------------------------------
 void
-FT_Grph_ShiftPnt_MSB (const p_PXY origin, p_PXY pxy, size_t num, short mode)
+FT_Grph_ShiftPnt_MSB (const PXY *origin, PXY *pxy, size_t num, short mode)
 {
 	if (!num) return;
 	
 	if (origin) {
-		pxy->x += origin->x;
-		pxy->y += origin->y;
+		pxy->p_x += origin->p_x;
+		pxy->p_y += origin->p_y;
 	}
 	if (mode == CoordModePrevious) {
 		while (--num) {
 			PXY * prev = pxy++;
-			pxy->x += prev->x;
-			pxy->y += prev->y;
+			pxy->p_x += prev->p_x;
+			pxy->p_y += prev->p_y;
 		}
 	
 	} else if (origin) { // && CoordModeOrigin
 		while (--num) {
 			pxy++;
-			pxy->x += origin->x;
-			pxy->y += origin->y;
+			pxy->p_x += origin->p_x;
+			pxy->p_y += origin->p_y;
 		}
 	}
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 void
-FT_Grph_ShiftPnt_LSB (const p_PXY origin, p_PXY pxy, size_t num, short mode)
+FT_Grph_ShiftPnt_LSB (const PXY *origin, PXY *pxy, size_t num, short mode)
 {
 	if (!num) return;
 	
 	if (origin) {
-		pxy->x = Swap16(pxy->x) + origin->x;
-		pxy->y = Swap16(pxy->y) + origin->y;
+		pxy->p_x = Swap16(pxy->p_x) + origin->p_x;
+		pxy->p_y = Swap16(pxy->p_y) + origin->p_y;
 	} else {
 		SwapPXY (pxy, pxy);
 	}
 	if (mode == CoordModePrevious) {
 		while (--num) {
 			PXY * prev = pxy++;
-			pxy->x = Swap16(pxy->x) + prev->x;
-			pxy->y = Swap16(pxy->y) + prev->y;
+			pxy->p_x = Swap16(pxy->p_x) + prev->p_x;
+			pxy->p_y = Swap16(pxy->p_y) + prev->p_y;
 		}
 	
 	} else if (origin) { // && CoordModeOrigin
 		while (--num) {
 			pxy++;
-			pxy->x = Swap16(pxy->x) + origin->x;
-			pxy->y = Swap16(pxy->y) + origin->y;
+			pxy->p_x = Swap16(pxy->p_x) + origin->p_x;
+			pxy->p_y = Swap16(pxy->p_y) + origin->p_y;
 		}
 	
 	} else { // CoordModeOrigin && !origin
@@ -1074,36 +1074,36 @@ FT_Grph_ShiftPnt_LSB (const p_PXY origin, p_PXY pxy, size_t num, short mode)
 
 //------------------------------------------------------------------------------
 void
-FT_Grph_ShiftR2P_MSB (const p_PXY origin, p_GRECT rct, size_t num)
+FT_Grph_ShiftR2P_MSB (const PXY *origin, GRECT * rct, size_t num)
 {
 	if (origin) {
 		while (num--) {
-			rct->w += (rct->x += origin->x) -1;
-			rct->h += (rct->y += origin->y) -1;
+			rct->g_w += (rct->g_x += origin->p_x) -1;
+			rct->g_h += (rct->g_y += origin->p_y) -1;
 			rct++;
 		}
 	} else {
 		while (num--) {
-			rct->w += rct->x -1;
-			rct->h += rct->y -1;
+			rct->g_w += rct->g_x -1;
+			rct->g_h += rct->g_y -1;
 			rct++;
 		}
 	}
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 void
-FT_Grph_ShiftR2P_LSB (const p_PXY origin, p_GRECT rct, size_t num)
+FT_Grph_ShiftR2P_LSB (const PXY *origin, GRECT *rct, size_t num)
 {
 	if (origin) {
 		while (num--) {
-			rct->w = Swap16(rct->w) + (rct->x = Swap16(rct->x) + origin->x) -1;
-			rct->h = Swap16(rct->h) + (rct->y = Swap16(rct->y) + origin->y) -1;
+			rct->g_w = Swap16(rct->g_w) + (rct->g_x = Swap16(rct->g_x) + origin->p_x) -1;
+			rct->g_h = Swap16(rct->g_h) + (rct->g_y = Swap16(rct->g_y) + origin->p_y) -1;
 			rct++;
 		}
 	} else {
 		while (num--) {
-			rct->w = Swap16(rct->w) + (rct->x = Swap16(rct->x)) -1;
-			rct->h = Swap16(rct->h) + (rct->y = Swap16(rct->y)) -1;
+			rct->g_w = Swap16(rct->g_w) + (rct->g_x = Swap16(rct->g_x)) -1;
+			rct->g_h = Swap16(rct->g_h) + (rct->g_y = Swap16(rct->g_y)) -1;
 			rct++;
 		}
 	}

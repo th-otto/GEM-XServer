@@ -40,8 +40,8 @@ WindOrigin (WINDOW * wind)
 	PXY orig = *(PXY*)&wind->Rect;
 	
 	while ((wind = wind->Parent)) {
-		orig.x += wind->Rect.x;
-		orig.y += wind->Rect.y;
+		orig.p_x += wind->Rect.g_x;
+		orig.p_y += wind->Rect.g_y;
 	}
 	
 	return orig;
@@ -57,14 +57,14 @@ WindGeometry (WINDOW * wind, GRECT * dst, CARD16 border)
 	//...........................................................................
 	
 	*(PXY*)dst = WindOrigin (wind);
-	dst->w     = wind->Rect.w;
-	dst->h     = wind->Rect.h;
+	dst->g_w     = wind->Rect.g_w;
+	dst->g_h     = wind->Rect.g_h;
 	if (border) {
-		dst->x -= border;
-		dst->y -= border;
+		dst->g_x -= border;
+		dst->g_y -= border;
 		border <<= 1;
-		dst->w += border;
-		dst->h += border;
+		dst->g_w += border;
+		dst->g_h += border;
 	}
 	return WindHandle (wind);
 }
@@ -80,12 +80,12 @@ WindPointerPos (WINDOW * wind)
 	PXY pos = *MAIN_PointerPos;
 	
 	if (!wind) {
-		pos.x -= WIND_Root.Rect.x;
-		pos.y -= WIND_Root.Rect.y;
+		pos.p_x -= WIND_Root.Rect.g_x;
+		pos.p_y -= WIND_Root.Rect.g_y;
 	
 	} else do {
-		pos.x -= wind->Rect.x;
-		pos.y -= wind->Rect.y;
+		pos.p_x -= wind->Rect.g_x;
+		pos.p_y -= wind->Rect.g_y;
 	} while ((wind = wind->Parent));
 	
 	return pos;

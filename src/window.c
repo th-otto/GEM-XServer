@@ -49,9 +49,9 @@ WindInit (BOOL initNreset)
 {
 	if (initNreset) {
 		wind_get_work (0, &WIND_Root.Rect);
-		_MAP_Inc = WIND_Root.Rect.y -1;
-		_WIND_RootX2 = WIND_Root.Rect.x + WIND_Root.Rect.w -1;
-		_WIND_RootY2 = WIND_Root.Rect.y + WIND_Root.Rect.h -1;
+		_MAP_Inc = WIND_Root.Rect.g_y -1;
+		_WIND_RootX2 = WIND_Root.Rect.g_x + WIND_Root.Rect.g_w -1;
+		_WIND_RootY2 = WIND_Root.Rect.g_y + WIND_Root.Rect.g_h -1;
 		
 	} else {
 		if (WIND_Root.StackBot) {
@@ -168,7 +168,7 @@ WindButton (CARD16 prev_mask, int count)
 		short dmy;
 		printf ("\nW:%X 0x%lX #%i [%i,%i/%i,%i/%i] * %i \n",
 		        wind->Id, wind->u.Event.Mask, wind->Handle,
-		        wind->Rect.x, wind->Rect.y, wind->Rect.w, wind->Rect.h,
+		        wind->Rect.g_x, wind->Rect.g_y, wind->Rect.g_w, wind->Rect.g_h,
 		        wind->BorderWidth, wind->Depth);
 		if (wind->hasBorder || wind->hasBackGnd) {
 			if (wind->hasBorder) {
@@ -228,7 +228,7 @@ WindButton (CARD16 prev_mask, int count)
 			w_id = wind->Id;
 
 		} else {
-			int hdl = wind_find (MAIN_PointerPos->x, MAIN_PointerPos->y);
+			int hdl = wind_find (MAIN_PointerPos->p_x, MAIN_PointerPos->p_y);
 			if (hdl >= 0) {
 				w_id = hdl | ROOT_WINDOW;
 			}
@@ -759,10 +759,10 @@ _Wind_Resize (WINDOW * wind, GRECT * diff)
 	CARD32 above = (wind->PrevSibl ? wind->PrevSibl->Id : None);
 	GRECT  work;
 	
-	work.x = (wind->Rect.x += diff->x) - wind->BorderWidth;
-	work.y = (wind->Rect.y += diff->y) - wind->BorderWidth;
-	work.w =  wind->Rect.w += diff->w;
-	work.h =  wind->Rect.h += diff->h;
+	work.g_x = (wind->Rect.g_x += diff->g_x) - wind->BorderWidth;
+	work.g_y = (wind->Rect.g_y += diff->g_y) - wind->BorderWidth;
+	work.g_w =  wind->Rect.g_w += diff->g_w;
+	work.g_h =  wind->Rect.g_h += diff->g_h;
 	EvntConfigureNotify (wind, wind->Id, above, &work,
 	                     wind->BorderWidth, wind->Override);
 	
@@ -771,28 +771,28 @@ _Wind_Resize (WINDOW * wind, GRECT * diff)
 		if       (wind->WinGravity == NorthGravity  ||
 		          wind->WinGravity == CenterGravity ||
 		          wind->WinGravity == SouthGravity) {
-			wind->Rect.x += diff->w /2;
+			wind->Rect.g_x += diff->g_w /2;
 			notify       =  xTrue;
 		} else if (wind->WinGravity == NorthEastGravity ||
 		           wind->WinGravity == EastGravity      ||
 		           wind->WinGravity == SouthEastGravity) {
-			wind->Rect.x += diff->w;
+			wind->Rect.g_x += diff->g_w;
 			notify       =  xTrue;
 		}
 		if       (wind->WinGravity == WestGravity   ||
 		          wind->WinGravity == CenterGravity ||
 		          wind->WinGravity == EastGravity) {
-			wind->Rect.y += diff->h /2;
+			wind->Rect.g_y += diff->g_h /2;
 			notify       =  xTrue;
 		} else if (wind->WinGravity == SouthWestGravity ||
 		           wind->WinGravity == SouthGravity     ||
 		           wind->WinGravity == SouthEastGravity) {
-			wind->Rect.y += diff->h;
+			wind->Rect.g_y += diff->g_h;
 			notify       =  xTrue;
 		}
 		if (notify) {
-			PXY pos = { wind->Rect.x - wind->BorderWidth,
-			            wind->Rect.y - wind->BorderWidth };
+			PXY pos = { wind->Rect.g_x - wind->BorderWidth,
+			            wind->Rect.g_y - wind->BorderWidth };
 			EvntGravityNotify (wind, wind->Id, pos);
 		} else if (wind->isMapped  &&  wind->WinGravity == UnmapGravity) {
 			WindClrMapped (wind, xTrue);
@@ -807,31 +807,31 @@ WindResize (WINDOW * wind, GRECT * diff)
 	GRECT curr;
 	
 	WmgrCalcBorder (&curr, wind);
-	if ((curr.x += diff->x) < WIND_Root.Rect.x) {
-		diff->x += WIND_Root.Rect.x - curr.x;
-		curr.x  =  WIND_Root.Rect.x;
+	if ((curr.g_x += diff->g_x) < WIND_Root.Rect.g_x) {
+		diff->g_x += WIND_Root.Rect.g_x - curr.g_x;
+		curr.g_x  =  WIND_Root.Rect.g_x;
 	}
-	if ((curr.y += diff->y) < WIND_Root.Rect.y) {
-		diff->y += WIND_Root.Rect.y - curr.y;
-		curr.y  =  WIND_Root.Rect.y;
+	if ((curr.g_y += diff->g_y) < WIND_Root.Rect.g_y) {
+		diff->g_y += WIND_Root.Rect.g_y - curr.g_y;
+		curr.g_y  =  WIND_Root.Rect.g_y;
 	}
-	curr.w += diff->w;
-	curr.h += diff->h;
+	curr.g_w += diff->g_w;
+	curr.g_h += diff->g_h;
 	
 	_Wind_Resize (wind, diff);
 	
 	if (wind->isMapped) {
 		wind_set_curr (wind->Handle, &curr);
-		if (!diff->x && !diff->y) {
+		if (!diff->g_x && !diff->g_y) {
 			short decor = (wind->GwmDecor ? WMGR_Decor : 0);
-			if (diff->w < decor || diff->h < decor) {
+			if (diff->g_w < decor || diff->g_h < decor) {
 				WindDrawSection (wind, NULL);
 			} else {
 				GRECT work = wind->Rect;
-				work.x += WIND_Root.Rect.x;
-				work.y += WIND_Root.Rect.y;
-				work.w -= diff->w - decor;
-				work.h -= diff->h - decor;
+				work.g_x += WIND_Root.Rect.g_x;
+				work.g_y += WIND_Root.Rect.g_y;
+				work.g_w -= diff->g_w - decor;
+				work.g_h -= diff->g_h - decor;
 				WindDrawSection (wind, &work);
 			}
 		}
@@ -880,10 +880,10 @@ RQ_CreateWindow (CLIENT * clnt, xCreateWindowReq * q)
 		wind->ClassInOut = (q->class == CopyFromParent ? pwnd->ClassInOut :
 		                    q->class == InputOutput    ? xTrue : xFalse);
 		
-		wind->Rect.x      = q->x + q->borderWidth;
-		wind->Rect.y      = q->y + q->borderWidth;
-		wind->Rect.w      = q->width;
-		wind->Rect.h      = q->height;
+		wind->Rect.g_x      = q->x + q->borderWidth;
+		wind->Rect.g_y      = q->y + q->borderWidth;
+		wind->Rect.g_w      = q->width;
+		wind->Rect.g_h      = q->height;
 		wind->BorderWidth = q->borderWidth;
 		wind->Depth       = (!q->depth && wind->ClassInOut
 		                     ? pwnd->Depth : q->depth);
@@ -1075,16 +1075,16 @@ RQ_UnmapSubwindows (CLIENT * clnt, xUnmapSubwindowsReq * q)
 				GRECT work = w->Rect;
 				int   b    = w->BorderWidth;
 				if (b) {
-					work.x -= b;
-					work.y -= b;
+					work.g_x -= b;
+					work.g_y -= b;
 					b *= 2;
-					work.w += b;
-					work.h += b;
+					work.g_w += b;
+					work.g_h += b;
 				}
-				if (rect.x >  work.x)            rect.x = work.x;
-				if (rect.w < (work.w += work.x)) rect.w = work.w;
-				if (rect.y >  work.y)            rect.y = work.y;
-				if (rect.h < (work.h += work.y)) rect.h = work.h;
+				if (rect.g_x >  work.g_x)            rect.g_x = work.g_x;
+				if (rect.g_w < (work.g_w += work.g_x)) rect.g_w = work.g_w;
+				if (rect.g_y >  work.g_y)            rect.g_y = work.g_y;
+				if (rect.g_h < (work.g_h += work.g_y)) rect.g_h = work.g_h;
 			}
 			_Wind_Unmap (w, xFalse, xFalse);
 		} while ((w = w->NextSibl));
@@ -1092,10 +1092,10 @@ RQ_UnmapSubwindows (CLIENT * clnt, xUnmapSubwindowsReq * q)
 		if (vis) {
 			if (draw) {
 				PXY orig = WindOrigin (wind);
-				rect.w -= rect.x;
-				rect.x += orig.x;
-				rect.h -= rect.y;
-				rect.y += orig.y;
+				rect.g_w -= rect.g_x;
+				rect.g_x += orig.p_x;
+				rect.g_h -= rect.g_y;
+				rect.g_y += orig.p_y;
 				WindDrawSection (wind, &rect);
 			}
 			WindPointerWatch (xFalse);
@@ -1129,18 +1129,18 @@ RQ_ConfigureWindow (CLIENT * clnt, xConfigureWindowReq * q)
 			val = (CARD32*)(q +1);
 		}
 		
-		if (q->mask & CWX)      { d.x = (short)*(val++) + db - r->x;
-}//		                          PRINT (,"+- x=%+i", d.x); }
-		if (q->mask & CWY)      { d.y = (short)*(val++) + db - r->y;
-}//		                          PRINT (,"+- y=%+i", d.y); }
-		if (q->mask & CWWidth)  { d.w = (short)*(val++) - r->w;
-}//		                          PRINT (,"+- w=%+i", d.w); }
-		if (q->mask & CWHeight) { d.h = (short)*(val++) - r->h;
-}//		                          PRINT (,"+- h=%+i", d.h); }
+		if (q->mask & CWX)      { d.g_x = (short)*(val++) + db - r->g_x;
+}//		                          PRINT (,"+- x=%+i", d.g_x); }
+		if (q->mask & CWY)      { d.g_y = (short)*(val++) + db - r->g_y;
+}//		                          PRINT (,"+- y=%+i", d.g_y); }
+		if (q->mask & CWWidth)  { d.g_w = (short)*(val++) - r->g_w;
+}//		                          PRINT (,"+- w=%+i", d.g_w); }
+		if (q->mask & CWHeight) { d.g_h = (short)*(val++) - r->g_h;
+}//		                          PRINT (,"+- h=%+i", d.g_h); }
 		if (q->mask & CWBorderWidth) {
 			db = (wind->BorderWidth = (short)*(val++)) - db;
-			r->x += db;
-			r->y += db;
+			r->g_x += db;
+			r->g_y += db;
 //			PRINT (,"+- brdr=%+i", db);
 		}
 		if (q->mask & CWSibling) {
@@ -1158,15 +1158,15 @@ RQ_ConfigureWindow (CLIENT * clnt, xConfigureWindowReq * q)
 			
 		} else {
 			_Wind_Resize (wind, &d);
-			if (WindVisible (wind) && (d.x || d.y || d.w || d.h)) {
+			if (WindVisible (wind) && (d.g_x || d.g_y || d.g_w || d.g_h)) {
 				GRECT clip;
 				WindGeometry (wind, &clip, wind->BorderWidth);
-				if (d.x < 0) d.x    = -d.x;
-				else         clip.x -= d.x;
-				clip.w += (d.x > d.w ? d.x : d.w);
-				if (d.y < 0) d.y    = -d.y;
-				else         clip.y -= d.y;
-				clip.h += (d.y > d.h ? d.y : d.h);
+				if (d.g_x < 0) d.g_x    = -d.g_x;
+				else         clip.g_x -= d.g_x;
+				clip.g_w += (d.g_x > d.g_w ? d.g_x : d.g_w);
+				if (d.g_y < 0) d.g_y    = -d.g_y;
+				else         clip.g_y -= d.g_y;
+				clip.g_h += (d.g_y > d.g_h ? d.g_y : d.g_h);
 				WindDrawSection (wind->Parent, &clip);
 			}
 		}
@@ -1409,8 +1409,8 @@ RQ_ReparentWindow (CLIENT * clnt, xReparentWindowReq * q)
 			pwnd->StackBot = wind;
 		}
 		pwnd->StackTop = wind;
-		wind->Rect.x   = q->x;
-		wind->Rect.y   = q->y;
+		wind->Rect.g_x   = q->x;
+		wind->Rect.g_y   = q->y;
 		
 		if (wind->u.List.AllMasks & StructureNotifyMask) {
 			EvntReparentNotify (wind, StructureNotifyMask,

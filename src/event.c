@@ -48,7 +48,7 @@ _M2STR (CARD8 mode)
 }
 
 # define TRACEP(w,el,m,p,id,r) printf ("W:%X " el " %s [%i,%i] W:%lX [%i,%i] \n", \
-                                       w->Id, _M2STR(m), p.x, p.y, id, r.x, r.y)
+                                       w->Id, _M2STR(m), p.p_x, p.p_y, id, r.p_x, r.p_y)
 
 #else
 # define TRACEP(w,el,m,p,id,r)
@@ -217,7 +217,7 @@ Evnt_Buffer (O_BUFF * buf, size_t need) {
 
 //==============================================================================
 void
-EvntExpose (WINDOW * wind, short len, const struct s_GRECT * rect)
+EvntExpose (WINDOW * wind, short len, const GRECT * rect)
 {
 	CARD16     num = (wind->u.List.AllMasks < 0 ? wind->u.List.p->Length : 1);
 	WINDEVNT * lst = (num > 1 ? wind->u.List.p->Event : &wind->u.Event);
@@ -262,7 +262,7 @@ EvntExpose (WINDOW * wind, short len, const struct s_GRECT * rect)
 //==============================================================================
 void
 EvntGraphExp (CLIENT * clnt, p_DRAWABLE draw,
-              CARD16 major, short len, const struct s_GRECT * rect)
+              CARD16 major, short len, const GRECT * rect)
 {
 	size_t   spc = sizeof(xEvent) * len;
 	xEvent * evn = Evnt_Buffer (&clnt->oBuf, spc);
@@ -351,8 +351,8 @@ EvntPropagate (WINDOW * wind, CARD32 mask, BYTE event,
 			mask &= !wind->u.List.AllMasks;
 		}
 		if (mask &= wind->PropagateMask) {
-			e_xy.x += wind->Rect.x;
-			e_xy.y += wind->Rect.y;
+			e_xy.p_x += wind->Rect.g_x;
+			e_xy.p_y += wind->Rect.g_y;
 			if (c_id) chld = wind->Id;
 		} else {
 			break;
@@ -395,8 +395,8 @@ EvntPointer (WINDOW ** stack, int anc, int top,
 			                 mode, ELFlagSameScreen, detl);
 		}
 		if (anc > 0) {
-			e_xy.x += stack[0]->Rect.x;
-			e_xy.y += stack[0]->Rect.y;
+			e_xy.p_x += stack[0]->Rect.g_x;
+			e_xy.p_y += stack[0]->Rect.g_y;
 		}
 	}
 	for (bot = 1; bot < anc; ++bot) {
@@ -405,15 +405,15 @@ EvntPointer (WINDOW ** stack, int anc, int top,
 			EvntLeaveNotify (stack[bot], r_id, None, r_xy, e_xy,
 			                 mode, ELFlagSameScreen, next);
 		}
-		e_xy.x += stack[bot]->Rect.x;
-		e_xy.y += stack[bot]->Rect.y;
+		e_xy.p_x += stack[bot]->Rect.g_x;
+		e_xy.p_y += stack[bot]->Rect.g_y;
 	}
 	
 	// notify leave events
 	
 	for (bot = anc +1; bot < top; ++bot) {
-		e_xy.x -= stack[bot]->Rect.x;
-		e_xy.y -= stack[bot]->Rect.y;
+		e_xy.p_x -= stack[bot]->Rect.g_x;
+		e_xy.p_y -= stack[bot]->Rect.g_y;
 		TRACEP (stack[bot], "Enter", next, e_xy, r_id, r_xy);
 		if (stack[bot]->u.List.AllMasks & EnterWindowMask) {
 			EvntEnterNotify (stack[bot], r_id, None, r_xy, e_xy,
@@ -422,8 +422,8 @@ EvntPointer (WINDOW ** stack, int anc, int top,
 	}
 	if (stack[top]) {
 		if (anc < top) {
-			e_xy.x -= stack[top]->Rect.x;
-			e_xy.y -= stack[top]->Rect.y;
+			e_xy.p_x -= stack[top]->Rect.g_x;
+			e_xy.p_y -= stack[top]->Rect.g_y;
 		}
 		TRACEP (stack[top], "Enter", last, e_xy, r_id, r_xy);
 		if (stack[top]->u.List.AllMasks & EnterWindowMask) {

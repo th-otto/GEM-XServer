@@ -187,12 +187,12 @@ _Gcnt_setup (CLIENT * clnt, GC * gc, CARD32 mask, CARD32 * val, CARD8 req)
 		val++;
 	}
 	if (mask & GCTileStipXOrigin) {
-		gc->TileStip.x = *(val++);
-		DEBUG (,"+- stpx=%i", gc->TileStip.x);
+		gc->TileStip.p_x = *(val++);
+		DEBUG (,"+- stpx=%i", gc->TileStip.p_x);
 	}
 	if (mask & GCTileStipYOrigin) {
-		gc->TileStip.y = *(val++);
-		DEBUG (,"+- stpy=%i", gc->TileStip.y);
+		gc->TileStip.p_y = *(val++);
+		DEBUG (,"+- stpy=%i", gc->TileStip.p_y);
 	}
 	if (mask & GCFont) {
 		if (!FontValues ((p_FONTABLE)gc, *val)) {
@@ -225,12 +225,12 @@ _Gcnt_setup (CLIENT * clnt, GC * gc, CARD32 mask, CARD32 * val, CARD8 req)
 		}
 	}
 	if (mask & GCClipXOrigin) {
-		gc->Clip.x = *(val++);
-		DEBUG (,"+- clpx=%i", gc->Clip.x);
+		gc->Clip.p_x = *(val++);
+		DEBUG (,"+- clpx=%i", gc->Clip.p_x);
 	}
 	if (mask & GCClipYOrigin) {
-		gc->Clip.y = *(val++);
-		DEBUG (,"+- clpy=%i", gc->Clip.y);
+		gc->Clip.p_y = *(val++);
+		DEBUG (,"+- clpy=%i", gc->Clip.p_y);
 	}
 	if (mask & GCClipMask) {
 		if (*val == None) {
@@ -333,8 +333,8 @@ RQ_CreateGC (CLIENT * clnt, xCreateGCReq * q)
 		gc->Tile        = NULL;
 		gc->Stipple     = NULL;
 		gc->ClipMask    = NULL;
-		gc->TileStip.x  = gc->TileStip.y = 0;
-		gc->Clip.x      = gc->Clip.y     = 0;
+		gc->TileStip.p_x  = gc->TileStip.p_y = 0;
+		gc->Clip.p_x      = gc->Clip.p_y     = 0;
 		gc->ClipRect    = NULL;
 		gc->ClipNum     = 0;
 		
@@ -453,10 +453,10 @@ RQ_CopyGC (CLIENT * clnt, xCopyGCReq * q)
 		if (q->mask & GCPlaneMask)         dst->PlaneMask   = src->PlaneMask;
 		if (q->mask & GCForeground)        dst->Foreground  = src->Foreground;
 		if (q->mask & GCBackground)        dst->Background  = src->Background;
-		if (q->mask & GCTileStipXOrigin)   dst->TileStip.x  = src->TileStip.x;
-		if (q->mask & GCTileStipYOrigin)   dst->TileStip.y  = src->TileStip.y;
-		if (q->mask & GCClipXOrigin)       dst->Clip.x      = src->Clip.x;
-		if (q->mask & GCClipYOrigin)       dst->Clip.y      = src->Clip.y;
+		if (q->mask & GCTileStipXOrigin)   dst->TileStip.p_x  = src->TileStip.p_x;
+		if (q->mask & GCTileStipYOrigin)   dst->TileStip.p_y  = src->TileStip.p_y;
+		if (q->mask & GCClipXOrigin)       dst->Clip.p_x      = src->Clip.p_x;
+		if (q->mask & GCClipYOrigin)       dst->Clip.p_y      = src->Clip.p_y;
 	}
 }
 
@@ -517,8 +517,8 @@ RQ_SetClipRectangles (CLIENT * clnt, xSetClipRectanglesReq * q)
 		} else {
 			gc->ClipNum = -1; // disables output
 		}
-		gc->Clip.x = q->xOrigin;
-		gc->Clip.y = q->yOrigin;
+		gc->Clip.p_x = q->xOrigin;
+		gc->Clip.p_y = q->yOrigin;
 	}
 }
 

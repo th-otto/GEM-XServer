@@ -313,22 +313,22 @@ WmgrActivate (BOOL onNoff)
 					if       (w->WinGravity == NorthWestGravity ||
 					          w->WinGravity == NorthGravity     ||
 					          w->WinGravity == NorthEastGravity) {
-						 w->Rect.y = curr.y - WIND_Root.Rect.y + w->BorderWidth;
+						 w->Rect.g_y = curr.g_y - WIND_Root.Rect.g_y + w->BorderWidth;
 					} else if (w->WinGravity == SouthWestGravity ||
 					           w->WinGravity == SouthGravity     ||
 					           w->WinGravity == SouthEastGravity) {
-						 w->Rect.y = curr.y - WIND_Root.Rect.y - w->BorderWidth *2
-						           + curr.h - w->Rect.h;
+						 w->Rect.g_y = curr.g_y - WIND_Root.Rect.g_y - w->BorderWidth *2
+						           + curr.g_h - w->Rect.g_h;
 					}
 					if       (w->WinGravity == NorthWestGravity ||
 					          w->WinGravity == WestGravity      ||
 					          w->WinGravity == SouthWestGravity) {
-						w->Rect.x = curr.x - WIND_Root.Rect.x + w->BorderWidth;
+						w->Rect.g_x = curr.g_x - WIND_Root.Rect.g_x + w->BorderWidth;
 					} else if (w->WinGravity == NorthEastGravity ||
 					           w->WinGravity == EastGravity      ||
 					           w->WinGravity == SouthEastGravity) {
-						w->Rect.x = curr.x - WIND_Root.Rect.x - w->BorderWidth *2
-						          + curr.w - w->Rect.w;
+						w->Rect.g_x = curr.g_x - WIND_Root.Rect.g_x - w->BorderWidth *2
+						          + curr.g_w - w->Rect.g_w;
 					}
 					WmgrWindMap (w, &curr);
 					if (w->u.List.AllMasks & StructureNotifyMask) {
@@ -430,13 +430,13 @@ void
 WmgrCalcBorder (GRECT * curr, WINDOW * wind)
 {
 	GRECT work = wind->Rect;
-	work.x += WIND_Root.Rect.x;
-	work.y += WIND_Root.Rect.y;
+	work.g_x += WIND_Root.Rect.g_x;
+	work.g_y += WIND_Root.Rect.g_y;
 	
 	if (wind->GwmDecor) {
-		work.x -= WMGR_DECOR;
-		work.w += WMGR_DECOR *2;
-		work.h += WMGR_DECOR;
+		work.g_x -= WMGR_DECOR;
+		work.g_w += WMGR_DECOR *2;
+		work.g_h += WMGR_DECOR;
 		wind_calc_grect (WC_BORDER, A_WIDGETS, &work, curr);
 	
 	} else {
@@ -445,10 +445,10 @@ WmgrCalcBorder (GRECT * curr, WINDOW * wind)
 			if (wind->hasBorder &&  wind->BorderPixel == G_BLACK) {
 				b--;
 			}
-			work.x -= b;
-			work.y -= b;
-			work.w += b *2;
-			work.h += b *2;
+			work.g_x -= b;
+			work.g_y -= b;
+			work.g_w += b *2;
+			work.g_h += b *2;
 		}
 		wind_calc_grect (WC_BORDER, P_WIDGETS, &work, curr);
 	}
@@ -513,30 +513,30 @@ WmgrWindMap (WINDOW * wind, GRECT * curr)
 	} else if (!wind->isMapped) {
 		
 		if (!wind->GwmDecor) {
-			if (curr->y < 0) {
+			if (curr->g_y < 0) {
 				CARD32 above = (wind->PrevSibl ? wind->PrevSibl->Id : None);
 				GRECT  work;
-				wind->Rect.y -= curr->y;
-				curr->y       = 0;
+				wind->Rect.g_y -= curr->g_y;
+				curr->g_y       = 0;
 				WmgrCalcBorder (curr, wind);
-				work.x = wind->Rect.x - wind->BorderWidth;
-				work.y = wind->Rect.y - wind->BorderWidth;
-				work.w = wind->Rect.w;
-				work.h = wind->Rect.h;
+				work.g_x = wind->Rect.g_x - wind->BorderWidth;
+				work.g_y = wind->Rect.g_y - wind->BorderWidth;
+				work.g_w = wind->Rect.g_w;
+				work.g_h = wind->Rect.g_h;
 				EvntConfigureNotify (wind, wind->Id, above,
 				                     &work, wind->BorderWidth, wind->Override);
 			}
 			if (wind->SaveUnder && wind->Override) {
 				GRECT rect = *curr;
-				rect.w += 2;
-				rect.h += 2;
+				rect.g_w += 2;
+				rect.g_h += 2;
 				WindSaveUnder (wind->Id, &rect, 0);
 			}
 			wind->GwmParented = xFalse;
 						
 		} else if (!wind->GwmParented) {
 			CARD16 b  = wind->BorderWidth;
-			int    dx = wind->Rect.x - curr->x, dy = wind->Rect.y - curr->y, d;
+			int    dx = wind->Rect.g_x - curr->g_x, dy = wind->Rect.g_y - curr->g_y, d;
 			PXY    pos;
 		#	define clnt &_WMGR_Client
 			PRINT (ReparentWindow, "(W:%X) mapped", wind->Id);
@@ -544,35 +544,35 @@ WmgrWindMap (WINDOW * wind, GRECT * curr)
 			if       (wind->WinGravity == NorthWestGravity ||
 			          wind->WinGravity == WestGravity      ||
 			          wind->WinGravity == SouthWestGravity) {
-				curr->x = wind->Rect.x + WIND_Root.Rect.x - b;
+				curr->g_x = wind->Rect.g_x + WIND_Root.Rect.g_x - b;
 			} else if (wind->WinGravity == NorthEastGravity ||
 			           wind->WinGravity == EastGravity      ||
 			           wind->WinGravity == SouthEastGravity) {
-				curr->x = wind->Rect.x + WIND_Root.Rect.x + wind->Rect.w + b *2
-				        - curr->w;
+				curr->g_x = wind->Rect.g_x + WIND_Root.Rect.g_x + wind->Rect.g_w + b *2
+				        - curr->g_w;
 			}
-			d = (curr->x + curr->w) - (WIND_Root.Rect.x + WIND_Root.Rect.w);
-			if (d > 0)                      curr->x -= d;
-			if (curr->x < WIND_Root.Rect.x) curr->x  = WIND_Root.Rect.x;
-			wind->Rect.x = curr->x + dx;
+			d = (curr->g_x + curr->g_w) - (WIND_Root.Rect.g_x + WIND_Root.Rect.g_w);
+			if (d > 0)                      curr->g_x -= d;
+			if (curr->g_x < WIND_Root.Rect.g_x) curr->g_x  = WIND_Root.Rect.g_x;
+			wind->Rect.g_x = curr->g_x + dx;
 			
 			if       (wind->WinGravity == NorthWestGravity ||
 			          wind->WinGravity == NorthGravity     ||
 			          wind->WinGravity == NorthEastGravity) {
-				curr->y = wind->Rect.y + WIND_Root.Rect.y - b;
+				curr->g_y = wind->Rect.g_y + WIND_Root.Rect.g_y - b;
 			} else if (wind->WinGravity == SouthWestGravity ||
 			           wind->WinGravity == SouthGravity     ||
 			           wind->WinGravity == SouthEastGravity) {
-				curr->y = wind->Rect.y + WIND_Root.Rect.y + wind->Rect.h + b *2
-				        - curr->h;
+				curr->g_y = wind->Rect.g_y + WIND_Root.Rect.g_y + wind->Rect.g_h + b *2
+				        - curr->g_h;
 			}
-			d = (curr->y + curr->h) - (WIND_Root.Rect.y + WIND_Root.Rect.h);
-			if (d > 0)                      curr->y -= d;
-			if (curr->y < WIND_Root.Rect.y) curr->y  = WIND_Root.Rect.y;
-			wind->Rect.y = curr->y + dy;
+			d = (curr->g_y + curr->g_h) - (WIND_Root.Rect.g_y + WIND_Root.Rect.g_h);
+			if (d > 0)                      curr->g_y -= d;
+			if (curr->g_y < WIND_Root.Rect.g_y) curr->g_y  = WIND_Root.Rect.g_y;
+			wind->Rect.g_y = curr->g_y + dy;
 			
-			pos.x = wind->Rect.x - b;
-			pos.y = wind->Rect.y - b;
+			pos.p_x = wind->Rect.g_x - b;
+			pos.p_y = wind->Rect.g_y - b;
 			if (wind->u.List.AllMasks & StructureNotifyMask) {
 				EvntReparentNotify (wind, StructureNotifyMask,
 				                    wind->Id, ROOT_WINDOW, pos, wind->Override);
@@ -656,22 +656,22 @@ _Wmgr_DrawIcon (WINDOW * wind, GRECT * clip)
 	wind_get_work (wind->Handle, &work);
 	pxy[2] = icon->fd_w -1;
 	pxy[3] = icon->fd_h -1;
-	pxy[4] = work.x + ((work.w - icon->fd_w) /2);
-	pxy[5] = work.y + ((work.h - icon->fd_h) /2);
+	pxy[4] = work.g_x + ((work.g_w - icon->fd_w) /2);
+	pxy[5] = work.g_y + ((work.g_h - icon->fd_h) /2);
 	pxy[6] = pxy[4] + icon->fd_w -1;
 	pxy[7] = pxy[5] + icon->fd_h -1;
-	rec[1].x = (rec[0].x = work.x) + work.w -1;
-	rec[1].y = (rec[0].y = work.y) + work.h -1;
+	rec[1].p_x = (rec[0].p_x = work.g_x) + work.g_w -1;
+	rec[1].p_y = (rec[0].p_y = work.g_y) + work.g_h -1;
 	
 	if (!clip || GrphIntersect (&work, clip)) {
 		vswr_mode (GRPH_Vdi, MD_REPLACE);
 		vsf_color (GRPH_Vdi, G_LWHITE);
 		v_hide_c  (GRPH_Vdi);
 		wind_get_first (wind->Handle, &sect);
-		while (sect.w > 0  &&  sect.h > 0) {
+		while (sect.g_w > 0  &&  sect.g_h > 0) {
 			if (GrphIntersect (&sect, &work)) {
-				sect.w += sect.x -1;
-				sect.h += sect.y -1;
+				sect.g_w += sect.g_x -1;
+				sect.g_h += sect.g_y -1;
 				vs_clip_pxy (GRPH_Vdi, (PXY*)&sect);
 				v_bar       (GRPH_Vdi, (short*)rec);
 				if (mask) vrt_cpyfm (GRPH_Vdi, MD_TRANS, pxy, mask, &screen, col +1);
@@ -707,7 +707,7 @@ WmgrWindIcon (WINDOW * wind)
 
 //==============================================================================
 void
-WmgrCursor (WINDOW * wind, p_PXY pos)
+WmgrCursor (WINDOW * wind, PXY *pos)
 {
 	CARD16 type;
 	
@@ -722,10 +722,10 @@ WmgrCursor (WINDOW * wind, p_PXY pos)
 			*pos = WindPointerPos (wind);
 		}
 		type = 0x0000;
-		if (pos->y >= 0) {
-			if      (pos->x <  0)            type =  0x100;
-			else if (pos->x >= wind->Rect.w) type =  0x001;
-			if      (pos->y >= wind->Rect.h) type |= 0x010;
+		if (pos->p_y >= 0) {
+			if      (pos->p_x <  0)            type =  0x100;
+			else if (pos->p_x >= wind->Rect.g_w) type =  0x001;
+			if      (pos->p_y >= wind->Rect.g_h) type |= 0x010;
 		}
 	}
 	if (type != WMGR_Cursor) {
@@ -837,18 +837,18 @@ WmgrMenu (short title, short entry, short meta)
 				form[ABOUT_BUILD].ob_spec.tedinfo->te_ptext = (char*)GLBL_Build;
 				form[ABOUT_OK].ob_state &= ~OS_SELECTED;
 				
-				form_center (form, &rect.x, &rect.y, &rect.w, &rect.h);
-				form_dial (FMD_SHRINK, rect.x, rect.y, rect.w, rect.h,
-				           sbox.x, sbox.y, sbox.w, sbox.h);
-				form_dial (FMD_START, 0,0,0,0, rect.x, rect.y, rect.w, rect.h);
-				objc_draw (form, ROOT, MAX_DEPTH, rect.x, rect.y, rect.w, rect.h);
+				form_center (form, &rect.g_x, &rect.g_y, &rect.g_w, &rect.g_h);
+				form_dial (FMD_SHRINK, rect.g_x, rect.g_y, rect.g_w, rect.g_h,
+				           sbox.g_x, sbox.g_y, sbox.g_w, sbox.g_h);
+				form_dial (FMD_START, 0,0,0,0, rect.g_x, rect.g_y, rect.g_w, rect.g_h);
+				objc_draw (form, ROOT, MAX_DEPTH, rect.g_x, rect.g_y, rect.g_w, rect.g_h);
 				form_do (form, 0);
-				objc_offset (form, ABOUT_OK, &sbox.x, &sbox.y);
-				sbox.w = form[ABOUT_OK].ob_width;
-				sbox.h = form[ABOUT_OK].ob_height;
-				form_dial (FMD_SHRINK, sbox.x, sbox.y, sbox.w, sbox.h,
-				           rect.x, rect.y, rect.w, rect.h);
-				form_dial (FMD_FINISH, 0,0,0,0, rect.x, rect.y, rect.w, rect.h);
+				objc_offset (form, ABOUT_OK, &sbox.g_x, &sbox.g_y);
+				sbox.g_w = form[ABOUT_OK].ob_width;
+				sbox.g_h = form[ABOUT_OK].ob_height;
+				form_dial (FMD_SHRINK, sbox.g_x, sbox.g_y, sbox.g_w, sbox.g_h,
+				           rect.g_x, rect.g_y, rect.g_w, rect.g_h);
+				form_dial (FMD_FINISH, 0,0,0,0, rect.g_x, rect.g_y, rect.g_w, rect.g_h);
 			}
 		}	break;
 		
@@ -912,7 +912,7 @@ static WINDOW *
 _Wmgr_WindByPointer (void)
 {
 	WINDOW * wind = NULL;
-	short    hdl  = wind_find (MAIN_PointerPos->x, MAIN_PointerPos->y);
+	short    hdl  = wind_find (MAIN_PointerPos->p_x, MAIN_PointerPos->p_y);
 	
 	if (hdl >= 0) {
 		wind = _Wmgr_WindByHandle (hdl);
@@ -962,10 +962,10 @@ WmgrMessage (short * msg)
 		case WM_REDRAW: if ((wind = _Wmgr_WindByHandle(msg[3]))) {
 			GRECT * rect = (GRECT*)(msg +4);
 			if (WIND_SaveDone
-			    &&  rect->x              >= WIND_SaveArea->lu.x
-			    &&  rect->y              >= WIND_SaveArea->lu.y
-			    &&  rect->x + rect->w -1 <= WIND_SaveArea->rd.x
-			    &&  rect->y + rect->h -1 <= WIND_SaveArea->rd.y) {
+			    &&  rect->g_x              >= WIND_SaveArea->lu.p_x
+			    &&  rect->g_y              >= WIND_SaveArea->lu.p_y
+			    &&  rect->g_x + rect->g_w -1 <= WIND_SaveArea->rd.p_x
+			    &&  rect->g_y + rect->g_h -1 <= WIND_SaveArea->rd.p_y) {
 				inv_save = xFalse;
 			} else {
 				if (wind->GwmIcon) _Wmgr_DrawIcon  (wind, rect);
@@ -979,13 +979,13 @@ WmgrMessage (short * msg)
 				CARD32 above = (wind->PrevSibl ? wind->PrevSibl->Id : None);
 				GRECT work;
 				wind_get_work (msg[3], &work);
-				work.x -= WIND_Root.Rect.x - WMGR_DECOR;
-				work.y -= WIND_Root.Rect.y;
+				work.g_x -= WIND_Root.Rect.g_x - WMGR_DECOR;
+				work.g_y -= WIND_Root.Rect.g_y;
 				*(PXY*)&wind->Rect = *(PXY*)&work;
-				work.x -= wind->BorderWidth;
-				work.y -= wind->BorderWidth;
-				work.w =  wind->Rect.w;
-				work.h =  wind->Rect.h;
+				work.g_x -= wind->BorderWidth;
+				work.g_y -= wind->BorderWidth;
+				work.g_w =  wind->Rect.g_w;
+				work.g_h =  wind->Rect.g_h;
 				EvntConfigureNotify (wind, wind->Id, above,
 					                  &work, wind->BorderWidth, wind->Override);
 			}
@@ -1154,7 +1154,7 @@ WmgrButton (WINDOW * wind)
 	} else {
 		EVMULT_IN  ev_i = {
 			MU_BUTTON|MU_M1|MU_TIMER, 1,0x03,0x00,
-			MO_LEAVE, { MAIN_PointerPos->x, MAIN_PointerPos->y, 1,1 },
+			MO_LEAVE, { MAIN_PointerPos->p_x, MAIN_PointerPos->p_y, 1,1 },
 			0, {0,0, 0,0}, 20,0 };
 		EVMULT_OUT ev_o;
 		short      ev, dummy[8];
@@ -1162,7 +1162,7 @@ WmgrButton (WINDOW * wind)
 		PXY        pc[5],              pw[5];
 		int        c_l, c_r, c_u, c_d, w_l, w_r, w_u, w_d;
 		int        mx, my;
-		int        ml = 0, mu = 0, mr = WIND_Root.Rect.w, md = WIND_Root.Rect.h;
+		int        ml = 0, mu = 0, mr = WIND_Root.Rect.g_w, md = WIND_Root.Rect.g_h;
 		int        magnet = 0x1111;
 		GRECT      magn;
 		
@@ -1178,53 +1178,53 @@ WmgrButton (WINDOW * wind)
 		cursor = WMGR_Cursor;
 		
 		wind_get_curr (wind->Handle, (GRECT*)pc);
-		pc[2].x = pc[1].x += (pc[3].x = pc[4].x = pc[0].x) -1;
-		pc[2].y = pc[3].y =   pc[0].y + pc[1].y            -1;
-		pc[4].y =            (pc[1].y = pc[0].y)           +1;
-		pw[1].x =  pw[2].x =           wind->Rect.x + WIND_Root.Rect.x;
-		pw[4].y = (pw[0].y = pw[1].y = wind->Rect.y + WIND_Root.Rect.y) +1;
-		pw[0].x =  pw[3].x = pw[4].x = pw[1].x + wind->Rect.w -1;
-		pw[2].y =  pw[3].y =           pw[1].y + wind->Rect.h -1;
-		c_l = pc[0].x - MAIN_PointerPos->x;
-		c_u = pc[1].y - MAIN_PointerPos->y;
-		c_r = pc[2].x - MAIN_PointerPos->x;
-		c_d = pc[3].y - MAIN_PointerPos->y;
-		w_l = pw[1].x - MAIN_PointerPos->x;
-		w_u = pw[0].y - MAIN_PointerPos->y;
-		w_r = pw[3].x - MAIN_PointerPos->x;
-		w_d = pw[2].y - MAIN_PointerPos->y;
+		pc[2].p_x = pc[1].p_x += (pc[3].p_x = pc[4].p_x = pc[0].p_x) -1;
+		pc[2].p_y = pc[3].p_y =   pc[0].p_y + pc[1].p_y            -1;
+		pc[4].p_y =            (pc[1].p_y = pc[0].p_y)           +1;
+		pw[1].p_x =  pw[2].p_x =           wind->Rect.g_x + WIND_Root.Rect.g_x;
+		pw[4].p_y = (pw[0].p_y = pw[1].p_y = wind->Rect.g_y + WIND_Root.Rect.g_y) +1;
+		pw[0].p_x =  pw[3].p_x = pw[4].p_x = pw[1].p_x + wind->Rect.g_w -1;
+		pw[2].p_y =  pw[3].p_y =           pw[1].p_y + wind->Rect.g_h -1;
+		c_l = pc[0].p_x - MAIN_PointerPos->p_x;
+		c_u = pc[1].p_y - MAIN_PointerPos->p_y;
+		c_r = pc[2].p_x - MAIN_PointerPos->p_x;
+		c_d = pc[3].p_y - MAIN_PointerPos->p_y;
+		w_l = pw[1].p_x - MAIN_PointerPos->p_x;
+		w_u = pw[0].p_y - MAIN_PointerPos->p_y;
+		w_r = pw[3].p_x - MAIN_PointerPos->p_x;
+		w_d = pw[2].p_y - MAIN_PointerPos->p_y;
 		
 		if (!move) {
 			int min_x = 0, min_y = 0;
 			PROPERTIES * pool;
 			if (!size && (pool = wind->Properties)) {
 				if (pool->Base.valid) {
-					min_x = pool->Base.Size.x;
-					min_y = pool->Base.Size.y;
+					min_x = pool->Base.Size.p_x;
+					min_y = pool->Base.Size.p_y;
 					if (pool->Inc.valid) {
-						min_x *= pool->Inc.Step.x;
-						min_y *= pool->Inc.Step.y;
+						min_x *= pool->Inc.Step.p_x;
+						min_y *= pool->Inc.Step.p_y;
 					}
 				} else if (pool->Min.valid) {
-					min_x = pool->Min.Size.x;
-					min_y = pool->Min.Size.y;
+					min_x = pool->Min.Size.p_x;
+					min_y = pool->Min.Size.p_y;
 				}
 				if (pool->Max.valid) {
-					if      (cursor & 0x0001) mr = pw[1].x + pool->Max.Size.x - w_r;
-					else if (cursor & 0x0100) ml = pw[3].x - pool->Max.Size.x - w_l;
-					if      (cursor & 0x0010) md = pw[0].y + pool->Max.Size.y - w_d;
+					if      (cursor & 0x0001) mr = pw[1].p_x + pool->Max.Size.p_x - w_r;
+					else if (cursor & 0x0100) ml = pw[3].p_x - pool->Max.Size.p_x - w_l;
+					if      (cursor & 0x0010) md = pw[0].p_y + pool->Max.Size.p_y - w_d;
 				}
 			}
-			if      (cursor & 0x0001) ml = pw[1].x + min_x - w_r;
-			else if (cursor & 0x0100) mr = pw[3].x - min_x - w_l;
-			if      (cursor & 0x0010) mu = pw[0].y + min_y - w_d;
+			if      (cursor & 0x0001) ml = pw[1].p_x + min_x - w_r;
+			else if (cursor & 0x0100) mr = pw[3].p_x - min_x - w_l;
+			if      (cursor & 0x0010) mu = pw[0].p_y + min_y - w_d;
 		
 		} else { // (move == xTrue)
-			mu     = WIND_Root.Rect.y                    - c_u -1;
-			magn.x = WIND_Root.Rect.x                    - c_l;
-			magn.w = WIND_Root.Rect.x + WIND_Root.Rect.w - c_r - magn.x;
-			magn.y = -1;
-			magn.h = WIND_Root.Rect.y + WIND_Root.Rect.h - c_d - magn.y;
+			mu     = WIND_Root.Rect.g_y                    - c_u -1;
+			magn.g_x = WIND_Root.Rect.g_x                    - c_l;
+			magn.g_w = WIND_Root.Rect.g_x + WIND_Root.Rect.g_w - c_r - magn.g_x;
+			magn.g_y = -1;
+			magn.g_h = WIND_Root.Rect.g_y + WIND_Root.Rect.g_h - c_d - magn.g_y;
 			ev_i.emi_m2leave = MO_LEAVE;
 			ev_i.emi_m2      = magn;
 			ev_i.emi_flags  |= MU_M2;
@@ -1240,10 +1240,10 @@ WmgrButton (WINDOW * wind)
 			v_pline (GRPH_Vdi, 5, (short*)pw);
 			v_show_c (GRPH_Vdi, 1);
 			ev = evnt_multi_fast (&ev_i, dummy, &ev_o);
-			mx = (ev_o.emo_mouse.x <= ml ? ml :
-			      ev_o.emo_mouse.x >= mr ? mr : ev_o.emo_mouse.x);
-			my = (ev_o.emo_mouse.y <= mu ? mu :
-			      ev_o.emo_mouse.y >= md ? md : ev_o.emo_mouse.y);
+			mx = (ev_o.emo_mouse.p_x <= ml ? ml :
+			      ev_o.emo_mouse.p_x >= mr ? mr : ev_o.emo_mouse.p_x);
+			my = (ev_o.emo_mouse.p_y <= mu ? mu :
+			      ev_o.emo_mouse.p_y >= md ? md : ev_o.emo_mouse.p_y);
 			v_hide_c (GRPH_Vdi);
 			v_pline (GRPH_Vdi, 5, (short*)pw);
 			v_pline (GRPH_Vdi, 5, (short*)pc);
@@ -1254,26 +1254,26 @@ WmgrButton (WINDOW * wind)
 				if (ev_i.emi_m2leave == MO_ENTER) {
 					ev_i.emi_m2leave = MO_LEAVE;
 				} else {
-					if (mx < magn.x) {
-						ev_i.emi_m2.x = magn.x - WMGR_DECOR *2 +1;
-						ev_i.emi_m2.w = WMGR_DECOR *2;
+					if (mx < magn.g_x) {
+						ev_i.emi_m2.g_x = magn.g_x - WMGR_DECOR *2 +1;
+						ev_i.emi_m2.g_w = WMGR_DECOR *2;
 						magnet        = 0x1010;
-					} else if (mx >= magn.x + magn.w) {
-						ev_i.emi_m2.x = magn.x + magn.w;
-						ev_i.emi_m2.w = WMGR_DECOR *2;
+					} else if (mx >= magn.g_x + magn.g_w) {
+						ev_i.emi_m2.g_x = magn.g_x + magn.g_w;
+						ev_i.emi_m2.g_w = WMGR_DECOR *2;
 						magnet        = 0x1010;
 					} else {
-						ev_i.emi_m2.x = magn.x;
-						ev_i.emi_m2.w = magn.w;
+						ev_i.emi_m2.g_x = magn.g_x;
+						ev_i.emi_m2.g_w = magn.g_w;
 						magnet        = 0x1111;
 					}
-					if (my >= magn.y + magn.h) {
-						ev_i.emi_m2.y = magn.y + magn.h;
-						ev_i.emi_m2.h = WMGR_DECOR *2;
+					if (my >= magn.g_y + magn.g_h) {
+						ev_i.emi_m2.g_y = magn.g_y + magn.g_h;
+						ev_i.emi_m2.g_h = WMGR_DECOR *2;
 						magnet       &= ~0x1010;
 					} else {
-						ev_i.emi_m2.y = magn.y;
-						ev_i.emi_m2.h = magn.h;
+						ev_i.emi_m2.g_y = magn.g_y;
+						ev_i.emi_m2.g_h = magn.g_h;
 					}
 					if (magnet != 0x1111) {
 						PXY m = { mx, my };
@@ -1288,20 +1288,20 @@ WmgrButton (WINDOW * wind)
 			if (ev & MU_M1) {
 				cursor = WMGR_Cursor & magnet;
 				if (cursor & 0x1000) {
-					pc[4].y = (pc[0].y = pc[1].y = my + c_u) +1;
-					pw[4].y = (pw[0].y = pw[1].y = my + w_u) +1;
+					pc[4].p_y = (pc[0].p_y = pc[1].p_y = my + c_u) +1;
+					pw[4].p_y = (pw[0].p_y = pw[1].p_y = my + w_u) +1;
 				}
 				if (cursor & 0x0010) {
-					pc[2].y = pc[3].y           = my + c_d;
-					pw[2].y = pw[3].y           = my + w_d;
+					pc[2].p_y = pc[3].p_y           = my + c_d;
+					pw[2].p_y = pw[3].p_y           = my + w_d;
 				}
 				if (cursor & 0x0100) {
-					pc[0].x = pc[3].x = pc[4].x = mx + c_l;
-					pw[1].x = pw[2].x           = mx + w_l;
+					pc[0].p_x = pc[3].p_x = pc[4].p_x = mx + c_l;
+					pw[1].p_x = pw[2].p_x           = mx + w_l;
 				}
 				if (cursor & 0x0001) {
-					pc[1].x = pc[2].x           = mx + c_r;
-					pw[0].x = pw[3].x = pw[4].x = mx + w_r;
+					pc[1].p_x = pc[2].p_x           = mx + c_r;
+					pw[0].p_x = pw[3].p_x = pw[4].p_x = mx + w_r;
 				}
 				*(PXY*)&ev_i.emi_m1 = ev_o.emo_mouse;
 			}
@@ -1314,20 +1314,20 @@ WmgrButton (WINDOW * wind)
 			                                                     : PlaceOnBottom));
 		
 		} else if (move) {
-			if (pw[1].x != wind->Rect.x + WIND_Root.Rect.x ||
-			    pw[1].y != wind->Rect.y + WIND_Root.Rect.y) {
+			if (pw[1].p_x != wind->Rect.g_x + WIND_Root.Rect.g_x ||
+			    pw[1].p_y != wind->Rect.g_y + WIND_Root.Rect.g_y) {
 				short msg[8] = {
 					WM_MOVED, 0, 0, wind->Handle,
-					pc[0].x, pc[0].y, pc[2].x - pc[0].x +1, pc[2].y - pc[0].y +1 };
+					pc[0].p_x, pc[0].p_y, pc[2].p_x - pc[0].p_x +1, pc[2].p_y - pc[0].p_y +1 };
 				WmgrMessage (msg);
 			}
 			
 		} else {
-			pw[2].x  = pw[1].x - WIND_Root.Rect.x - wind->Rect.x;
-			pw[2].y  = 0;
-			pw[3].x -= pw[1].x -1 + wind->Rect.w;
-			pw[3].y -= pw[1].y -1 + wind->Rect.h;
-			if (pw[2].x || pw[3].x || pw[3].y) {
+			pw[2].p_x  = pw[1].p_x - WIND_Root.Rect.g_x - wind->Rect.g_x;
+			pw[2].p_y  = 0;
+			pw[3].p_x -= pw[1].p_x -1 + wind->Rect.g_w;
+			pw[3].p_y -= pw[1].p_y -1 + wind->Rect.g_h;
+			if (pw[2].p_x || pw[3].p_x || pw[3].p_y) {
 				WindResize (wind, (GRECT*)(pw +2));
 			}
 			WindPointerWatch (xFalse);

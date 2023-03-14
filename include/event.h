@@ -33,7 +33,7 @@ BOOL EvntPropagate(p_WINDOW wind, CARD32 mask, BYTE event, CARD32 c_id, PXY r_xy
 /* EnterNotify/LeaveNotify */
 void EvntPointer(p_WINDOW *stack, int anc, int top, PXY e_xy, PXY r_xy, CARD32 r_id, CARD8 mode);
 
-void EvntGraphExp(p_CLIENT, p_DRAWABLE, CARD16 major, short len, const struct s_GRECT *rect);
+void EvntGraphExp(p_CLIENT, p_DRAWABLE, CARD16 major, short len, const GRECT *rect);
 
 void EvntMappingNotify(CARD8 request, CARD8 first, CARD8 count);
 
@@ -74,7 +74,7 @@ _Void EvntConfigureNotify(WND, WID, AID, RCT, BRD, OVR);
 _Void EvntCreateNotify(WND, WID, RCT, BRD, OVR);
 _Void EvntDestroyNotify(WND, WID);
 _Void EvntEnterNotify(WND, WID, CID, RXY, EXY, MOD, FOC, DTL);
-void EvntExpose(WND, short len, const struct s_GRECT *rect);
+void EvntExpose(WND, short len, const GRECT *rect);
 _Void EvntFocusIn(WND, MOD, DTL);
 _Void EvntFocusOut(WND, MOD, DTL);
 _Void EvntGravityNotify(WND, WID, WXY);

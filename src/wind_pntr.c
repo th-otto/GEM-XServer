@@ -75,8 +75,8 @@ WindPointerWatch (BOOL movedNreorg)
 	PXY      e_p = // pointer coordinates relative to the event windows origin
 			         *MAIN_PointerPos,
 			   r_p = // pointer coordinates relative to the new pointer root origin
-			         { MAIN_PointerPos->x - WIND_Root.Rect.x,
-			           MAIN_PointerPos->y - WIND_Root.Rect.y };
+			         { MAIN_PointerPos->p_x - WIND_Root.Rect.g_x,
+			           MAIN_PointerPos->p_y - WIND_Root.Rect.g_y };
 	CARD32   r_id  = -1;
 	short    focus = 0;
 	
@@ -86,14 +86,14 @@ WindPointerWatch (BOOL movedNreorg)
 	
 	if (!(*stack = _WIND_PointerRoot)) {
 		// noting to leave
-		e_p.x -= WIND_Root.Rect.x;
-		e_p.y -= WIND_Root.Rect.y;
+		e_p.p_x -= WIND_Root.Rect.g_x;
+		e_p.p_y -= WIND_Root.Rect.g_y;
 		stack[++anc] = &WIND_Root;
 		
 	} else while (1) {
 		WINDOW * w = stack[anc];
-		e_p.x -= w->Rect.x;
-		e_p.y -= w->Rect.y;
+		e_p.p_x -= w->Rect.g_x;
+		e_p.p_y -= w->Rect.g_y;
 		if (w->Parent) stack[++anc] = w->Parent;
 		else           break;
 	}
@@ -101,7 +101,7 @@ WindPointerWatch (BOOL movedNreorg)
 	
 	/*--- find the gem window the pointer is over ---*/
 	
-	if ((hdl = wind_find (MAIN_PointerPos->x, MAIN_PointerPos->y)) < 0) {
+	if ((hdl = wind_find (MAIN_PointerPos->p_x, MAIN_PointerPos->p_y)) < 0) {
 		// the pointer is outside of all windows, e.g. in the title bar
 		
 		puts("*PLONK*");
@@ -126,8 +126,8 @@ WindPointerWatch (BOOL movedNreorg)
 					// over x window
 					if (w->isMapped) {
 						watch |= (0 != (w->u.List.AllMasks & ALL_MOTION_MASK));
-						r_p.x -= w->Rect.x;
-						r_p.y -= w->Rect.y;
+						r_p.p_x -= w->Rect.g_x;
+						r_p.p_y -= w->Rect.g_y;
 						stack[top] = w;
 						focus      = hdl;
 					}
@@ -157,14 +157,14 @@ WindPointerWatch (BOOL movedNreorg)
 		} else {
 			// find section
 			wind_get_first (hdl, &sect);
-			while (sect.w && sect.h && !PXYinRect (MAIN_PointerPos, &sect)) {
+			while (sect.g_w && sect.g_h && !PXYinRect (MAIN_PointerPos, &sect)) {
 				wind_get_next (hdl, &sect);
 			}
-			if (!sect.w || !sect.h) {
+			if (!sect.g_w || !sect.g_h) {
 				// the pointer is outside of all work areas, so it's over a gem widget
 				
 				*(PXY*)&sect = *MAIN_PointerPos;
-				sect.w = sect.h = 1;
+				sect.g_w = sect.g_h = 1;
 				watch = xFalse;
 				
 				if (!hdl) {
@@ -181,21 +181,21 @@ WindPointerWatch (BOOL movedNreorg)
 				/*--- find the subwindow and its section the pointer is in ---*/
 				
 				GRECT o = // the origin of the window, absolute coordinate
-				          { WIND_Root.Rect.x + stack[top]->Rect.x,
-				            WIND_Root.Rect.y + stack[top]->Rect.y,
-				            stack[top]->Rect.w, stack[top]->Rect.h };
+				          { WIND_Root.Rect.g_x + stack[top]->Rect.g_x,
+				            WIND_Root.Rect.g_y + stack[top]->Rect.g_y,
+				            stack[top]->Rect.g_w, stack[top]->Rect.g_h };
 				
-				if (r_p.x < 0  ||  r_p.y < 0  ||  r_p.x >= o.w  ||  r_p.y >= o.h) {
+				if (r_p.p_x < 0  ||  r_p.p_y < 0  ||  r_p.p_x >= o.g_w  ||  r_p.p_y >= o.g_h) {
 					// the pointer is over the border of the main window
 					
 					WINDOW * w = stack[top];
 					short    b = (w->GwmDecor ? WMGR_Decor : 0);
 					if (b) widget = w;
 					else   b      = w->BorderWidth;
-					if      (r_p.x <  0)   { o.x -= b;   o.w = b;   }
-					else if (r_p.x >= o.w) { o.x += o.w; o.w = b;   }
-					if      (r_p.y <  0)   { o.y -= b;   o.h = b;   }
-					else if (r_p.y >= o.h) { o.y += o.h; o.h = b;   }
+					if      (r_p.p_x <  0)   { o.g_x -= b;   o.g_w = b;   }
+					else if (r_p.p_x >= o.g_w) { o.g_x += o.g_w; o.g_w = b;   }
+					if      (r_p.p_y <  0)   { o.g_y -= b;   o.g_h = b;   }
+					else if (r_p.p_y >= o.g_h) { o.g_y += o.g_h; o.g_h = b;   }
 					GrphIntersect (&sect, &o);
 					watch = xFalse;
 					if (stack[anc-1]) {
@@ -209,7 +209,7 @@ WindPointerWatch (BOOL movedNreorg)
 					WINDOW * w = stack[top]->StackTop;
 					while (w) {
 						if (w->isMapped) {
-							GRECT r = { 0, 0, o.w, o.h };
+							GRECT r = { 0, 0, o.g_w, o.g_h };
 							if (GrphIntersect (&r, &w->Rect) && PXYinRect (&r_p, &r)) {
 								if (anc &&  w == stack[anc-1]) {
 									top = --anc;
@@ -220,13 +220,13 @@ WindPointerWatch (BOOL movedNreorg)
 								}
 								watch |= (0 != (w->u.List.AllMasks & ALL_MOTION_MASK));
 								// set origin to inferiors value, and watching rectangle
-								o.x += w->Rect.x;
-								o.y += w->Rect.y;
-								o.w =  r.w;
-								o.h =  r.h;
+								o.g_x += w->Rect.g_x;
+								o.g_y += w->Rect.g_y;
+								o.g_w =  r.g_w;
+								o.g_h =  r.g_h;
 								// update relative pointer position for new origin
-								r_p.x -= w->Rect.x;
-								r_p.y -= w->Rect.y;
+								r_p.p_x -= w->Rect.g_x;
+								r_p.p_y -= w->Rect.g_y;
 								w   =  w->StackTop;
 								continue;
 							}
@@ -236,22 +236,22 @@ WindPointerWatch (BOOL movedNreorg)
 					r_id = stack[top]->Id;
 					GrphIntersect (&sect, &o);
 					if ((w = stack[top]->StackBot)) {
-						sect.w += sect.x;
-						sect.h += sect.y;
+						sect.g_w += sect.g_x;
+						sect.g_h += sect.g_y;
 						do {
 							int q;
-							if        ((q =  w->Rect.x) >  r_p.x) {
-									 if (q <= sect.w - o.x) sect.w = q + o.x;
-							} else if ((q += w->Rect.w) <= r_p.x) {
-									 if (q >  sect.x - o.x) sect.x = q + o.x;
-							} else if ((q =  w->Rect.y) >  r_p.y) {
-									 if (q <= sect.h - o.y) sect.h = q + o.y;
-							} else if ((q += w->Rect.h) <= r_p.y) {
-									 if (q >  sect.y - o.y) sect.y = q + o.y;
+							if        ((q =  w->Rect.g_x) >  r_p.p_x) {
+									 if (q <= sect.g_w - o.g_x) sect.g_w = q + o.g_x;
+							} else if ((q += w->Rect.g_w) <= r_p.p_x) {
+									 if (q >  sect.g_x - o.g_x) sect.g_x = q + o.g_x;
+							} else if ((q =  w->Rect.g_y) >  r_p.p_y) {
+									 if (q <= sect.g_h - o.g_y) sect.g_h = q + o.g_y;
+							} else if ((q += w->Rect.g_h) <= r_p.p_y) {
+									 if (q >  sect.g_y - o.g_y) sect.g_y = q + o.g_y;
 							}
 						} while ((w = w->NextSibl));
-						sect.w -= sect.x;
-						sect.h -= sect.y;
+						sect.g_w -= sect.g_x;
+						sect.g_h -= sect.g_y;
 					}
 				}
 			}
@@ -337,7 +337,7 @@ WindPointerWatch (BOOL movedNreorg)
 
 //==============================================================================
 void
-WindPointerMove (const p_PXY pointer_xy)
+WindPointerMove (const PXY *pointer_xy)
 {
 	PXY r_xy, e_xy;
 	WINDOW * wind = _WIND_PointerRoot;
@@ -356,8 +356,8 @@ WindPointerMove (const p_PXY pointer_xy)
 	} else if (wind) {
 		r_xy = *MAIN_PointerPos;
 		do {
-			r_xy.x -= wind->Rect.x;
-			r_xy.y -= wind->Rect.y;
+			r_xy.p_x -= wind->Rect.g_x;
+			r_xy.p_y -= wind->Rect.g_y;
 		} while ((wind = wind->Parent));
 		wind = _WIND_PointerRoot;
 	}
@@ -368,13 +368,13 @@ WindPointerMove (const p_PXY pointer_xy)
 		if (msk & wind->u.List.AllMasks) {
 			EvntMotionNotify (wind, msk, r_id, r_id, r_xy, e_xy);
 		#	ifdef _TRACE_POINTER
-			printf ("moved on W:%X [%i,%i] \n", wind->Id, e_xy.x, e_xy.y);
+			printf ("moved on W:%X [%i,%i] \n", wind->Id, e_xy.p_x, e_xy.p_y);
 		#	endif
 			msk &= !wind->u.List.AllMasks;
 		}
 		if (msk &= wind->PropagateMask) {
-			e_xy.x += wind->Rect.x;
-			e_xy.y += wind->Rect.y;
+			e_xy.p_x += wind->Rect.g_x;
+			e_xy.p_y += wind->Rect.g_y;
 		} else {
 			break;
 		}
@@ -420,8 +420,8 @@ RQ_QueryPointer (CLIENT * clnt, xQueryPointerReq * q)
 		DEBUG (QueryPointer," W:%lX", q->id);
 		
 		r->root  = ROOT_WINDOW;
-		r->rootX = pos.x;
-		r->rootY = pos.y;
+		r->rootX = pos.p_x;
+		r->rootY = pos.p_y;
 		r->mask  = MAIN_KeyButMask;
 		r->child = None;
 		
@@ -434,11 +434,11 @@ RQ_QueryPointer (CLIENT * clnt, xQueryPointerReq * q)
 			r->sameScreen = xTrue;
 			
 			if (!wind) {
-				pos.x = MAIN_PointerPos->x - work.x;
-				pos.y = MAIN_PointerPos->y - work.y;
+				pos.p_x = MAIN_PointerPos->p_x - work.g_x;
+				pos.p_y = MAIN_PointerPos->p_y - work.g_y;
 			
 			} else if (wind == &WIND_Root) {
-				short hdl = wind_find (MAIN_PointerPos->x, MAIN_PointerPos->y);
+				short hdl = wind_find (MAIN_PointerPos->p_x, MAIN_PointerPos->p_y);
 				if (hdl > 0) {
 					r->child = ROOT_WINDOW|hdl;
 					if ((wind = wind->StackTop)) {
@@ -450,9 +450,9 @@ RQ_QueryPointer (CLIENT * clnt, xQueryPointerReq * q)
 				}
 			} else {
 				pos    = WindPointerPos (wind);
-				work.x = work.y = 0;
-				work.w = wind->Rect.w;
-				work.h = wind->Rect.h;
+				work.g_x = work.g_y = 0;
+				work.g_w = wind->Rect.g_w;
+				work.g_h = wind->Rect.g_h;
 				if (PXYinRect (&pos, &work) && (wind = wind->StackTop)) {
 					do if (wind->isMapped && PXYinRect (&pos, &wind->Rect)) {
 						r->child = wind->Id;
@@ -460,8 +460,8 @@ RQ_QueryPointer (CLIENT * clnt, xQueryPointerReq * q)
 					} while ((wind = wind->PrevSibl));
 				}
 			}
-			r->winX = pos.x;
-			r->winY = pos.y;
+			r->winX = pos.p_x;
+			r->winY = pos.p_y;
 		}
 		ClntReply (QueryPointer,, "wwPP.");
 	}
@@ -495,8 +495,8 @@ RQ_TranslateCoords (CLIENT * clnt, xTranslateCoordsReq * q)
 	} else {
 		GRECT work;
 		if ((ok = wind_get_work (q->srcWid & 0x7FFF, &work))) {
-			p_src.x = work.x - WIND_Root.Rect.x;
-			p_src.y = work.y - WIND_Root.Rect.y;
+			p_src.p_x = work.g_x - WIND_Root.Rect.g_x;
+			p_src.p_y = work.g_y - WIND_Root.Rect.g_y;
 		}
 	}
 	if (!ok) {
@@ -509,8 +509,8 @@ RQ_TranslateCoords (CLIENT * clnt, xTranslateCoordsReq * q)
 	} else {
 		GRECT work;
 		if ((ok = wind_get_work (q->dstWid & 0x7FFF, &work))) {
-			p_dst.x = work.x - WIND_Root.Rect.x;
-			p_dst.y = work.y - WIND_Root.Rect.y;
+			p_dst.p_x = work.g_x - WIND_Root.Rect.g_x;
+			p_dst.p_y = work.g_y - WIND_Root.Rect.g_y;
 		}
 	}
 	if (!ok) {
@@ -524,12 +524,12 @@ RQ_TranslateCoords (CLIENT * clnt, xTranslateCoordsReq * q)
 		       q->srcX, q->srcY, q->dstWid, q->srcWid);
 		
 		r->sameScreen = xTrue;
-		r->dstX       = q->srcX + p_src.x - p_dst.x;
-		r->dstY       = q->srcY + p_src.y - p_dst.y;
+		r->dstX       = q->srcX + p_src.p_x - p_dst.p_x;
+		r->dstY       = q->srcY + p_src.p_y - p_dst.p_y;
 		r->child      = None;
 		
 		if (wdst == &WIND_Root) {
-			short hdl = wind_find (MAIN_PointerPos->x, MAIN_PointerPos->y);
+			short hdl = wind_find (MAIN_PointerPos->p_x, MAIN_PointerPos->p_y);
 			if (hdl > 0) {
 				r->child = ROOT_WINDOW|hdl;
 				if ((wdst = wdst->StackTop)) {
@@ -540,8 +540,8 @@ RQ_TranslateCoords (CLIENT * clnt, xTranslateCoordsReq * q)
 				}
 			}
 		} else if (wdst) {
-			if (r->dstX >= 0  &&  r->dstX < wdst->Rect.w &&
-		       r->dstY >= 0  &&  r->dstY < wdst->Rect.h &&
+			if (r->dstX >= 0  &&  r->dstX < wdst->Rect.g_w &&
+		       r->dstY >= 0  &&  r->dstY < wdst->Rect.g_h &&
 		       (wdst = wdst->StackTop)) {
 				p_dst = *(PXY*)&r->dstX;
 				do if (wdst->isMapped && PXYinRect (&p_dst, &wdst->Rect)) {

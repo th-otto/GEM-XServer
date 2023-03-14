@@ -192,7 +192,7 @@ main (int argc, char * argv[])
 						ev_i.emi_bclicks = 0x0102;
 					}
 					if (WindButton (prev_mask, ev_o.emo_mclicks) && _MAIN_Mctrl) {
-						graf_mkstate (&ev_o.emo_mouse.x, &ev_o.emo_mouse.y,
+						graf_mkstate (&ev_o.emo_mouse.p_x, &ev_o.emo_mouse.p_y,
 						              &ev_o.emo_mbutton, &ev_o.emo_kmeta);
 						if (!ev_o.emo_mbutton) {
 							WindMctrl (xFalse);
@@ -299,7 +299,7 @@ MainSetMove (BOOL onNoff)
 
 //==============================================================================
 void
-MainSetWatch (const p_GRECT area, BOOL leaveNenter)
+MainSetWatch (const GRECT *area, BOOL leaveNenter)
 {
 	if (area) {
 		ev_i.emi_flags  |= MU_M1;

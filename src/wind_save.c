@@ -27,8 +27,8 @@ static MFDB  _WIND_SaveMfdb   = { NULL, 0,0,0,0,0,0,0,0 };
 void
 WindSaveUnder (CARD32 id, GRECT * rect, short hdl)
 {
-	size_t width = (rect->w +15) /16;
-	void * addr  = malloc (width *2 * rect->h * GRPH_Depth);
+	size_t width = (rect->g_w +15) /16;
+	void * addr  = malloc (width *2 * rect->g_h * GRPH_Depth);
 	if (addr) {
 		MFDB    scrn = { NULL, };
 		PRECT * src  = &WIND_SaveArea[0];
@@ -40,14 +40,14 @@ WindSaveUnder (CARD32 id, GRECT * rect, short hdl)
 		_WIND_SaveUnder           = id;
 		_WIND_SaveHandle          = -hdl;
 		_WIND_SaveMfdb.fd_addr    = addr;
-		_WIND_SaveMfdb.fd_w       = rect->w;
-		_WIND_SaveMfdb.fd_h       = rect->h;
+		_WIND_SaveMfdb.fd_w       = rect->g_w;
+		_WIND_SaveMfdb.fd_h       = rect->g_h;
 		_WIND_SaveMfdb.fd_wdwidth = width;
 		_WIND_SaveMfdb.fd_nplanes = GRPH_Depth;
-		src->rd.x = (src->lu.x = rect->x) + (dst->rd.x = rect->w -1);
-		src->rd.y = (src->lu.y = rect->y) + (dst->rd.y = rect->h -1);
-		dst->lu.x = 0;
-		dst->lu.y = 0;
+		src->rd.p_x = (src->lu.p_x = rect->g_x) + (dst->rd.p_x = rect->g_w -1);
+		src->rd.p_y = (src->lu.p_y = rect->g_y) + (dst->rd.p_y = rect->g_h -1);
+		dst->lu.p_x = 0;
+		dst->lu.p_y = 0;
 		v_hide_c    (GRPH_Vdi);
 		vro_cpyfm (GRPH_Vdi, S_ONLY,
 		           (short*)&WIND_SaveArea[0], &scrn, &_WIND_SaveMfdb);
@@ -75,14 +75,14 @@ WindSaveFlush (BOOL restore)
 				PRECT * dst = &WIND_SaveArea[2];
 				WIND_UPDATE_BEG;
 				wind_get_first (_WIND_SaveHandle, (GRECT*)dst);
-				while (dst->rd.x > 0  &&  dst->rd.y > 0) {
-					dst->rd.x += dst->lu.x -1;
-					dst->rd.y += dst->lu.y -1;
+				while (dst->rd.p_x > 0  &&  dst->rd.p_y > 0) {
+					dst->rd.p_x += dst->lu.p_x -1;
+					dst->rd.p_y += dst->lu.p_y -1;
 					if (GrphIntersectP (dst, &WIND_SaveArea[0])) {
-						src->lu.x = dst->lu.x - WIND_SaveArea[0].lu.x;
-						src->lu.y = dst->lu.y - WIND_SaveArea[0].lu.y;
-						src->rd.x = dst->rd.x - WIND_SaveArea[0].lu.x;
-						src->rd.y = dst->rd.y - WIND_SaveArea[0].lu.y;
+						src->lu.p_x = dst->lu.p_x - WIND_SaveArea[0].lu.p_x;
+						src->lu.p_y = dst->lu.p_y - WIND_SaveArea[0].lu.p_y;
+						src->rd.p_x = dst->rd.p_x - WIND_SaveArea[0].lu.p_x;
+						src->rd.p_y = dst->rd.p_y - WIND_SaveArea[0].lu.p_y;
 						vro_cpyfm (GRPH_Vdi, S_ONLY,
 						           (short*)&WIND_SaveArea[1], &_WIND_SaveMfdb, &scrn);
 					}

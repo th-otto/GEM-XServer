@@ -40,13 +40,13 @@ clip_children (WINDOW * wind, PXY orig, PRECT * dst, PRECT * clip)
 	while (wind) {
 		if (wind->isMapped) {
 			register int b = wind->BorderWidth;
-			dst->rd.x = (dst->lu.x = orig.x + wind->Rect.x) + wind->Rect.w -1;
-			dst->rd.y = (dst->lu.y = orig.y + wind->Rect.y) + wind->Rect.h -1;
+			dst->rd.p_x = (dst->lu.p_x = orig.p_x + wind->Rect.g_x) + wind->Rect.g_w -1;
+			dst->rd.p_y = (dst->lu.p_y = orig.p_y + wind->Rect.g_y) + wind->Rect.g_h -1;
 			if (b) {
-				dst->lu.x -= b;
-				dst->lu.y -= b;
-				dst->rd.x += b;
-				dst->rd.y += b;
+				dst->lu.p_x -= b;
+				dst->lu.p_y -= b;
+				dst->rd.p_x += b;
+				dst->rd.p_y += b;
 			}
 			if (GrphIntersectP (dst, clip)) {
 				dst++;
@@ -66,14 +66,14 @@ clip_children (WINDOW * wind, PXY orig, PRECT * dst, PRECT * clip)
 		dst    -= num;
 		list[0] = dst++;
 		for (i = 1; i < num; i++) {
-			short x = dst->lu.x;
-			short y = dst->lu.y;
+			short x = dst->lu.p_x;
+			short y = dst->lu.p_y;
 			int   j = i -1;
-			while (j >= 0  &&  list[j]->lu.y > y) {
+			while (j >= 0  &&  list[j]->lu.p_y > y) {
 				list[j+1] = list[j];
 				j--;
 			}
-			while (j >= 0  &&  list[j]->lu.y == y  &&  list[j]->lu.x > x) {
+			while (j >= 0  &&  list[j]->lu.p_y == y  &&  list[j]->lu.p_x > x) {
 				list[j+1] = list[j];
 				j--;
 			}
@@ -84,44 +84,44 @@ clip_children (WINDOW * wind, PXY orig, PRECT * dst, PRECT * clip)
 		// find free rectangles between child geometries
 					
 		beg = 0;
-		bot = clip->lu.y;
+		bot = clip->lu.p_y;
 		do {
-			short x = clip->lu.x;
-			if (bot < list[beg]->lu.y) { // found area above first child geometry
-				top = list[beg]->lu.y;
-				area->lu.x = x;
-				area->lu.y = bot;
-				area->rd.x = clip->rd.x;
-				area->rd.y = top -1;
+			short x = clip->lu.p_x;
+			if (bot < list[beg]->lu.p_y) { // found area above first child geometry
+				top = list[beg]->lu.p_y;
+				area->lu.p_x = x;
+				area->lu.p_y = bot;
+				area->rd.p_x = clip->rd.p_x;
+				area->rd.p_y = top -1;
 				area++;
 				cnt++;
 			} else {
 				top = bot;
 			}
-			bot = list[beg]->rd.y;
+			bot = list[beg]->rd.p_y;
 			
 			for (end = beg +1; end < num; ++end) {
-				if (list[end]->lu.y > top) {
-					if (list[end]->lu.y <= bot) bot = list[end]->lu.y -1;
+				if (list[end]->lu.p_y > top) {
+					if (list[end]->lu.p_y <= bot) bot = list[end]->lu.p_y -1;
 					break;
-				} else if (list[end]->rd.y < bot) {
-					bot = list[end]->rd.y;
+				} else if (list[end]->rd.p_y < bot) {
+					bot = list[end]->rd.p_y;
 				}
 			}
 			i = beg;
 			while (i < end) {
-				if (x < list[i]->lu.x) { // free area on left side of child
-					area->lu.x = x;
-					area->lu.y = top;
-					area->rd.x = list[i]->lu.x -1;
-					area->rd.y = bot;
+				if (x < list[i]->lu.p_x) { // free area on left side of child
+					area->lu.p_x = x;
+					area->lu.p_y = top;
+					area->rd.p_x = list[i]->lu.p_x -1;
+					area->rd.p_y = bot;
 					area++;
 					cnt++;
 				}
-				if (x <= list[i]->rd.x) {
-					x = list[i]->rd.x +1;
+				if (x <= list[i]->rd.p_x) {
+					x = list[i]->rd.p_x +1;
 				}
-				if      (list[i]->rd.y > bot) i++;
+				if      (list[i]->rd.p_y > bot) i++;
 				else if (i == beg)            beg = ++i;
 				else {
 					short j = i;
@@ -129,23 +129,23 @@ clip_children (WINDOW * wind, PXY orig, PRECT * dst, PRECT * clip)
 					if (--num < end)  end = num;
 				}
 			}
-			if (x <= clip->rd.x) { // free area on right side of last child
-				area->lu.x = x;
-				area->lu.y = top;
-				area->rd.x = clip->rd.x;
-				area->rd.y = bot;
+			if (x <= clip->rd.p_x) { // free area on right side of last child
+				area->lu.p_x = x;
+				area->lu.p_y = top;
+				area->rd.p_x = clip->rd.p_x;
+				area->rd.p_y = bot;
 				area++;
 				cnt++;
 			}
 			
 			if (i > beg) {
-				while (i < num  &&  list[i]->lu.y == bot
-				       &&  list[i]->lu.x < list[i-1]->lu.x) {
+				while (i < num  &&  list[i]->lu.p_y == bot
+				       &&  list[i]->lu.p_x < list[i-1]->lu.p_x) {
 					short   j    = i;
 					PRECT * save = list[i];
 					do {
 						list[j] = list[j-1];
-					} while (--j > beg  &&  save->lu.x < list[j]->lu.x);
+					} while (--j > beg  &&  save->lu.p_x < list[j]->lu.p_x);
 					list[j] = save;
 				}
 				i++;
@@ -154,9 +154,9 @@ clip_children (WINDOW * wind, PXY orig, PRECT * dst, PRECT * clip)
 		
 		} while (beg < num);
 		
-		if (bot <= clip->rd.y) { // free area at the bottom
-			area->lu.x = clip->lu.x;
-			area->lu.y = bot;
+		if (bot <= clip->rd.p_y) { // free area at the bottom
+			area->lu.p_x = clip->lu.p_x;
+			area->lu.p_y = bot;
 			area->rd   = clip->rd;
 			area++;
 			cnt++;
@@ -188,38 +188,38 @@ WindClipLock (WINDOW * wind, CARD16 border, const GRECT * clip, short n_clip,
 	short    l = 0x7FFF, u = 0x7FFF, r = 0x8000, d = 0x8000;
 	
 	if (border) {
-		work.x -= border;
-		work.y -= border;
+		work.g_x -= border;
+		work.g_y -= border;
 		border *= 2;
-		work.w += border;
-		work.h += border;
+		work.g_w += border;
+		work.g_h += border;
 	}
-	if (work.x < 0) { work.w += work.x; work.x = 0; }
-	if (work.y < 0) { work.h += work.y; work.y = 0; }
+	if (work.g_x < 0) { work.g_w += work.g_x; work.g_x = 0; }
+	if (work.g_y < 0) { work.g_h += work.g_y; work.g_y = 0; }
 	
 	*orig = *(PXY*)&wind->Rect;
 	
 	while ((pwnd = twnd->Parent)) {
-		if (work.x + work.w > pwnd->Rect.w) work.w = pwnd->Rect.w - work.x;
-		if (work.y + work.h > pwnd->Rect.h) work.h = pwnd->Rect.h - work.y;
-		if ((work.x += pwnd->Rect.x) < 0) { work.w += work.x; work.x = 0; }
-		if ((work.y += pwnd->Rect.y) < 0) { work.h += work.y; work.y = 0; }
-		orig->x += pwnd->Rect.x;
-		orig->y += pwnd->Rect.y;
+		if (work.g_x + work.g_w > pwnd->Rect.g_w) work.g_w = pwnd->Rect.g_w - work.g_x;
+		if (work.g_y + work.g_h > pwnd->Rect.g_h) work.g_h = pwnd->Rect.g_h - work.g_y;
+		if ((work.g_x += pwnd->Rect.g_x) < 0) { work.g_w += work.g_x; work.g_x = 0; }
+		if ((work.g_y += pwnd->Rect.g_y) < 0) { work.g_h += work.g_y; work.g_y = 0; }
+		orig->p_x += pwnd->Rect.g_x;
+		orig->p_y += pwnd->Rect.g_y;
 		if (pwnd == &WIND_Root  || !(visb &= pwnd->isMapped)) break;
 		twnd = pwnd;
 	}
-	if (!visb ||  work.w <= 0  ||  work.h <= 0) return 0;
+	if (!visb ||  work.g_w <= 0  ||  work.g_h <= 0) return 0;
 	
-	work.w += work.x -1;
-	work.h += work.y -1;
+	work.g_w += work.g_x -1;
+	work.g_h += work.g_y -1;
 	
 	if (clip  &&  n_clip > 0) {
 		PRECT * c = p_clip = alloca (sizeof(PRECT) * n_clip);
 		n         = 0;
 		while (n_clip--) {
-			c->rd.x = (c->lu.x = clip->x + orig->x) + clip->w -1;
-			c->rd.y = (c->lu.y = clip->y + orig->y) + clip->h -1;
+			c->rd.p_x = (c->lu.p_x = clip->g_x + orig->p_x) + clip->g_w -1;
+			c->rd.p_y = (c->lu.p_y = clip->g_y + orig->p_y) + clip->g_h -1;
 			clip++;
 			if (GrphIntersectP (c, (PRECT*)&work)) {
 				c++;
@@ -232,8 +232,8 @@ WindClipLock (WINDOW * wind, CARD16 border, const GRECT * clip, short n_clip,
 		p_clip = (PRECT*)&work;
 		if (clip  &&  n_clip < 0) {
 			PRECT c;
-			c.rd.x = (c.lu.x = clip->x) + clip->w -1;
-			c.rd.y = (c.lu.y = clip->y) + clip->h -1;
+			c.rd.p_x = (c.lu.p_x = clip->g_x) + clip->g_w -1;
+			c.rd.p_y = (c.lu.p_y = clip->g_y) + clip->g_h -1;
 			if (!GrphIntersectP (p_clip, &c)) return 0;
 		}
 		n_clip = 1;
@@ -244,18 +244,18 @@ WindClipLock (WINDOW * wind, CARD16 border, const GRECT * clip, short n_clip,
 	*pBuf = sect = (PRECT*)(((long)a << 16) | (b & 0xFFFF));
 	
 	wind_get_first (twnd->Handle, &rect);
-	while (rect.w > 0  &&  rect.h > 0) {
+	while (rect.g_w > 0  &&  rect.g_h > 0) {
 		PRECT * c = p_clip;
 		n         = n_clip;
-		rect.w   += rect.x -1;
-		rect.h   += rect.y -1;
+		rect.g_w   += rect.g_x -1;
+		rect.g_h   += rect.g_y -1;
 		do {
 			*sect = *(PRECT*)&rect;
 			if (GrphIntersectP (sect, c++)) {
-				if (l > sect->lu.x) l = sect->lu.x;
-				if (u > sect->lu.y) u = sect->lu.y;
-				if (r < sect->rd.x) r = sect->rd.x;
-				if (d < sect->rd.y) d = sect->rd.y;
+				if (l > sect->lu.p_x) l = sect->lu.p_x;
+				if (u > sect->lu.p_y) u = sect->lu.p_y;
+				if (r < sect->rd.p_x) r = sect->rd.p_x;
+				if (d < sect->rd.p_y) d = sect->rd.p_y;
 				sect++;
 				nClp++;
 			}
@@ -268,10 +268,10 @@ WindClipLock (WINDOW * wind, CARD16 border, const GRECT * clip, short n_clip,
 	
 	} else if (!incl_chlds && wind->StackBot) {
 		PRECT * rct;
-		p_clip->lu.x = l;
-		p_clip->lu.y = u;
-		p_clip->rd.x = r;
-		p_clip->rd.y = d;
+		p_clip->lu.p_x = l;
+		p_clip->lu.p_y = u;
+		p_clip->rd.p_x = r;
+		p_clip->rd.p_y = d;
 		n   = 0;
 		a   = clip_children (wind, *orig, sect, p_clip);
 		rct = sect + a;
@@ -296,10 +296,10 @@ WindClipLock (WINDOW * wind, CARD16 border, const GRECT * clip, short n_clip,
 		}		
 		
 	} else {
-		sect->lu.x = l;
-		sect->lu.y = u;
-		sect->rd.x = r;
-		sect->rd.y = d;
+		sect->lu.p_x = l;
+		sect->lu.p_y = u;
+		sect->rd.p_x = r;
+		sect->rd.p_y = d;
 	}
 	return nClp;
 }
@@ -310,7 +310,7 @@ void
 WindDrawPmap (PIXMAP * pmap, PXY orig, p_PRECT sect)
 {
 	MFDB  scrn = { NULL, };
-	PXY   offs = { sect->lu.x - orig.x, sect->lu.y - orig.y };
+	PXY   offs = { sect->lu.p_x - orig.p_x, sect->lu.p_y - orig.p_y };
 	short rd_x = pmap->W -1, rd_y = pmap->H -1;
 	short color[2] = { G_BLACK, G_WHITE };
 	PXY   pxy[4];
@@ -320,23 +320,23 @@ WindDrawPmap (PIXMAP * pmap, PXY orig, p_PRECT sect)
 	#define d_rd pxy[3]
 	int  d;
 	
-	if (offs.x >= pmap->W) offs.x %= pmap->W;
-	if (offs.y >= pmap->H) offs.y %= pmap->H;
+	if (offs.p_x >= pmap->W) offs.p_x %= pmap->W;
+	if (offs.p_y >= pmap->H) offs.p_y %= pmap->H;
 	
-	s_lu.y = offs.y;
-	s_rd.y = rd_y;
-	d_lu.y = sect->lu.y;
+	s_lu.p_y = offs.p_y;
+	s_rd.p_y = rd_y;
+	d_lu.p_y = sect->lu.p_y;
 	d_rd   = sect->rd;
-	while ((d = d_rd.y - d_lu.y) >= 0) {
-		if (d < rd_y - s_lu.y) {
-			s_rd.y = s_lu.y + d;
+	while ((d = d_rd.p_y - d_lu.p_y) >= 0) {
+		if (d < rd_y - s_lu.p_y) {
+			s_rd.p_y = s_lu.p_y + d;
 		}
-		s_lu.x = offs.x;
-		s_rd.x = rd_x;
-		d_lu.x = sect->lu.x;
-		while ((d = d_rd.x - d_lu.x) >= 0) {
-			if (d < rd_x - s_lu.x) {
-				s_rd.x = s_lu.x + d;
+		s_lu.p_x = offs.p_x;
+		s_rd.p_x = rd_x;
+		d_lu.p_x = sect->lu.p_x;
+		while ((d = d_rd.p_x - d_lu.p_x) >= 0) {
+			if (d < rd_x - s_lu.p_x) {
+				s_rd.p_x = s_lu.p_x + d;
 			}
 			if (pmap->Depth == 1) {
 				vrt_cpyfm (GRPH_Vdi, MD_REPLACE,
@@ -344,11 +344,11 @@ WindDrawPmap (PIXMAP * pmap, PXY orig, p_PRECT sect)
 			} else {
 				vro_cpyfm (GRPH_Vdi, S_ONLY, (short*)pxy, PmapMFDB(pmap), &scrn);
 			}
-			d_lu.x += pmap->W - s_lu.x;
-			s_lu.x =  0;
+			d_lu.p_x += pmap->W - s_lu.p_x;
+			s_lu.p_x =  0;
 		}
-		d_lu.y += pmap->H - s_lu.y;
-		s_lu.y =  0;
+		d_lu.p_y += pmap->H - s_lu.p_y;
+		s_lu.p_y =  0;
 	}
 	#undef s_lu
 	#undef s_rd
@@ -371,10 +371,10 @@ WindDrawBgnd (WINDOW * wind, PXY orig, PRECT * area,
 			if (GrphIntersectP (&rect, sect++)) {
 				WindDrawPmap (wind->Back.Pixmap, orig, &rect);
 				if (exps) {
-					exps->w = rect.rd.x - rect.lu.x +1;
-					exps->h = rect.rd.y - rect.lu.y +1;
-					exps->x = rect.lu.x - orig.x;
-					exps->y = rect.lu.y - orig.y;
+					exps->g_w = rect.rd.p_x - rect.lu.p_x +1;
+					exps->g_h = rect.rd.p_y - rect.lu.p_y +1;
+					exps->g_x = rect.lu.p_x - orig.p_x;
+					exps->g_y = rect.lu.p_y - orig.p_y;
 					exps++;
 				}
 				cnt++;
@@ -387,10 +387,10 @@ WindDrawBgnd (WINDOW * wind, PXY orig, PRECT * area,
 			if (GrphIntersectP (&rect, sect++)) {
 				v_bar (GRPH_Vdi, (short*)&rect.lu);
 				if (exps) {
-					exps->w = rect.rd.x - rect.lu.x +1;
-					exps->h = rect.rd.y - rect.lu.y +1;
-					exps->x = rect.lu.x - orig.x;
-					exps->y = rect.lu.y - orig.y;
+					exps->g_w = rect.rd.p_x - rect.lu.p_x +1;
+					exps->g_h = rect.rd.p_y - rect.lu.p_y +1;
+					exps->g_x = rect.lu.p_x - orig.p_x;
+					exps->g_y = rect.lu.p_y - orig.p_y;
 					exps++;
 				}
 				cnt++;
@@ -407,30 +407,30 @@ static void
 draw_brdr (WINDOW * wind, PRECT * work, PRECT * area, PRECT * sect, int num)
 {
 	int   i = wind->BorderWidth;
-	short l = work->lu.x - i;
-	short r = work->rd.x + i;
+	short l = work->lu.p_x - i;
+	short r = work->rd.p_x + i;
 	int   n = 0;
 	PRECT brdr[4];
 	
-	brdr[0].lu.x = l;
-	brdr[0].lu.y = work->lu.y - i;
-	brdr[0].rd.x = r;
-	brdr[0].rd.y = work->lu.y - 1;
+	brdr[0].lu.p_x = l;
+	brdr[0].lu.p_y = work->lu.p_y - i;
+	brdr[0].rd.p_x = r;
+	brdr[0].rd.p_y = work->lu.p_y - 1;
 	if (GrphIntersectP (brdr, area)) n++;
-	brdr[n].lu.x = l;
-	brdr[n].lu.y = work->lu.y;
-	brdr[n].rd.x = work->lu.x - 1;
-	brdr[n].rd.y = work->rd.y;
+	brdr[n].lu.p_x = l;
+	brdr[n].lu.p_y = work->lu.p_y;
+	brdr[n].rd.p_x = work->lu.p_x - 1;
+	brdr[n].rd.p_y = work->rd.p_y;
 	if (GrphIntersectP (brdr + n, area)) n++;
-	brdr[n].lu.x = work->rd.x + 1;
-	brdr[n].lu.y = work->lu.y;
-	brdr[n].rd.x = work->rd.x + i;
-	brdr[n].rd.y = work->rd.y;
+	brdr[n].lu.p_x = work->rd.p_x + 1;
+	brdr[n].lu.p_y = work->lu.p_y;
+	brdr[n].rd.p_x = work->rd.p_x + i;
+	brdr[n].rd.p_y = work->rd.p_y;
 	if (GrphIntersectP (brdr + n, area)) n++;
-	brdr[n].lu.x = l;
-	brdr[n].lu.y = work->rd.y + 1;
-	brdr[n].rd.x = r;
-	brdr[n].rd.y = work->rd.y + i;
+	brdr[n].lu.p_x = l;
+	brdr[n].lu.p_y = work->rd.p_y + 1;
+	brdr[n].rd.p_x = r;
+	brdr[n].rd.p_y = work->rd.p_y + i;
 	if (GrphIntersectP (brdr + n, area)) n++;
 	else if (!n)                          return;
 	
@@ -470,10 +470,10 @@ draw_wind (WINDOW * wind, PRECT * work,
 			do {
 				*exps = *(GRECT*)area;
 				if (GrphIntersectP ((PRECT*)exps, sect)) {
-					exps->w -= exps->x -1;
-					exps->h -= exps->y -1;
-					exps->x -= orig.x;
-					exps->y -= orig.y;
+					exps->g_w -= exps->g_x -1;
+					exps->g_h -= exps->g_y -1;
+					exps->g_x -= orig.p_x;
+					exps->g_y -= orig.p_y;
 					exps++;
 					nEvn++;
 				}
@@ -507,7 +507,7 @@ WindDrawSection (WINDOW * wind, const GRECT * clip)
 		                     clip, -1, &base, &sect, IncludeInferiors);
 		if (nClp) {
 			PRECT work = { base, {
-			               base.x + wind->Rect.w -1, base.y + wind->Rect.h -1 } };
+			               base.p_x + wind->Rect.g_w -1, base.p_y + wind->Rect.g_h -1 } };
 			area = (sect + nClp);
 			WmgrDrawDeco (wind, &work, area, sect, nClp);
 			if (draw_wind (wind, &work, area, sect, nClp)
@@ -524,18 +524,18 @@ WindDrawSection (WINDOW * wind, const GRECT * clip)
 		                      clip, -1, &base, &sect, IncludeInferiors);
 		level = 0;
 		area  = (sect + nClp);
-		base.x -= wind->Rect.x;
-		base.y -= wind->Rect.y;
+		base.p_x -= wind->Rect.g_x;
+		base.p_y -= wind->Rect.g_y;
 	}
 	if (!nClp) return;
 	
 	do {
 		if (enter && wind->isMapped) {
-			PXY     orig = { base.x + wind->Rect.x, base.y + wind->Rect.y };
+			PXY     orig = { base.p_x + wind->Rect.g_x, base.p_y + wind->Rect.g_y };
 			PRECT * work = area +1;
 			work->lu   = orig;
-			work->rd.x = orig.x + wind->Rect.w -1;
-			work->rd.y = orig.y + wind->Rect.h -1;
+			work->rd.p_x = orig.p_x + wind->Rect.g_w -1;
+			work->rd.p_y = orig.p_y + wind->Rect.g_h -1;
 			if (wind->ClassInOut) {
 				if (wind->hasBorder && wind->BorderWidth) {
 					draw_brdr (wind, work, area, sect, nClp);
@@ -557,8 +557,8 @@ WindDrawSection (WINDOW * wind, const GRECT * clip)
 				area--;
 				enter  =  xFalse;
 				wind   =  wind->Parent;
-				base.x -= wind->Rect.x;
-				base.y -= wind->Rect.y;
+				base.p_x -= wind->Rect.g_x;
+				base.p_y -= wind->Rect.g_y;
 			}
 		}
 	} while (level);
@@ -569,7 +569,7 @@ WindDrawSection (WINDOW * wind, const GRECT * clip)
 
 //==============================================================================
 void
-WindPutMono (p_WINDOW wind, p_GC gc, p_GRECT rct, p_MFDB src)
+WindPutMono (p_WINDOW wind, p_GC gc, GRECT * rct, MFDB *src)
 {
 	PRECT * sect;
 	PXY     orig;
@@ -592,15 +592,15 @@ WindPutMono (p_WINDOW wind, p_GC gc, p_GRECT rct, p_MFDB src)
 		                gc->Function == GXor ? MD_XOR   : MD_REPLACE);
 		PRECT pxy[2];
 		
-		orig.x -= rct[0].x - rct[1].x;
-		orig.y -= rct[0].y - rct[1].y;
+		orig.p_x -= rct[0].g_x - rct[1].g_x;
+		orig.p_y -= rct[0].g_y - rct[1].g_y;
 		v_hide_c (GRPH_Vdi);
 		do {
 			pxy[1]      = *(sect++);
-			pxy[0].lu.x = pxy[1].lu.x - orig.x;
-			pxy[0].lu.y = pxy[1].lu.y - orig.y;
-			pxy[0].rd.x = pxy[1].rd.x - orig.x;
-			pxy[0].rd.y = pxy[1].rd.y - orig.y;
+			pxy[0].lu.p_x = pxy[1].lu.p_x - orig.p_x;
+			pxy[0].lu.p_y = pxy[1].lu.p_y - orig.p_y;
+			pxy[0].rd.p_x = pxy[1].rd.p_x - orig.p_x;
+			pxy[0].rd.p_y = pxy[1].rd.p_y - orig.p_y;
 			vrt_cpyfm (GRPH_Vdi, mode, (short*)pxy, src, &dst, col);
 		} while (--nClp);
 		
@@ -611,7 +611,7 @@ WindPutMono (p_WINDOW wind, p_GC gc, p_GRECT rct, p_MFDB src)
 
 //==============================================================================
 void
-WindPutColor (p_WINDOW wind, p_GC gc, p_GRECT rct, p_MFDB src)
+WindPutColor (p_WINDOW wind, p_GC gc, GRECT * rct, MFDB *src)
 {
 	PRECT * sect;
 	PXY     orig;
@@ -631,15 +631,15 @@ WindPutColor (p_WINDOW wind, p_GC gc, p_GRECT rct, p_MFDB src)
 		MFDB  dst = { NULL };
 		PRECT pxy[2];
 		
-		orig.x -= rct[0].x - rct[1].x;
-		orig.y -= rct[0].y - rct[1].y;
+		orig.p_x -= rct[0].g_x - rct[1].g_x;
+		orig.p_y -= rct[0].g_y - rct[1].g_y;
 		v_hide_c (GRPH_Vdi);
 		do {
 			pxy[1]      = *(sect++);
-			pxy[0].lu.x = pxy[1].lu.x - orig.x;
-			pxy[0].lu.y = pxy[1].lu.y - orig.y;
-			pxy[0].rd.x = pxy[1].rd.x - orig.x;
-			pxy[0].rd.y = pxy[1].rd.y - orig.y;
+			pxy[0].lu.p_x = pxy[1].lu.p_x - orig.p_x;
+			pxy[0].lu.p_y = pxy[1].lu.p_y - orig.p_y;
+			pxy[0].rd.p_x = pxy[1].rd.p_x - orig.p_x;
+			pxy[0].rd.p_y = pxy[1].rd.p_y - orig.p_y;
 			vro_cpyfm (GRPH_Vdi, gc->Function, (short*)pxy, src, &dst);
 		} while (--nClp);
 		
@@ -652,7 +652,7 @@ WindPutColor (p_WINDOW wind, p_GC gc, p_GRECT rct, p_MFDB src)
 //------------------------------------------------------------------------------
 /*
 static void
-_put_mono (p_WINDOW wind, p_GC gc, PXY offs, p_MFDB src,
+_put_mono (p_WINDOW wind, p_GC gc, PXY offs, MFDB *src,
            PRECT * sect, CARD16 nSct, PRECT * clip, CARD16 nClp)
 {
 	short mode      = (gc->Function == GXor ? MD_TRANS : MD_REPLACE);
@@ -680,7 +680,7 @@ _put_mono (p_WINDOW wind, p_GC gc, PXY offs, p_MFDB src,
 
 //------------------------------------------------------------------------------
 static void
-_put_color (p_WINDOW wind, p_GC gc, PXY offs, p_MFDB src,
+_put_color (p_WINDOW wind, p_GC gc, PXY offs, MFDB *src,
                PRECT * sect, CARD16 nSct, PRECT * clip, CARD16 nClp)
 {
 	short mode = gc->Function;
@@ -693,10 +693,10 @@ _put_color (p_WINDOW wind, p_GC gc, PXY offs, p_MFDB src,
 		do {
 			pxy[1] = *clip;
 			if (GrphIntersectP (&pxy[1], s++)) {
-				pxy[0].lu.x = offs.x + pxy[1].lu.x;
-				pxy[0].rd.x = offs.x + pxy[1].rd.x;
-				pxy[0].lu.y = offs.y + pxy[1].lu.y;
-				pxy[0].rd.y = offs.y + pxy[1].rd.y;
+				pxy[0].lu.p_x = offs.p_x + pxy[1].lu.p_x;
+				pxy[0].rd.p_x = offs.p_x + pxy[1].rd.p_x;
+				pxy[0].lu.p_y = offs.p_y + pxy[1].lu.p_y;
+				pxy[0].rd.p_y = offs.p_y + pxy[1].rd.p_y;
 				vro_cpyfm (GRPH_Vdi, mode, (short*)pxy, src, &dst);
 			}
 		} while (--n);
@@ -706,12 +706,12 @@ _put_color (p_WINDOW wind, p_GC gc, PXY offs, p_MFDB src,
 
 //==============================================================================
 void
-WindPutImg (p_WINDOW wind, p_GC gc, p_GRECT rct, p_MFDB src,
+WindPutImg (p_WINDOW wind, p_GC gc, GRECT *rct, MFDB *src,
             PXY orig, PRECT * sect, CARD16 nSct)
 {
 	PRECT * clip;
 	CARD16  nClp;
-	PXY     offs = { rct[0].x - rct[1].x - orig.x, rct[0].y - rct[1].y - orig.y };
+	PXY     offs = { rct[0].g_x - rct[1].g_x - orig.p_x, rct[0].g_y - rct[1].g_y - orig.p_y };
 	
 	if (gc->ClipNum > 0) {
 		CARD16  n = gc->ClipNum;
@@ -721,8 +721,8 @@ WindPutImg (p_WINDOW wind, p_GC gc, p_GRECT rct, p_MFDB src,
 		do {
 			*r = *(c++);
 			if (GrphIntersect (r, &rct[1])) {
-				r->w += (r->x += orig.x) -1;
-				r->h += (r->y += orig.y) -1;
+				r->g_w += (r->g_x += orig.p_x) -1;
+				r->g_h += (r->g_y += orig.p_y) -1;
 				r++;
 				nClp++;
 			}
@@ -730,8 +730,8 @@ WindPutImg (p_WINDOW wind, p_GC gc, p_GRECT rct, p_MFDB src,
 	} else {
 		clip = alloca (sizeof(PRECT));
 		nClp = 1;
-		clip->rd.x = (clip->lu.x = rct[1].x + orig.x) + rct[1].w -1;
-		clip->rd.y = (clip->lu.y = rct[1].y + orig.y) + rct[1].h -1;
+		clip->rd.p_x = (clip->lu.p_x = rct[1].g_x + orig.p_x) + rct[1].g_w -1;
+		clip->rd.p_y = (clip->lu.p_y = rct[1].g_y + orig.p_y) + rct[1].g_h -1;
 	}
 	v_hide_c (GRPH_Vdi);
 	//
@@ -755,24 +755,24 @@ WindScroll (p_WINDOW wind, p_GC gc, GRECT * rect,
 	
 	MFDB   s_mfdb  = { NULL, }, d_mfdb = { NULL, };
 	BOOL   do_tile = (exps != NULL || wind->hasBackGnd);
-	short  d_x     = (diff.x < 0 ? -diff.x : diff.x);
-	short  d_y     = (diff.y < 0 ? -diff.y : diff.y);
+	short  d_x     = (diff.p_x < 0 ? -diff.p_x : diff.p_x);
+	short  d_y     = (diff.p_y < 0 ? -diff.p_y : diff.p_y);
 	CARD16 nExp = 0;
 	PRECT  area;     // to be intersected with sect[]
 	PRECT * cLst;
 	CARD16  nLst;
 	PRECT  pxy[2];
 	
-	pxy->rd.x = (pxy->lu.x = rect[1].x + orig.x) + rect[1].w -1;
-	pxy->rd.y = (pxy->lu.y = rect[1].y + orig.y) + rect[1].h -1;
+	pxy->rd.p_x = (pxy->lu.p_x = rect[1].g_x + orig.p_x) + rect[1].g_w -1;
+	pxy->rd.p_y = (pxy->lu.p_y = rect[1].g_y + orig.p_y) + rect[1].g_h -1;
 	if (gc->ClipNum > 0) {
 		PRECT * c = cLst = alloca (sizeof(PRECT) * gc->ClipNum);
 		GRECT * r = gc->ClipRect;
 		CARD16  n = gc->ClipNum;
 		nLst      = 0;
 		while (n--) {
-			c->rd.x = (c->lu.x = r->x + orig.x) + r->w -1;
-			c->rd.y = (c->lu.y = r->y + orig.y) + r->h -1;
+			c->rd.p_x = (c->lu.p_x = r->g_x + orig.p_x) + r->g_w -1;
+			c->rd.p_y = (c->lu.p_y = r->g_y + orig.p_y) + r->g_h -1;
 			if (GrphIntersectP (c, pxy)) {
 				c++;
 				nLst++;
@@ -785,8 +785,8 @@ WindScroll (p_WINDOW wind, p_GC gc, GRECT * rect,
 		*cLst = *pxy;
 		nLst  = 1;
 	}
-	area.rd.x = (area.lu.x = rect[0].x + orig.x) + rect[0].w -1;
-	area.rd.y = (area.lu.y = rect[0].y + orig.y) + rect[0].h -1;
+	area.rd.p_x = (area.lu.p_x = rect[0].g_x + orig.p_x) + rect[0].g_w -1;
+	area.rd.p_y = (area.lu.p_y = rect[0].g_y + orig.p_y) + rect[0].g_h -1;
 	
 	if (!wind->hasBackPix) {
 		vswr_mode (GRPH_Vdi, MD_REPLACE);
@@ -810,66 +810,66 @@ WindScroll (p_WINDOW wind, p_GC gc, GRECT * rect,
 			pxy[0] = pxy[1];
 			nTil   = 0;
 			offs   = 0;
-			if (diff.y < 0) {   //................scroll.up......
+			if (diff.p_y < 0) {   //................scroll.up......
 				offs++; // start tileing at left/right area
-				pxy[0].lu.y += d_y;
-				pxy[0].rd.y += d_y;
-				if (pxy[0].rd.y > clip.rd.y) {
-					pxy[1].rd.y -= pxy[0].rd.y - clip.rd.y;
-					pxy[0].rd.y =  clip.rd.y;
+				pxy[0].lu.p_y += d_y;
+				pxy[0].rd.p_y += d_y;
+				if (pxy[0].rd.p_y > clip.rd.p_y) {
+					pxy[1].rd.p_y -= pxy[0].rd.p_y - clip.rd.p_y;
+					pxy[0].rd.p_y =  clip.rd.p_y;
 					if (do_tile) {               // tile below
-						tile[2].lu.x = pxy[0].lu.x;
-						tile[2].lu.y = pxy[1].rd.y +1;
+						tile[2].lu.p_x = pxy[0].lu.p_x;
+						tile[2].lu.p_y = pxy[1].rd.p_y +1;
 						tile[2].rd   = pxy[0].rd;
 						nTil++;
 					}
 				}
-			} else if (diff.y > 0) {   //.........scroll.down....
-				pxy[0].lu.y -= d_y;
-				pxy[0].rd.y -= d_y;
-				if (pxy[0].lu.y < clip.lu.y) {
-					pxy[1].lu.y -= pxy[0].lu.y - clip.lu.y;
-					pxy[0].lu.y =  clip.lu.y;
+			} else if (diff.p_y > 0) {   //.........scroll.down....
+				pxy[0].lu.p_y -= d_y;
+				pxy[0].rd.p_y -= d_y;
+				if (pxy[0].lu.p_y < clip.lu.p_y) {
+					pxy[1].lu.p_y -= pxy[0].lu.p_y - clip.lu.p_y;
+					pxy[0].lu.p_y =  clip.lu.p_y;
 					if (do_tile) {               // tile above
 						tile[0].lu   = pxy[0].lu;
-						tile[0].rd.x = pxy[1].rd.x;
-						tile[0].rd.y = pxy[1].lu.y -1;
+						tile[0].rd.p_x = pxy[1].rd.p_x;
+						tile[0].rd.p_y = pxy[1].lu.p_y -1;
 						nTil++;
 					}
 				}
 			}
-			if (diff.x < 0) {   //................scroll.left....
-				pxy[0].lu.x += d_x;
-				pxy[0].rd.x += d_x;
-				if (pxy[0].rd.x > clip.rd.x) {
-					pxy[1].rd.x -= pxy[0].rd.x - clip.rd.x;
-					pxy[0].rd.x =  clip.rd.x;
+			if (diff.p_x < 0) {   //................scroll.left....
+				pxy[0].lu.p_x += d_x;
+				pxy[0].rd.p_x += d_x;
+				if (pxy[0].rd.p_x > clip.rd.p_x) {
+					pxy[1].rd.p_x -= pxy[0].rd.p_x - clip.rd.p_x;
+					pxy[0].rd.p_x =  clip.rd.p_x;
 					if (do_tile) {               // tile right
-						tile[1].lu.x = pxy[1].rd.x +1;
-						tile[1].lu.y = pxy[1].lu.y;
-						tile[1].rd.x = pxy[0].rd.x;
-						tile[1].rd.y = pxy[1].rd.y;
+						tile[1].lu.p_x = pxy[1].rd.p_x +1;
+						tile[1].lu.p_y = pxy[1].lu.p_y;
+						tile[1].rd.p_x = pxy[0].rd.p_x;
+						tile[1].rd.p_y = pxy[1].rd.p_y;
 						nTil++;
 					}
 				}
-			} else if (diff.x > 0) {   //.........scroll.right...
-				pxy[0].lu.x -= d_x;
-				pxy[0].rd.x -= d_x;
-				if (pxy[0].lu.x < clip.lu.x) {
-					pxy[1].lu.x -= pxy[0].lu.x - clip.lu.x;
-					pxy[0].lu.x =  clip.lu.x;
+			} else if (diff.p_x > 0) {   //.........scroll.right...
+				pxy[0].lu.p_x -= d_x;
+				pxy[0].rd.p_x -= d_x;
+				if (pxy[0].lu.p_x < clip.lu.p_x) {
+					pxy[1].lu.p_x -= pxy[0].lu.p_x - clip.lu.p_x;
+					pxy[0].lu.p_x =  clip.lu.p_x;
 					if (do_tile) {               // tile left
-						tile[1].lu.x = pxy[0].lu.x;
-						tile[1].lu.y = pxy[1].lu.y;
-						tile[1].rd.x = pxy[1].lu.x -1;
-						tile[1].rd.y = pxy[1].rd.y;
+						tile[1].lu.p_x = pxy[0].lu.p_x;
+						tile[1].lu.p_y = pxy[1].lu.p_y;
+						tile[1].rd.p_x = pxy[1].lu.p_x -1;
+						tile[1].rd.p_y = pxy[1].rd.p_y;
 						nTil++;
 					}
 				}
 			} else if (offs) {
 				offs++; // start tileing at below area
 			}
-			if (pxy[0].lu.x <= pxy[0].rd.x  &&  pxy[0].lu.y <= pxy[0].rd.y) {
+			if (pxy[0].lu.p_x <= pxy[0].rd.p_x  &&  pxy[0].lu.p_y <= pxy[0].rd.p_y) {
 				v_hide_c  (GRPH_Vdi);
 				vro_cpyfm (GRPH_Vdi, S_ONLY, (short*)pxy, &s_mfdb, &d_mfdb);
 				v_show_c  (GRPH_Vdi, 1);
@@ -887,10 +887,10 @@ WindScroll (p_WINDOW wind, p_GC gc, GRECT * rect,
 					}
 				} else if (exps) do {
 					PRECT * c = (tile + offs++);
-					exps->w = c->rd.x - c->lu.x +1;
-					exps->h = c->rd.y - c->lu.y +1;
-					exps->x = c->lu.x - orig.x;
-					exps->y = c->lu.y - orig.y;
+					exps->g_w = c->rd.p_x - c->lu.p_x +1;
+					exps->g_h = c->rd.p_y - c->lu.p_y +1;
+					exps->g_x = c->lu.p_x - orig.p_x;
+					exps->g_y = c->lu.p_y - orig.p_y;
 					exps++;
 					nExp++;
 				} while (nTil--);
@@ -939,11 +939,11 @@ RQ_ClearArea (CLIENT * clnt, xClearAreaReq * q)
 		DEBUG (ClearArea," W:%X [%i,%i/%i,%i]",
 		       wind->Id, q->x, q->y, q->width, q->height);
 		
-		if ((short)q->width <= 0 || q->x + q->width > wind->Rect.w) {
-			q->width = wind->Rect.w - q->x;
+		if ((short)q->width <= 0 || q->x + q->width > wind->Rect.g_w) {
+			q->width = wind->Rect.g_w - q->x;
 		}
-		if((short)q->height <= 0 || q->y + q->height > wind->Rect.h) {
-			q->height = wind->Rect.h - q->y;
+		if((short)q->height <= 0 || q->y + q->height > wind->Rect.g_h) {
+			q->height = wind->Rect.g_h - q->y;
 		}
 		if (q->width > 0  &&  q->height > 0
 		    && (nClp = WindClipLock (wind, 0, (GRECT*)&q->x, 1, &orig, &sect,
@@ -959,12 +959,12 @@ RQ_ClearArea (CLIENT * clnt, xClearAreaReq * q)
 				if (wind->hasBackGnd) {
 					extern OBJECT WMGR_Desktop;
 					do {
-						sect->rd.x -= sect->lu.x -1;
-						sect->rd.y -= sect->lu.y -1;
+						sect->rd.p_x -= sect->lu.p_x -1;
+						sect->rd.p_y -= sect->lu.p_y -1;
 						objc_draw (&WMGR_Desktop, 0, 1,
-						           sect->lu.x, sect->lu.y, sect->rd.x, sect->rd.y);
-						sect->lu.x -= orig.x;
-						sect->lu.y -= orig.y;
+						           sect->lu.p_x, sect->lu.p_y, sect->rd.p_x, sect->rd.p_y);
+						sect->lu.p_x -= orig.p_x;
+						sect->lu.p_y -= orig.p_y;
 						sect++;
 					} while (--nClp);
 				}
@@ -994,10 +994,10 @@ RQ_ClearArea (CLIENT * clnt, xClearAreaReq * q)
 					for (i = 0; i < num; i++) {
 						*exps = *(GRECT*)sect;
 						if (GrphIntersectP ((PRECT*)exps, area + i)) {
-							exps->w -= exps->x -1;
-							exps->h -= exps->y -1;
-							exps->x -= orig.x;
-							exps->y -= orig.y;
+							exps->g_w -= exps->g_x -1;
+							exps->g_h -= exps->g_y -1;
+							exps->g_x -= orig.p_x;
+							exps->g_y -= orig.p_y;
 							exps++;
 							nEvn++;
 						}

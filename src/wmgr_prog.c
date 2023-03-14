@@ -7,10 +7,6 @@
 // 2001-07-10 - Initial Version.
 //==============================================================================
 //
-#include "main.h"
-#include "wmgr.h"
-#include "x_mint.h"
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -18,6 +14,11 @@
 
 #include <dirent.h>
 #include <sys/stat.h>
+
+#include "main.h"
+#include "types.h"
+#include "wmgr.h"
+#include "x_mint.h"
 
 
 //------------------------------------------------------------------------------

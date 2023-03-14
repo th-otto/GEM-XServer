@@ -145,25 +145,25 @@ PmapVdi (p_PIXMAP pmap, p_GC gc, BOOL fonts)
 		}
 	}
 	
-	return (pmap->Vdi);
+	return pmap->Vdi;
 }
 
 
 //==============================================================================
 void
-PmapPutMono (PIXMAP * pmap, p_GC gc, p_GRECT r, p_MFDB src)
+PmapPutMono (PIXMAP * pmap, p_GC gc, GRECT * r, MFDB *src)
 {
 	if (gc->Function == GXcopy  &&  pmap->Depth == 1
-	    && !r[0].x && !r[1].x  &&  r[0].w == pmap->W) {
-		memcpy ((char*)pmap->Mem    + (pmap->nPads *2 * r[1].y),
-		        (char*)src->fd_addr + (pmap->nPads *2 * r[0].y),
-		        pmap->Depth         *  pmap->nPads *2 * r[0].h);
+	    && !r[0].g_x && !r[1].g_x  &&  r[0].g_w == pmap->W) {
+		memcpy ((char*)pmap->Mem    + (pmap->nPads *2 * r[1].g_y),
+		        (char*)src->fd_addr + (pmap->nPads *2 * r[0].g_y),
+		        pmap->Depth         *  pmap->nPads *2 * r[0].g_h);
 	
 	} else {
-		short pxy[8] = { r[0].x,             r[0].y,
-		                 r[0].x + r[0].w -1, r[0].y + r[0].h -1,
-		                 r[1].x,             r[1].y,
-		                 r[1].x + r[1].w -1, r[1].y + r[1].h -1 };
+		short pxy[8] = { r[0].g_x,             r[0].g_y,
+		                 r[0].g_x + r[0].g_w -1, r[0].g_y + r[0].g_h -1,
+		                 r[1].g_x,             r[1].g_y,
+		                 r[1].g_x + r[1].g_w -1, r[1].g_y + r[1].g_h -1 };
 		short colors[2] = { gc->Foreground, gc->Background };
 		short mode;
 		
@@ -181,12 +181,12 @@ PmapPutMono (PIXMAP * pmap, p_GC gc, p_GRECT r, p_MFDB src)
 
 //==============================================================================
 void
-PmapPutColor (PIXMAP * pmap, p_GC gc, p_GRECT r, p_MFDB src)
+PmapPutColor (PIXMAP * pmap, p_GC gc, GRECT * r, MFDB *src)
 {
-	short pxy[8] = { r[0].x,             r[0].y,
-	                 r[0].x + r[0].w -1, r[0].y + r[0].h -1,
-	                 r[1].x,             r[1].y,
-	                 r[1].x + r[1].w -1, r[1].y + r[1].h -1 };
+	short pxy[8] = { r[0].g_x,             r[0].g_y,
+	                 r[0].g_x + r[0].g_w -1, r[0].g_y + r[0].g_h -1,
+	                 r[1].g_x,             r[1].g_y,
+	                 r[1].g_x + r[1].g_w -1, r[1].g_y + r[1].g_h -1 };
 	
 	vro_cpyfm (GRPH_Vdi, gc->Function, pxy, src, PmapMFDB(pmap));
 }
@@ -194,7 +194,7 @@ PmapPutColor (PIXMAP * pmap, p_GC gc, p_GRECT r, p_MFDB src)
 
 //==============================================================================
 void
-PmapDrawPoints (p_PIXMAP pmap, p_GC gc, p_PXY pxy, int num)
+PmapDrawPoints (p_PIXMAP pmap, p_GC gc, PXY *pxy, int num)
 {
 	INT16 x = 0, y = 0;
 	
@@ -203,13 +203,13 @@ PmapDrawPoints (p_PIXMAP pmap, p_GC gc, p_PXY pxy, int num)
 #	undef clnt
 	
 	if (gc->Foreground & 1) while (num--) {
-		x =  pxy->x; y =  pxy->y;
+		x =  pxy->p_x; y =  pxy->p_y;
 		if (x >= 0  &&  x < pmap->W  &&  y >= 0  &&  y < pmap->H) {
 			pmap->Mem[(pmap->nPads *2 * y) + (x /8)] |= 0x0080 >> (x & 7);
 		}
 		pxy++;
 	} else while (num--) {
-		x =  pxy->x; y =  pxy->y;
+		x =  pxy->p_x; y =  pxy->p_y;
 		if (x >= 0  &&  x < pmap->W  &&  y >= 0  &&  y < pmap->H) {
 			pmap->Mem[(pmap->nPads *2 * y) + (x /8)] &= 0xFF7F >> (x & 7);
 		}
@@ -219,7 +219,7 @@ PmapDrawPoints (p_PIXMAP pmap, p_GC gc, p_PXY pxy, int num)
 	
 //==============================================================================
 void
-PmapFillRects (p_PIXMAP pmap, p_GC gc, p_GRECT rec, int num)
+PmapFillRects (p_PIXMAP pmap, p_GC gc, GRECT *rec, int num)
 {
 #	define clnt NULL
 	
@@ -230,11 +230,11 @@ PmapFillRects (p_PIXMAP pmap, p_GC gc, p_GRECT rec, int num)
 	DEBUG (PolyFillRectangle," P:%X G:%X (%i)", pmap->Id, gc->Id, num);
 	
 	if (pat) while (num--) {
-		int y   = (rec->y          <  0       ? 0                : rec->y);
-		int h   = (rec->y + rec->h >= pmap->H ? pmap->H - rec->y : rec->h +1);
-		int beg = (rec->x          <  0       ? 0                : rec->x);
-		int end = (rec->x + rec->w >  pmap->W ?
-		                                    pmap->W -1 : rec->x + rec->w);
+		int y   = (rec->g_y          <  0       ? 0                : rec->g_y);
+		int h   = (rec->g_y + rec->g_h >= pmap->H ? pmap->H - rec->g_y : rec->g_h +1);
+		int beg = (rec->g_x          <  0       ? 0                : rec->g_x);
+		int end = (rec->g_x + rec->g_w >  pmap->W ?
+		                                    pmap->W -1 : rec->g_x + rec->g_w);
 		CARD16 * mem = ((CARD16*)pmap->Addr) + y * pmap->nPads;
 		CARD16   lft = pat >> (beg & 0xF);
 		CARD16   rgt = pat >> (end & 0xF);

@@ -18,6 +18,7 @@
 
 #include <stddef.h>
 #include <X11/Xmd.h>
+#include <gem.h>
 
 
 #define RID_MASK_BITS    18
@@ -30,13 +31,6 @@
 #define DFLT_COLORMAP   0x0200uL
 
 #define PADD_BITS   16
-
-struct s_PXY;
-typedef struct s_PXY *p_PXY;
-struct s_GRECT;
-typedef struct s_GRECT *p_GRECT;
-struct s_PRECT;
-typedef struct s_PRECT *p_PRECT;
 
 struct s_GC;
 typedef struct s_GC *p_GC;
@@ -67,7 +61,7 @@ typedef struct s_CURSOR *p_CURSOR;
 
 
 extern CARD32 MAIN_TimeStamp;
-extern p_PXY MAIN_PointerPos;
+extern PXY *MAIN_PointerPos;
 extern CARD16 MAIN_KeyButMask;
 
 #define             MAIN_Key_Mask (((CARD8*)&MAIN_KeyButMask)[1])
@@ -77,14 +71,14 @@ extern long MAIN_FDSET_wr;
 extern long MAIN_FDSET_rd;
 
 void MainSetMove(BOOL onNoff);
-void MainSetWatch(const p_GRECT area, BOOL leaveNenter);
+void MainSetWatch(const GRECT *area, BOOL leaveNenter);
 
 #define MainClrWatch() MainSetWatch (NULL, 0)
 
 
 BOOL WindButton(CARD16 prev_mask, int count);
 void WindPointerWatch(BOOL movedNreorg);
-void WindPointerMove(const p_PXY mouse);
+void WindPointerMove(const PXY *mouse);
 
 
 extern short _MAIN_Wupdt;
@@ -92,30 +86,26 @@ extern short _MAIN_Mctrl;
 
 static inline void WindUpdate(int onNoff)
 {
-	extern short wind_update(short);
-
 	if (onNoff)
 	{
-		wind_update(1);
+		wind_update(BEG_UPDATE);
 		_MAIN_Wupdt++;
 	} else if (_MAIN_Wupdt)
 	{
-		wind_update(0);
+		wind_update(END_UPDATE);
 		_MAIN_Wupdt--;
 	}
 }
 
 static inline void WindMctrl(int onNoff)
 {
-	extern short wind_update(short);
-
 	if (onNoff)
 	{
-		wind_update(3);
+		wind_update(BEG_MCTRL);
 		_MAIN_Mctrl++;
 	} else if (_MAIN_Mctrl)
 	{
-		wind_update(2);
+		wind_update(END_MCTRL);
 		_MAIN_Mctrl--;
 	}
 }

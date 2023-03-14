@@ -15,9 +15,6 @@
 #include "xrsc.h"
 
 
-typedef struct memory_form *p_MFDB;
-
-
 typedef struct s_DRAWABLE
 {
 	XRSC(DRAWABLE, isWind);

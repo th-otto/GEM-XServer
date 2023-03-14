@@ -51,7 +51,7 @@ extern short _app;
 #endif
 
 #if __GEMLIB_MINOR__ >= 44
-#define v_gtext16n(hdl, pos, wstr, num) v_gtext16n(hdl, (pos).x, (pos).y, wstr, num)
+#define v_gtext16n(hdl, pos, wstr, num) v_gtext16n(hdl, (pos).p_x, (pos).p_y, wstr, num)
 #endif
 
 #endif /* __X_GEM_H__ */

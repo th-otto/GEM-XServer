@@ -12,15 +12,17 @@
 #ifndef __GRPH_H__
 #define __GRPH_H__
 
+#include <X11/Xproto.h>
+
 
 BOOL GrphInit(void);
 void GrphExit(void);
 int GrphSetup(void *format_arr);
 
-BOOL GrphIntersect(p_GRECT a, const struct s_GRECT *b);
+BOOL GrphIntersect(GRECT* a, const GRECT *b);
 BOOL GrphIntersectP(p_PRECT a, const struct s_PRECT *b);
-CARD16 GrphInterList(p_GRECT r, const struct s_GRECT *a, CARD16 n, const struct s_GRECT *b, CARD16 m);
-void GrphCombine(p_GRECT a, const struct s_GRECT *b);
+CARD16 GrphInterList(GRECT *r, const GRECT *a, CARD16 n, const GRECT *b, CARD16 m);
+void GrphCombine(GRECT *a, const GRECT *b);
 
 
 extern short GRPH_Handle;
@@ -39,24 +41,18 @@ enum
 };
 extern short GRPH_Format;
 
-struct memory_form;
-extern BOOL(*GrphRasterPut) (struct memory_form *, CARD16 wdth, CARD16 hght);
-extern BOOL(*GrphRasterGet) (struct memory_form *, PRECT * pxy, struct memory_form *ptr);
+extern BOOL(*GrphRasterPut) (MFDB *, CARD16 wdth, CARD16 hght);
+extern BOOL(*GrphRasterGet) (MFDB *, PRECT *pxy, MFDB *ptr);
 
 void GrphError(void);
 
 
-#ifndef __p_xArc
-#define __p_xArc
-struct _xArc;
-typedef struct _xArc *p_xArc;
-#endif
-void FT_Grph_ShiftArc_MSB(const p_PXY, p_xArc arc, size_t num, short mode);
-void FT_Grph_ShiftArc_LSB(const p_PXY, p_xArc arc, size_t num, short mode);
-void FT_Grph_ShiftPnt_MSB(const p_PXY, p_PXY pxy, size_t num, short mode);
-void FT_Grph_ShiftPnt_LSB(const p_PXY, p_PXY pxy, size_t num, short mode);
-void FT_Grph_ShiftR2P_MSB(const p_PXY, p_GRECT rct, size_t num);
-void FT_Grph_ShiftR2P_LSB(const p_PXY, p_GRECT rct, size_t num);
+void FT_Grph_ShiftArc_MSB(const PXY *origin, xArc *arc, size_t num, short mode);
+void FT_Grph_ShiftArc_LSB(const PXY *origin, xArc *arc, size_t num, short mode);
+void FT_Grph_ShiftPnt_MSB(const PXY *origin, PXY *pxy, size_t num, short mode);
+void FT_Grph_ShiftPnt_LSB(const PXY *origin, PXY *pxy, size_t num, short mode);
+void FT_Grph_ShiftR2P_MSB(const PXY *origin, GRECT *rct, size_t num);
+void FT_Grph_ShiftR2P_LSB(const PXY *origin, GRECT *rct, size_t num);
 
 
 #endif /* __GRPH_H__ */

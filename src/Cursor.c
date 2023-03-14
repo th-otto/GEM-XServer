@@ -219,8 +219,8 @@ RQ_CreateCursor (CLIENT * clnt, xCreateCursorReq * q)
 		
 		crsr->Reffs     = 1;
 		crsr->Depth     = 1;
-		crsr->HotSpot.x = (q->x <= 15 ? q->x : 15);
-		crsr->HotSpot.y = (q->y <= 15 ? q->y : 15);
+		crsr->HotSpot.p_x = (q->x <= 15 ? q->x : 15);
+		crsr->HotSpot.p_y = (q->y <= 15 ? q->y : 15);
 		_Crsr_color (crsr, (RGB*)&q->foreRed, (RGB*)&q->backRed);
 		mem = (CARD16*)fgnd->Mem;
 		for (i = 0; i < h;  crsr->Fmask[i++] = *mem & msk) mem += fgnd->nPads;
