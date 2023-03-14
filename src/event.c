@@ -8,14 +8,14 @@
 // 2000-07-01 - Initial Version.
 //==============================================================================
 //
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "main.h"
 #include "tools.h"
 #include "clnt.h"
 #include "event.h"
 #include "window.h"
-
-#include <stdlib.h>
-#include <stdio.h>
 
 #include <X11/Xproto.h>
 

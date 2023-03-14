@@ -7,6 +7,8 @@
 // 2001-01-22 - Initial Version.
 //==============================================================================
 //
+#include <stdlib.h>
+
 #include "window_P.h"
 #include "Cursor.h"
 

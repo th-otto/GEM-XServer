@@ -8,16 +8,16 @@
 // 2000-07-27 - Initial Version.
 //==============================================================================
 //
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
 #include "main.h"
 #include "tools.h"
 #include "clnt.h"
 #include "grph.h"
 #include "colormap.h"
 #include "x_gem.h"
-
-#include <stdio.h> // printf
-#include <string.h>
-#include <ctype.h>
 
 #include <X11/X.h>
 

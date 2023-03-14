@@ -8,6 +8,10 @@
 // 2000-06-05 - Initial Version.
 //==============================================================================
 //
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+
 #include "window_P.h"
 #include "x_gem.h"
 #include "wmgr.h"
@@ -20,10 +24,6 @@
 #include "Cursor.h"
 #include "grph.h"
 #include "colormap.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
 
 #include <X11/Xatom.h>
 

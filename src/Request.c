@@ -8,10 +8,10 @@
 // 2000-09-09 - Initial Version.
 //==============================================================================
 //
+#include <stdio.h>
+
 #include "clnt_P.h"
 #include "x_mint.h"
-
-#include <stdio.h> // printf
 
 #include <X11/Xproto.h>
 

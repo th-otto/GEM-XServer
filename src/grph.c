@@ -8,6 +8,10 @@
 // 2000-06-05 - Initial Version.
 //==============================================================================
 //
+#include <stdlib.h>
+#include <stdio.h>
+#include <mint/cookie.h>
+
 #include "main.h"
 #include "tools.h"
 #include "clnt.h"
@@ -19,10 +23,6 @@
 #include "gcontext.h"
 #include "x_gem.h"
 #include "gemx.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <mint/cookie.h>
 
 #include <X11/Xprotostr.h>
 

@@ -8,15 +8,16 @@
 // 2000-11-15 - Initial Version.
 //==============================================================================
 //
-#include "font_P.h"
-#include "Atom.h"
+#define _GNU_SOURCE
 
 #include <stdlib.h>
 #include <stdio.h>
-#define _GNU_SOURCE
 #include <string.h>
 #include <fnmatch.h>
 #include <ctype.h>
+
+#include "font_P.h"
+#include "Atom.h"
 
 #include <X11/X.h>
 

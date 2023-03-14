@@ -8,6 +8,10 @@
 // 2000-09-19 - Initial Version.
 //==============================================================================
 //
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+
 #include "window_P.h"
 #include "event.h"
 #include "gcontext.h"
@@ -15,10 +19,6 @@
 #include "pixmap.h"
 #include "wmgr.h"
 #include "x_gem.h"
-
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h> // printf
 
 #include <X11/Xproto.h>
 

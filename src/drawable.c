@@ -8,6 +8,8 @@
 // 2000-06-05 - Initial Version.
 //==============================================================================
 //
+#include <stdio.h>
+
 #include "main.h"
 #include "tools.h"
 #include "clnt.h"
@@ -18,8 +20,6 @@
 #include "grph.h"
 #include "x_gem.h"
 #include "gemx.h"
-
-#include <stdio.h>
 
 #include <X11/X.h>
 

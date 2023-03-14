@@ -8,12 +8,12 @@
 // 2000-07-24 - Initial Version.
 //==============================================================================
 //
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "window_P.h"
 #include "event.h"
 #include "Cursor.h"
-
-#include <stdio.h> // printf
-#include <stdlib.h>
 
 #include <X11/Xproto.h>
 

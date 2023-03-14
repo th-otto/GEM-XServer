@@ -8,16 +8,16 @@
 // 2000-06-05 - Initial Version.
 //==============================================================================
 //
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h> // memcpy memset
+#include <setjmp.h>
+
 #include "pixmap_P.h"
 #include "grph.h"
 #include "colormap.h"
 #include "x_gem.h"
 #include "gemx.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h> // memcpy memset
-#include <setjmp.h>
 
 #include <X11/X.h>
 

@@ -8,17 +8,17 @@
 // 2000-06-18 - Initial Version.
 //==============================================================================
 //
-#include "main.h"
-#include "tools.h"
-#include "Atom.h"
-#include "clnt.h"
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #include <X11/X.h>
 #include <X11/Xatom.h>
+
+#include "main.h"
+#include "tools.h"
+#include "Atom.h"
+#include "clnt.h"
 
 
 #define MAX_ATOM   200

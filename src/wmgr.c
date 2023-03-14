@@ -1,13 +1,21 @@
-//==============================================================================
-//
-// wmgr.c -- Built-in window manager.
-//
-// Copyright (C) 2000,2001 Ralph Lowinski <AltF4@freemint.de>
-//------------------------------------------------------------------------------
-// 2000-12-14 - Module released for beta state.
-// 2000-09-01 - Initial Version.
-//==============================================================================
-//
+/*
+ *==============================================================================
+ *
+ * wmgr.c -- Built-in window manager.
+ *
+ * Copyright (C) 2000,2001 Ralph Lowinski <AltF4@freemint.de>
+ *------------------------------------------------------------------------------
+ * 2000-12-14 - Module released for beta state.
+ * 2000-09-01 - Initial Version.
+ *==============================================================================
+ */
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <setjmp.h>
+#include <signal.h>
+
 #include "main.h"
 #include "clnt.h"
 #include "tools.h"
@@ -24,19 +32,13 @@
 #include "x_gem.h"
 #include "x_mint.h"
 #include "Xapp.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include <setjmp.h>
-#include <signal.h>
+#include "version.h"
 
 #include <X11/Xatom.h>
 #include <X11/cursorfont.h>
 
 
-extern const short _app;
+extern short _app;
 
 BOOL    WMGR_ExitFlag = xFalse;
 BOOL    WMGR_Active   = xFalse;;

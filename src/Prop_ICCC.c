@@ -7,13 +7,13 @@
 // 2001-06-30 - Initial Version.
 //==============================================================================
 //
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "Property_P.h"
 #include "pixmap.h"
 #include "wmgr.h"
 #include "ICCC.h"
-
-#include <stdlib.h>
-#include <stdio.h>
 
 
 //==============================================================================

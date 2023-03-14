@@ -8,6 +8,8 @@
 // 2000-08-31 - Initial Version.
 //==============================================================================
 //
+#include <stdio.h>
+
 #include "main.h"
 #include "clnt.h"
 #include "tools.h"

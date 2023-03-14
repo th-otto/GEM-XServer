@@ -8,9 +8,6 @@
 // 2000-12-07 - Initial Version.
 //==============================================================================
 //
-#include "font_P.h"
-#include "wmgr.h"
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -18,6 +15,9 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "font_P.h"
+#include "wmgr.h"
+#include "version.h"
 
 typedef struct {
 	char           fh_fmver[8];

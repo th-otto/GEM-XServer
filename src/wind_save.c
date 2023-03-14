@@ -7,11 +7,11 @@
 // 2001-03-01 - Initial Version.
 //==============================================================================
 //
+#include <stdlib.h>
+
 #include "window_P.h"
 #include "grph.h"
 #include "x_gem.h"
-
-#include <stdlib.h>
 
 #include <X11/Xproto.h>
 

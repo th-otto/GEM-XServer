@@ -8,6 +8,9 @@
 // 2000-09-07 - Initial Version.
 //==============================================================================
 //
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "main.h"
 #include "clnt.h"
 #include "tools.h"
@@ -17,9 +20,6 @@
 #include "colormap.h"
 #include "x_gem.h"
 #include "Xapp.h"
-
-#include <stdlib.h>
-#include <stdio.h>
 
 #include <X11/X.h>
 

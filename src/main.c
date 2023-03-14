@@ -1,22 +1,14 @@
-//==============================================================================
-//
-// main.c
-//
-// Copyright (C) 2000,2001 Ralph Lowinski <AltF4@freemint.de>
-//------------------------------------------------------------------------------
-// 2000-12-14 - Module released for beta state.
-// 2000-05-30 - Initial Version.
-//==============================================================================
-//
-#include "main.h"
-#include "tools.h"
-#include "server.h"
-#include "Pointer.h"
-#include "keyboard.h"
-#include "wmgr.h"
-#include "x_gem.h"
-#include "x_mint.h"
-
+/*
+ *==============================================================================
+ *
+ * main.c
+ *
+ * Copyright (C) 2000,2001 Ralph Lowinski <AltF4@freemint.de>
+ *------------------------------------------------------------------------------
+ * 2000-12-14 - Module released for beta state.
+ * 2000-05-30 - Initial Version.
+ *==============================================================================
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -27,12 +19,22 @@
 #include <signal.h>
 #include <mint/ssystem.h>
 
+#include "main.h"
+#include "tools.h"
+#include "server.h"
+#include "Pointer.h"
+#include "keyboard.h"
+#include "wmgr.h"
+#include "x_gem.h"
+#include "x_mint.h"
+#include "version.h"
+
 #include <X11/X.h>
 #include <X11/Xproto.h>
 
 void set_printf (BOOL buffer);
 
-extern const short _app;
+extern short _app;
 extern const BOOL  WIND_ChngTrigger;
 
 static void sig_child (int sig);

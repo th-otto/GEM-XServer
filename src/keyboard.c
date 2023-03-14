@@ -8,6 +8,9 @@
 // 2000-11-15 - Initial Version.
 //==============================================================================
 //
+#include <stdio.h>
+#include <mint/ssystem.h>
+
 #include "main.h"
 #include "clnt.h"
 #include "tools.h"
@@ -17,9 +20,6 @@
 #include "x_gem.h"
 #include "x_mint.h"
 #include "wmgr.h" // for debugging only
-
-#include <stdio.h>
-#include <mint/ssystem.h>
 
 #include <X11/Xproto.h>
 

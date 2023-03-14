@@ -8,15 +8,15 @@
 // 2000-09-28 - Initial Version.
 //==============================================================================
 //
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "window_P.h"
 #include "event.h"
 #include "grph.h"
 #include "Cursor.h"
 #include "wmgr.h"
 #include "x_gem.h"
-
-#include <stdio.h>
-#include <stdlib.h> // exit
 
 #include <X11/Xproto.h>
 

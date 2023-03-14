@@ -8,6 +8,12 @@
 // 2000-06-03 - Initial Version.
 //==============================================================================
 //
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/socket.h>
+
 #include "clnt_P.h"
 #include "server.h"
 #include "selection.h"
@@ -21,12 +27,6 @@
 #include "x_gem.h"
 #include "x_mint.h"
 #include "Request.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/socket.h>
 
 
 #define O_BLOCK 8192

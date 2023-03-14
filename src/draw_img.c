@@ -7,6 +7,9 @@
 // 2001-02-03 - Initial Version.
 //==============================================================================
 //
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "main.h"
 #include "clnt.h"
 #include "pixmap.h"
@@ -15,9 +18,6 @@
 #include "gcontext.h"
 #include "grph.h"
 #include "x_gem.h"
-
-#include <stdlib.h>
-#include <stdio.h>
 
 
 //==============================================================================

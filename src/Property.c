@@ -11,11 +11,11 @@
 // 2000-06-19 - Initial Version.
 //==============================================================================
 //
+#include <stdlib.h>
+
 #include "Property_P.h"
 #include "tools.h"
 #include "event.h"
-
-#include <stdlib.h>
 
 
 #define _Prop_Find(pool, name) \

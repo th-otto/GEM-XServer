@@ -8,6 +8,14 @@
 // 2000-06-03 - Initial Version.
 //==============================================================================
 //
+#include <stdio.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 #include "main.h"
 #include "tools.h"
 #include "grph.h"
@@ -21,14 +29,6 @@
 #include "keyboard.h"
 #include "window.h"
 #include "x_mint.h"
-
-#include <stdio.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <fcntl.h>
-#include <unistd.h>
 
 #include <X11/Xproto.h>
 
