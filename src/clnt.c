@@ -252,7 +252,7 @@ _Clnt_ConnRW (p_CONNECTION conn, BOOL rd, BOOL wr)
 					} else {
 						buf->Done     =  0;
 						MAIN_FDSET_wr &= ~CLNT_Requestor->FdSet;
-					/*
+#if 0
 						if (buf->Size > O_BLOCK) {
 							char * m = malloc (O_BLOCK);
 							if (m) {
@@ -261,7 +261,7 @@ _Clnt_ConnRW (p_CONNECTION conn, BOOL rd, BOOL wr)
 								buf->Size = O_BLOCK;
 							}
 						}
-					*/
+#endif
 					}
 				}
 			}

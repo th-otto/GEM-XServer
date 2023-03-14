@@ -18,14 +18,21 @@
 
 #include <X11/X.h>
 
+#define ATOM_BASE \
+	Atom Id; \
+	p_CLIENT SelOwner; \
+	p_WINDOW SelWind; \
+	CARD32 SelTime; \
+	size_t Length
+
 typedef struct s_ATOM
 {
-	Atom Id;
-	p_CLIENT SelOwner;
-	p_WINDOW SelWind;
-	CARD32 SelTime;
-	size_t Length;
+	ATOM_BASE;
+#if __GNUC_PREREQ(3, 0)
+	char Name[];
+#else
 	char Name[1];
+#endif
 } ATOM;
 extern ATOM *ATOM_Table[];
 extern CARD32 ATOM_Count;
