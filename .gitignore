@@ -64,3 +64,4 @@ core
 bla.*
 aaa.cfg
 .fuse_*
+*.map

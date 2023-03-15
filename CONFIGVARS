@@ -1,0 +1,113 @@
+# Define this if you cross-compile.  When cross-compiling some files
+# (notably programs and commands like zic, zdump or tzselect) won't
+# get installed.  You have to take car yourself that the libraries
+# and include files and so on will get installed in the right place
+# The easiest way to do this is to change "prefix", see below.
+#CROSS=yes
+
+# Silent build or verbose
+AM_DEFAULT_VERBOSITY = 0
+
+AM_V_CC = $(am__v_CC_$(V))
+am__v_CC_ = $(am__v_CC_$(AM_DEFAULT_VERBOSITY))
+am__v_CC_0 = @echo "  CC    " $@;
+AM_V_AS = $(am__v_AS_$(V))
+am__v_AS_ = $(am__v_AS_$(AM_DEFAULT_VERBOSITY))
+am__v_AS_0 = @echo "  AS    " $@;
+AM_V_LD = $(am__v_LD_$(V))
+am__v_LD_ = $(am__v_LD_$(AM_DEFAULT_VERBOSITY))
+am__v_LD_0 = @echo "  LD    " $@;
+AM_V_AR = $(am__v_AR_$(V))
+am__v_AR_ = $(am__v_AR_$(AM_DEFAULT_VERBOSITY))
+am__v_AR_0 = @echo "  AR    " $@;
+AM_V_RANLIB = $(am__v_RANLIB_$(V))
+am__v_RANLIB_ = $(am__v_RANLIB_$(AM_DEFAULT_VERBOSITY))
+am__v_RANLIB_0 = @echo "  RANLIB" $@;
+AM_V_at = $(am__v_at_$(V))
+am__v_at_ = $(am__v_at_$(AM_DEFAULT_VERBOSITY))
+am__v_at_0 = @
+am__v_at_1 = 
+
+# 
+# cross compiling
+#
+ifneq (yes,$(M68K_ATARI_MINT_CROSS))
+ifeq (no,$(M68K_ATARI_MINT_CROSS))
+CROSS = no
+else
+EVAL_CROSS := case `uname -s` in *MiNT*) echo no;; *) echo yes; esac
+CROSS := $(shell $(EVAL_CROSS))
+endif
+else
+CROSS = yes
+endif
+
+# Define this to "m68k-atari-mint" if you cross compile.
+ifneq ($(CROSS_TOOL),)
+ toolprefix=$(CROSS_TOOL)-
+ CROSS := yes
+else
+ifeq ($(CROSS),yes)
+ CROSS_TOOL=m68k-atari-mint
+ toolprefix=$(CROSS_TOOL)-
+else
+ toolprefix=
+endif
+endif
+
+# Define this if you want to build with included mintlib
+WITH_INCLUDED_MINTLIB = yes
+
+# Define this to the warning level you want.
+WARN    = -Wall #-Wcast-qual
+
+# Target CPU to build for
+CPU = -m68020-60
+
+# Minimal set of CFLAGS to use.  The flags "-mshort", "-mbaserel"
+CCOPTS  = -O2 -fomit-frame-pointer -fno-strict-aliasing $(CPU)
+
+# Additional defines.
+DEFS=
+
+CFLAGS = $(CCOPTS) $(WARN)
+
+# This variable is used for various others.  Change its value if 
+# need be.  When cross-compiling you will usually want to set this
+# to "/usr/local/m68k-atari-mint".
+# prefix=/usr/local/m68k-atari-mint
+# prefix=/usr/local
+prefix=/usr
+
+# This is where user programs get installed.
+bindir=${prefix}/X11R6/bin/
+
+# This is where configuration files get installed
+sysconfdir=/etc
+
+
+# Define this to the name of your C compiler.  You need at least 
+# gcc 2.7.2.  Older versions will not work.  If you use an older
+# gcc than 2.95.2 you will run into severe problems.
+CC  = $(toolprefix)gcc
+CXX = $(toolprefix)g++
+LD  = $(CC) -g
+# Define this to the name of your ar program.
+AR  = $(toolprefix)ar rcs
+# Define this to "${AR} s" if your system lacks the ranlib program.
+RANLIB=$(toolprefix)ranlib
+
+# If your system lacks a BSD compatible install you should set this
+# variable to "$(top_srcdir}/install-sh".
+# INSTALL=${top_srcdir}/install-sh
+INSTALL=install
+
+all::
+
+clean::
+	rm -f *.o
+	rm -rf .deps
+
+DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
+
+-include $(DEP_FILES) /dev/null

@@ -1,0 +1,235 @@
+# These are some standard rules common to all Makefiles that build 
+# libraries.
+
+# Turn off implicit rules, they are not needed here.
+MAKEFLAGS = -r
+
+include $(top_srcdir)/configvars
+include $(top_srcdir)/rules
+
+# This is the slow part of the Makefiles.  Exclude it if we build
+# binary distributions.
+ifndef top_distdir
+
+ifdef WITH_SOFT_FP
+SFPFLAG = -Dsfp004
+sfp = sfp
+endif
+
+libc := libc$(qualifier).a
+libiio := libiio$(qualifier).a
+
+LIBS := $(libc) $(libiio)
+
+ifeq ($(USE_WEAK_SYMBOLS), yes)
+ifdef HAVE_ASM_WEAKEXT_DIRECTIVE
+CFLAGS += -DHAVE_ASM_WEAKEXT_DIRECTIVE
+else
+CFLAGS += -DHAVE_ASM_WEAK_DIRECTIVE
+endif
+endif
+
+DIRSTEM=$(notdir $(<D))
+
+INCLUDES = -nostdinc -I$$(<$(top_srcdir)/includepath) -I$(<D) -I$(top_srcdir) \
+-I$(top_srcdir)/include -I$(top_srcdir)/mintlib -I$(top_srcdir)/stdlib
+DEFS += -DHAVE_CONFIG_H -D_LIBC -D_REENTRANT
+
+COMPILE = $(filter-out $(NOCFLAGS-$(<F)), $(filter-out $(nocflags),\
+$(CC) $(WARN) $(cflags) $(CFLAGS) $(CFLAGS-$(<F)) $(CFLAGS-$(DIRSTEM))) \
+$(INCLUDES) $(DEFS) $(DEFS-$(<F)) $(DEFS-$(DIRSTEM)))
+
+-include $(top_srcdir)/CFILES
+
+cryptdir   := $(top_srcdir)/crypt
+direntdir  := $(top_srcdir)/dirent
+gmpdir     := $(top_srcdir)/gmp
+logindir   := $(top_srcdir)/login
+mintlibdir := $(top_srcdir)/mintlib
+miscdir    := $(top_srcdir)/misc
+posixdir   := $(top_srcdir)/posix
+pwdgrpdir  := $(top_srcdir)/pwdgrp
+shadowdir  := $(top_srcdir)/shadow
+signaldir  := $(top_srcdir)/signal
+socketdir  := $(top_srcdir)/socket
+stdiiodir  := $(top_srcdir)/stdiio
+stdiodir   := $(top_srcdir)/stdio
+stdlibdir  := $(top_srcdir)/stdlib
+stringdir  := $(top_srcdir)/string
+sysvipcdir := $(top_srcdir)/sysvipc
+termiosdir := $(top_srcdir)/termios
+timedir    := $(top_srcdir)/time
+unixdir    := $(top_srcdir)/unix
+srcdirs   := $(cryptdir) $(direntdir) $(gmpdir) $(logindir) $(mintlibdir) \
+  $(miscdir) $(posixdir) $(pwdgrpdir) $(shadowdir) $(signaldir) $(socketdir) \
+  $(stdiiodir) $(stdiodir) $(stdlibdir) $(stringdir) $(sysvipcdir) $(termiosdir) \
+  $(timedir) $(unixdir)
+
+CRYPTSRCS   := $(addprefix $(cryptdir)/,   $(CRYPTCFILES))
+DIRENTSRCS  := $(addprefix $(direntdir)/,  $(DIRENTCFILES))
+GMPSRCS     := $(addprefix $(gmpdir)/,     $(GMPCFILES))
+LOGINSRCS   := $(addprefix $(logindir)/,   $(LOGINCFILES))
+MINTLIBSRCS := $(addprefix $(mintlibdir)/, $(MINTLIBCFILES))
+MISCSRCS    := $(addprefix $(miscdir)/,    $(MISCCFILES))
+POSIXSRCS   := $(addprefix $(posixdir)/,   $(POSIXCFILES))
+PWDGRPSRCS  := $(addprefix $(pwdgrpdir)/,  $(PWDGRPCFILES))
+SHADOWSRCS  := $(addprefix $(shadowdir)/,  $(SHADOWCFILES))
+SIGNALSRCS  := $(addprefix $(signaldir)/,  $(SIGNALCFILES))
+SOCKETSRCS  := $(addprefix $(socketdir)/,  $(SOCKETCFILES))
+STDIIOSRCS  := $(addprefix $(stdiiodir)/,  $(STDIIOCFILES))
+STDIOSRCS   := $(addprefix $(stdiodir)/,   $(STDIOCFILES))
+STDLIBSRCS  := $(addprefix $(stdlibdir)/,  $(STDLIBCFILES))
+STRINGSRCS  := $(addprefix $(stringdir)/,  $(STRINGCFILES))
+SYSVIPCSRCS := $(addprefix $(sysvipcdir)/, $(SYSVIPCCFILES))
+TERMIOSSRCS := $(addprefix $(termiosdir)/, $(TERMIOSCFILES))
+TIMESRCS    := $(addprefix $(timedir)/,    $(TIMECFILES))
+UNIXSRCS    := $(addprefix $(unixdir)/,    $(UNIXCFILES))
+SRCS := $(CRYPTSRCS) $(DIRENTSRCS) $(GMPSRCS) $(LOGINSRCS) $(MINTLIBSRCS) \
+  $(MISCSRCS) $(POSIXSRCS) $(PWDGRPSRCS) $(SHADOWSRCS) $(SIGNALSRCS) \
+  $(SOCKETSRCS) $(STDIOSRCS) $(STDIOSRCS) $(STDLIBSRCS) $(STRINGSRCS) \
+  $(SYSVIPCSRCS) $(TERMIOSSRCS) $(TIMESRCS) $(UNIXSRCS)
+
+ifeq ($(libsize), _p)
+CFLAGS-_mon.S = -DPROFILING
+endif
+NOCFLAGS-crtinit.c = -pg -fomit-frame-pointer
+NOCFLAGS-gmon.c = -pg -fomit-frame-pointer
+NOCFLAGS-mcount.c = -pg -fomit-frame-pointer
+NOCFLAGS-profil-freq.c = -pg -fomit-frame-pointer
+NOCFLAGS-profil-posix.c = -pg -fomit-frame-pointer
+#DEFS-vfscanf.c = -DNO_BUG_IN_ISO_C_CORRIGENDUM_1
+CFLAGS-vfprintf.c = -Wno-uninitialized
+CFLAGS-ivfprintf.c = -Wno-uninitialized
+DEFS-ident.c = -DVERSION=\"$(VERSION)\"
+DEFS-ident_sock.c = -DVERSION=\"$(VERSION)\"
+CFLAGS-crypt = -O3 -fexpensive-optimizations
+# This relies on a correctly working fstat()!
+DEFS-stdio_init.c = -D_STATBUF_ST_BLKSIZE
+
+CRYPTOBJS   := $(addsuffix .o, $(basename $(notdir $(CRYPTSRCS))))
+DIRENTOBJS  := $(addsuffix .o, $(basename $(notdir $(DIRENTSRCS))))
+GMPOBJS     := $(addsuffix .o, $(basename $(notdir $(GMPSRCS))))
+LOGINOBJS   := $(addsuffix .o, $(basename $(notdir $(LOGINSRCS))))
+MINTLIBOBJS := $(addsuffix .o, $(basename $(notdir $(MINTLIBSRCS))))
+MISCOBJS    := $(addsuffix .o, $(basename $(notdir $(MISCSRCS))))
+POSIXOBJS   := $(addsuffix .o, $(basename $(notdir $(POSIXSRCS))))
+PWDGRPOBJS  := $(addsuffix .o, $(basename $(notdir $(PWDGRPSRCS))))
+SHADOWOBJS  := $(addsuffix .o, $(basename $(notdir $(SHADOWSRCS))))
+SIGNALOBJS  := $(addsuffix .o, $(basename $(notdir $(SIGNALSRCS))))
+SOCKETOBJS  := $(addsuffix .o, $(basename $(notdir $(SOCKETSRCS))))
+STDIIOOBJS  := $(addsuffix .o, $(basename $(notdir $(STDIIOSRCS))))
+STDIOOBJS   := $(addsuffix .o, $(basename $(notdir $(STDIOSRCS))))
+STDLIBOBJS  := $(addsuffix .o, $(basename $(notdir $(STDLIBSRCS))))
+STRINGOBJS  := $(addsuffix .o, $(basename $(notdir $(STRINGSRCS))))
+SYSVIPCOBJS := $(addsuffix .o, $(basename $(notdir $(SYSVIPCSRCS))))
+TERMIOSOBJS := $(addsuffix .o, $(basename $(notdir $(TERMIOSSRCS))))
+TIMEOBJS    := $(addsuffix .o, $(basename $(notdir $(TIMESRCS))))
+UNIXOBJS    := $(addsuffix .o, $(basename $(notdir $(UNIXSRCS))))
+OBJS := $(CRYPTOBJS) $(DIRENTOBJS) $(GMPOBJS) $(LOGINOBJS) $(MINTLIBOBJS) \
+  $(MISCOBJS) $(POSIXOBJS) $(PWDGRPOBJS) $(SHADOWOBJS) $(SIGNALOBJS) \
+  $(SOCKETOBJS) $(STDIIOOBJS) $(STDIOOBJS) $(STDLIBOBJS) $(STRINGOBJS) \
+  $(SYSVIPCOBJS) $(TERMIOSOBJS) $(TIMEOBJS) $(UNIXOBJS)
+LIBCOBJS := $(CRYPTOBJS) $(DIRENTOBJS) $(GMPOBJS) $(LOGINOBJS) $(MINTLIBOBJS) \
+  $(MISCOBJS) $(POSIXOBJS) $(PWDGRPOBJS) $(SHADOWOBJS) $(SIGNALOBJS) \
+  $(STDIOOBJS) $(STDLIBOBJS) $(STRINGOBJS) $(SYSVIPCOBJS) $(TERMIOSOBJS) \
+  $(TIMEOBJS) $(UNIXOBJS) $(SOCKETOBJS)
+
+# All modules that reference vfprintf or vfscanf should be listed here.
+LIBIIO_ADDOBJS = err.o error.o doprnt.o dprintf.o fscanf.o scanf.o vscanf.o \
+vsscanf.o obstream.o printf.o vasprintf.o vdprintf.o vprintf.o vsnprintf.o \
+vsprintf.o sscanf.o
+
+DEP_FILES := $(addprefix $(top_srcdir)/.deps/,$(patsubst %.o,%.P,$(OBJS)))
+
+# These are automatically remade, no need for make to worry about
+# them.
+.PHONY : $(DEP_FILES)
+
+endif  # not top_distdir.
+
+all-here: $(top_srcdir)/CFILES $(top_srcdir)/includepath $(LIBS)
+
+$(top_srcdir)/includepath: $(top_srcdir)/configvars
+	@echo "Generating $@"; \
+	local= ; \
+	installdir=`$(CC) --print-search-dirs | awk '{ print $$2; exit; }'`; \
+	case $$installdir in /usr/local*) local=/local;; esac; \
+	echo "$${installdir}include -I/usr$$local/m68k-atari-mint/include" >$@
+	
+install-include:
+
+install-man:
+
+uninstall-include:
+
+uninstall-man:
+
+ifndef top_distdir    # Not needed when making distributions.
+
+# Copy SRCFILES from source directory here.
+$(top_srcdir)/CFILES: $(cryptdir)/SRCFILES $(direntdir)/SRCFILES \
+  $(gmpdir)/SRCFILES $(logindir)/SRCFILES $(mintlibdir)/SRCFILES \
+  $(miscdir)/SRCFILES $(posixdir)/SRCFILES $(pwdgrpdir)/SRCFILES \
+  $(shadowdir)/SRCFILES $(signaldir)/SRCFILES $(socketdir)/SRCFILES \
+  $(stdiiodir)/SRCFILES $(stdiodir)/SRCFILES $(stdlibdir)/SRCFILES \
+  $(stringdir)/SRCFILES $(sysvipcdir)/SRCFILES $(termiosdir)/SRCFILES \
+  $(timedir)/SRCFILES $(unixdir)/SRCFILES
+	rm -f $@
+	echo "# This file is a generated secondary file. Do not edit." >$@
+	sed -e 's,^SRCFILES *=,CRYPTCFILES =,g' $(cryptdir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,DIRENTCFILES =,g' $(direntdir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,GMPCFILES =,g' $(gmpdir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,LOGINCFILES =,g' $(logindir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,MINTLIBCFILES =,g' $(mintlibdir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,MISCCFILES =,g' $(miscdir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,POSIXCFILES =,g' $(posixdir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,PWDGRPCFILES =,g' $(pwdgrpdir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,SHADOWCFILES =,g' $(shadowdir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,SIGNALCFILES =,g' $(signaldir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,SOCKETCFILES =,g' $(socketdir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,STDIIOCFILES =,g' $(stdiiodir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,STDIOCFILES =,g' $(stdiodir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,STDLIBCFILES =,g' $(stdlibdir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,STRINGCFILES =,g' $(stringdir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,SYSVIPCCFILES =,g' $(sysvipcdir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,TERMIOSCFILES =,g' $(termiosdir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,TIMECFILES =,g' $(timedir)/SRCFILES >>$@
+	sed -e 's,^SRCFILES *=,UNIXCFILES =,g' $(unixdir)/SRCFILES >>$@
+
+vpath %.c $(srcdirs)
+vpath %.s $(srcdirs)
+vpath %.S $(srcdirs)
+
+.SUFFIXES:
+.SUFFIXES: .c .o .S .s
+
+.c.o:
+	$(AM_V_CC)$(COMPILE) -Wp,-MD,.deps/$(@:.o=.P) -c $< -o $@
+			
+.S.o:
+	$(AM_V_AS)$(COMPILE) -Wp,-MD,.deps/$(@:.o=.P) -c $< -o $@
+			
+.s.o:
+	$(AM_V_AS)$(COMPILE) -Wp,-MD,.deps/$(@:.o=.P) -c $< -o $@
+				
+# Finally, build the libs.
+$(libc): $(LIBCOBJS)
+	$(AM_V_at)rm -f $@
+	$(AM_V_AR)$(AR) $@ $(LIBCOBJS)
+	$(AM_V_RANLIB)$(RANLIB) $@
+
+$(libiio): $(STDIIOOBJS) $(LIBIIO_ADDOBJS)
+	$(AM_V_at)rm -f $@
+	$(AM_V_AR)$(AR) $@ $(STDIIOOBJS) $(LIBIIO_ADDOBJS)
+	$(AM_V_RANLIB)$(RANLIB) $@
+
+DEPS_MAGIC := $(shell mkdir $(top_srcdir)/.deps > /dev/null 2>&1 || :)
+
+.SECONDARY : $(DEP_FILES) $(SRCFILES)
+
+-include $(DEP_FILES) /dev/null
+
+endif   # not top_distdir.
+
+include $(top_srcdir)/phony
+

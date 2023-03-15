@@ -1,0 +1,12 @@
+# This file gets included by the Makefile in this directory to determine
+# the files that should go only into source distributions.
+# The files listed here are sorted in alphanumerical order.  This is
+# necessary but if it keeps like this the files are also compiled in
+# alphabetical order.
+#
+# The support subdirectories (crlf, lattice, purec and sozobon) are
+# handled in the Makefile.
+
+SRCFILES += EXTRAFILES MISCFILES Makefile SRCFILES \
+_itoa.h atomicity.h atomicity-68020.h errbase.h lib.h libc-symbols.h \
+machine-gmon.h memcopy.h profil-counter.h 

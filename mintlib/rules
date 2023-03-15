@@ -1,0 +1,41 @@
+# These are some standard rules common to all subdirectory Makefiles.
+
+include $(srcdir)/SRCFILES
+include $(srcdir)/EXTRAFILES
+include $(srcdir)/MISCFILES
+
+all:: all-here all-recursive
+
+bakclean:
+	rm -f *~ *#
+	rm -f *.orig *.rej
+
+clean::
+	rm -f *.o lib*.a *.tmp
+	rm -f core report nohup.out errlog includepath
+	rm -f foobar foo bar baz junk schrott muell
+
+install:
+
+uninstall:
+
+install-lib:
+
+check: check-recursive
+
+DISTFILES = $(MISCFILES) $(SRCFILES)
+
+all-recursive clean-recursive bakclean-recursive:
+	@set fnord $(MAKEFLAGS); amf=$$2; \
+	list='$(SUBDIRS)'; for subdir in $$list; do \
+	  target=`echo $@ | sed s/-recursive//`; \
+	  echo "Making $$target in $$subdir"; \
+	  (cd $$subdir && $(MAKE) -r $$target) \
+	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
+	done && test -z "$$fail"
+
+check-recursive \
+install-recursive uninstall-recursive install-lib-recursive \
+install-include-recursive install-man-recursive uninstall-lib-recursive \
+uninstall-include-recursive uninstall-man-recursive dist-recursive:
+	:

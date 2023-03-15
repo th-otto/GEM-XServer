@@ -1,46 +1,23 @@
-CROSS=m68k-atari-mint-
+top_srcdir=..
+include $(top_srcdir)/CONFIGVARS
 
-AM_DEFAULT_VERBOSITY = 0
-
-AM_V_CC = $(am__v_CC_$(V))
-am__v_CC_ = $(am__v_CC_$(AM_DEFAULT_VERBOSITY))
-am__v_CC_0 = @echo "  CC    " $@;
-AM_V_LD = $(am__v_LD_$(V))
-am__v_LD_ = $(am__v_LD_$(AM_DEFAULT_VERBOSITY))
-am__v_LD_0 = @echo "  LD    " $@;
-AM_V_AR = $(am__v_AR_$(V))
-am__v_AR_ = $(am__v_AR_$(AM_DEFAULT_VERBOSITY))
-am__v_AR_0 = @echo "  AR    " $@;
-AM_V_RANLIB = $(am__v_RANLIB_$(V))
-am__v_RANLIB_ = $(am__v_RANLIB_$(AM_DEFAULT_VERBOSITY))
-am__v_RANLIB_0 = @echo "  RANLIB" $@;
-
-
-WARN    = -Wall -Wpointer-arith -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wshadow \
-          -Werror #-Wcast-qual
-CCOPTS  = -O2 -fomit-frame-pointer -fno-strict-aliasing -m68030 #-DNODEBUG
-CCFLAGS = -funsigned-char \
-          -I. -I../include \
-          $(CCOPTS) $(WARN)
+CCOPTS += -funsigned-char #-DNODEBUG
+CFLAGS += -I. -I$(top_srcdir)/include
+WARN += -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wshadow -Wpointer-arith -Werror
+ifeq ($(WITH_INCLUDED_MINTLIB),yes)
+GCCINCLUDE := $(shell $(CC) -print-file-name=include)
+CFLAGS += -nostdinc -I$(top_srcdir)/mintlib/include -I$(GCCINCLUDE)
+endif
 
 #SHELL  = /bin/ash
 #TMPDIR = /ram/tmp
-
-CC  = $(CROSS)gcc
-CXX = $(CROSS)g++ #-pipe
-LD  = $(CC) -g
-AR  = $(CROSS)ar rcs
 
 PRG    = X.app
 LIBS   = -lgem -liio
 
 LDFLAGS = $(CCOPTS) -Wl,-stack,128k -s
 
-.c.o:
-	$(AM_V_CC)$(CC) $(CCFLAGS) -Wp,-MD,.deps/$(@:.o=.P) -c $< -o $@
-
-
-all: $(PRG)
+all:: $(PRG)
 
 SRCS = Atom.c Cursor.c Pointer.c Property.c Prop_ICCC.c Request.c \
       clnt.c clnt_swap.c colormap.c drawable.c draw_img.c \
@@ -57,14 +34,28 @@ DEP_FILES := $(addprefix .deps/,$(patsubst %.o,%.P,$(OBJS)))
 
 
 $(PRG): $(OBJS) Makefile
+ifeq ($(WITH_INCLUDED_MINTLIB),yes)
+	$(AM_V_LD)$(LD) -nostdlib $(top_srcdir)/mintlib/startup/crt0.o $(LDFLAGS) -o $@ $(OBJS) \
+	-L$(top_srcdir)/mintlib/lib \
+	-lgem -lgcc -liio -lc -lgcc
+else
 	$(AM_V_LD)$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
+endif
 
 $(OBJS): Makefile
 
 clean::
-	rm -f *.[bB][aA][kK] *.o $(PRG)
-	rm -rf .deps
+	rm -f $(PRG)
 
-DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
+.SUFFIXES:
+.SUFFIXES: .c .o .S .s
 
--include $(DEP_FILES) /dev/null
+.c.o:
+	$(AM_V_CC)$(CC) $(CFLAGS) -Wp,-MD,.deps/$(@:.o=.P) -c $< -o $@
+
+.S.o:
+	$(AM_V_AS)$(CC) $(CFLAGS) -Wp,-MD,.deps/$(@:.o=.P) -c $< -o $@
+
+.s.o:
+	$(AM_V_AS)$(CC) $(CFLAGS) -Wp,-MD,.deps/$(@:.o=.P) -c $< -o $@
+
