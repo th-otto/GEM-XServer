@@ -1,13 +1,14 @@
-//==============================================================================
-//
-// selection.c
-//
-// Copyright (C) 2000,2001 Ralph Lowinski <AltF4@freemint.de>
-//------------------------------------------------------------------------------
-// 2000-12-14 - Module released for beta state.
-// 2000-08-31 - Initial Version.
-//==============================================================================
-//
+/*
+ *==============================================================================
+ *
+ * selection.c
+ *
+ * Copyright (C) 2000,2001 Ralph Lowinski <AltF4@freemint.de>
+ *------------------------------------------------------------------------------
+ * 2000-12-14 - Module released for beta state.
+ * 2000-08-31 - Initial Version.
+ *==============================================================================
+ */
 #include <stdio.h>
 
 #include "main.h"
@@ -19,96 +20,105 @@
 #include "event.h"
 
 
-//==============================================================================
-void
-SlctRemove (CLIENT * clnt)
+/* ============================================================================== */
+void SlctRemove(CLIENT *clnt)
 {
-	// Remove all selections of that client
-	//...........................................................................
-	
+	/* Remove all selections of that client */
+	/*........................................................................... */
+
 	int i;
-	for (i = 0; i <= ATOM_Count; ++i) {
-		if (ATOM_Table[i]->SelOwner == clnt) {
+
+	for (i = 0; i <= ATOM_Count; ++i)
+	{
+		if (ATOM_Table[i]->SelOwner == clnt)
+		{
 			ATOM_Table[i]->SelWind->nSelections--;
-			ATOM_Table[i]->SelWind  = NULL;
+			ATOM_Table[i]->SelWind = NULL;
 			ATOM_Table[i]->SelOwner = NULL;
 		}
 	}
 }
 
-//==============================================================================
-void
-SlctClear (WINDOW * wind)
+/* ============================================================================== */
+void SlctClear(WINDOW *wind)
 {
-	// Remove all selections with that window
-	//...........................................................................
-	
+	/* Remove all selections with that window */
+	/*........................................................................... */
+
 	int i;
-	for (i = 0; i <= ATOM_Count; ++i) {
-		if (ATOM_Table[i]->SelWind == wind) {
-			EvntSelectionClear (ATOM_Table[i]->SelOwner, wind->Id, i);
+
+	for (i = 0; i <= ATOM_Count; ++i)
+	{
+		if (ATOM_Table[i]->SelWind == wind)
+		{
+			EvntSelectionClear(ATOM_Table[i]->SelOwner, wind->Id, i);
 			ATOM_Table[i]->SelOwner = NULL;
-			ATOM_Table[i]->SelWind  = NULL;
-			if (!--wind->nSelections) break;
+			ATOM_Table[i]->SelWind = NULL;
+			if (!--wind->nSelections)
+				break;
 		}
 	}
 }
 
 
-//==============================================================================
-//
-// Callback Functions
+/* ============================================================================== */
+/*  */
+/*  Callback Functions */
 
 #include "Request.h"
 
-//------------------------------------------------------------------------------
-void
-RQ_SetSelectionOwner (CLIENT * clnt, xSetSelectionOwnerReq * q)
+/* ------------------------------------------------------------------------------ */
+void RQ_SetSelectionOwner(CLIENT *clnt, xSetSelectionOwnerReq *q)
 {
-	// Set or clear a selection.  A probably previous owner will be notified.
-	//
-	// Atom   selection: to be set or cleared
-	// Window window:    owner or None for clear
-	// Time   time:      change time or CurrentTime
-	//...........................................................................
-	
-	WINDOW * wind = NULL;
-	
-	if (!AtomValid(q->selection)) {
-		Bad(BadAtom, q->selection, X_SetSelectionOwner,"_(W:%lX)", q->window);
-	
-	} else if (q->window != None  &&  !(wind = WindFind(q->window))) {
-		Bad(BadWindow, q->window, X_SetSelectionOwner,"_():\n          not %s.", 
-		                       (DBG_XRSC_TypeError ? "a window" : "found"));
-		
-	} else { //..................................................................
-		
-		Time   time = (q->time == CurrentTime ? MAIN_TimeStamp : q->time);
-		ATOM * atom = ATOM_Table[q->selection];
-		
-		if (time < atom->SelTime  || time > MAIN_TimeStamp) {
-			PRINT (X_SetSelectionOwner," of '%s' to W:%lX\n"
-			       "          ignored :T:%lu %s T:%lu.",
-			       atom->Name, q->window, time,
-			       (time > MAIN_TimeStamp ? "> server time" : "< last change"),
-			       (time > MAIN_TimeStamp ? MAIN_TimeStamp  : atom->SelTime));
-			
-		} else {
-			DEBUG (SetSelectionOwner," '%s' to W:%lX (T:%lu)",
-			       atom->Name, q->window, time);
-			
-			if (atom->SelOwner) {
-				if (atom->SelOwner != clnt) {
-					EvntSelectionClear (atom->SelOwner,
-					                    atom->SelWind->Id, q->selection);
+	/*
+	 * Set or clear a selection.  A probably previous owner will be notified.
+	 *
+	 * Atom   selection: to be set or cleared
+	 * Window window:    owner or None for clear
+	 * Time   time:      change time or CurrentTime
+	 *...........................................................................
+	 */
+	WINDOW *wind = NULL;
+
+	if (!AtomValid(q->selection))
+	{
+		Bad(BadAtom, q->selection, X_SetSelectionOwner, "_(W:%lX)", q->window);
+
+	} else if (q->window != None && !(wind = WindFind(q->window)))
+	{
+		Bad(BadWindow, q->window, X_SetSelectionOwner, "_():\n          not %s.",
+			(DBG_XRSC_TypeError ? "a window" : "found"));
+	} else
+	{
+		Time time = (q->time == CurrentTime ? MAIN_TimeStamp : q->time);
+		ATOM *atom = ATOM_Table[q->selection];
+
+		if (time < atom->SelTime || time > MAIN_TimeStamp)
+		{
+			PRINT(X_SetSelectionOwner, " of '%s' to W:%lX\n"
+				  "          ignored :T:%lu %s T:%lu.",
+				  atom->Name, q->window, time,
+				  (time > MAIN_TimeStamp ? "> server time" : "< last change"),
+				  (time > MAIN_TimeStamp ? MAIN_TimeStamp : atom->SelTime));
+		} else
+		{
+			DEBUG(X_SetSelectionOwner, " '%s' to W:%lX (T:%lu)", atom->Name, q->window, time);
+
+			if (atom->SelOwner)
+			{
+				if (atom->SelOwner != clnt)
+				{
+					EvntSelectionClear(atom->SelOwner, atom->SelWind->Id, q->selection);
 				}
 				atom->SelWind->nSelections--;
 			}
-			
-			if ((atom->SelWind = wind)) {
+
+			if ((atom->SelWind = wind))
+			{
 				atom->SelOwner = clnt;
 				wind->nSelections++;
-			} else {
+			} else
+			{
 				atom->SelOwner = NULL;
 			}
 			atom->SelTime = time;
@@ -116,85 +126,80 @@ RQ_SetSelectionOwner (CLIENT * clnt, xSetSelectionOwnerReq * q)
 	}
 }
 
-//------------------------------------------------------------------------------
-void
-RQ_GetSelectionOwner (CLIENT * clnt, xGetSelectionOwnerReq * q)
+/* ------------------------------------------------------------------------------ */
+void RQ_GetSelectionOwner(CLIENT *clnt, xGetSelectionOwnerReq *q)
 {
-	// Get the owner window of a selection
-	//
-	// CARD32 id: requested selection
-	//
-	// Reply:
-	// Window owner: owner or None
-	//...........................................................................
-	
-	if (!AtomValid(q->id)) {
-		Bad(BadAtom, q->id, X_GetSelectionOwner,"_");
-	
-	} else { //..................................................................
-		
-		ClntReplyPtr (GetSelectionOwner, r,0);
-		ATOM * atom = ATOM_Table[q->id];
-		
-		DEBUG (GetSelectionOwner," of '%s' (W:%lX)",
-		       atom->Name, (atom->SelWind ? atom->SelWind->Id : None));
-		
+	/*
+	 * Get the owner window of a selection
+	 *
+	 * CARD32 id: requested selection
+	 *
+	 * Reply:
+	 * Window owner: owner or None
+	 *...........................................................................
+	 */
+
+	if (!AtomValid(q->id))
+	{
+		Bad(BadAtom, q->id, X_GetSelectionOwner, "_");
+	} else
+	{
+		ClntReplyPtr(GetSelectionOwner, r, 0);
+		ATOM *atom = ATOM_Table[q->id];
+
+		DEBUG(X_GetSelectionOwner, " of '%s' (W:%lX)", atom->Name, (atom->SelWind ? atom->SelWind->Id : None));
+
 		r->owner = (atom->SelWind ? atom->SelWind->Id : None);
-		
-		ClntReply (GetSelectionOwner,0, "w");
+
+		ClntReply(GetSelectionOwner, 0, "w");
 	}
 }
 
-//------------------------------------------------------------------------------
-void
-RQ_ConvertSelection (CLIENT * clnt, xConvertSelectionReq * q)//, WINDOW * wind)
+/* ------------------------------------------------------------------------------ */
+void RQ_ConvertSelection(CLIENT *clnt, xConvertSelectionReq *q)	/*, WINDOW *wind) */
 {
-	// Request the conversion of a selection to a target
-	//
-	// Atom   selection: to be converted
-	// Atom   target:    result type
-	// Atom   property:  value to be converted or None
-	// Window requestor: where the conversion result should go to
-	// Time   time:      timestamp or CurrentTime
-	//...........................................................................
-	
-	WINDOW * wind = WindFind (q->requestor);
-	
-	if (!wind) {
-		Bad(BadWindow, q->requestor, X_ConvertSelection,"_():\n          not %s.",
-		                          (DBG_XRSC_TypeError ? "a window" : "found"));
-		
-	} else if (!AtomValid(q->selection)) {
-		Bad(BadAtom, q->selection, X_ConvertSelection,"_(W:%lX):\n"
-		                        "          invalid selection.", q->requestor);
-		
-	} else if (!AtomValid(q->target)) {
-		Bad(BadAtom, q->target, X_ConvertSelection,"_(W:%lX,'%s'):\n"
-		                     "          invalid target.",
-		                     q->requestor, ATOM_Table[q->selection]->Name);
-		
-	} else if (q->property != None  && !AtomValid(q->property)) {
-		Bad(BadAtom, q->property, X_ConvertSelection,"_(W:%lX,'%s','%s'):\n"
-		                       "          invalid property.", q->requestor,
-		                       ATOM_Table[q->selection]->Name,
-		                       ATOM_Table[q->target]->Name);
-	
-	} else { //..................................................................
-		
-		ATOM * slct = ATOM_Table[q->selection];
-		
-		DEBUG (ConvertSelection," '%s' with '%s' for W:%lX(%s)", slct->Name,
-		       (q->property == None
-		                       ? "<none>" : (char*)ATOM_Table[q->property]->Name),
-		       q->requestor, ATOM_Table[q->target]->Name);
-		
-		if (slct->SelOwner) {
-			EvntSelectionRequest (slct->SelOwner, q->time,
-			                      slct->SelWind->Id, q->requestor,
-			                      q->selection, q->target, q->property);
-		} else {
-			EvntSelectionNotify (clnt, q->time, q->requestor,
-			                     q->selection, q->target, None);
+	/*
+	 * Request the conversion of a selection to a target
+	 *
+	 * Atom   selection: to be converted
+	 * Atom   target:    result type
+	 * Atom   property:  value to be converted or None
+	 * Window requestor: where the conversion result should go to
+	 * Time   time:      timestamp or CurrentTime
+	 *...........................................................................
+	 */
+	WINDOW *wind = WindFind(q->requestor);
+
+	if (!wind)
+	{
+		Bad(BadWindow, q->requestor, X_ConvertSelection, "_():\n          not %s.",
+			(DBG_XRSC_TypeError ? "a window" : "found"));
+	} else if (!AtomValid(q->selection))
+	{
+		Bad(BadAtom, q->selection, X_ConvertSelection, "_(W:%lX):\n" "          invalid selection.", q->requestor);
+	} else if (!AtomValid(q->target))
+	{
+		Bad(BadAtom, q->target, X_ConvertSelection, "_(W:%lX,'%s'):\n"
+			"          invalid target.", q->requestor, ATOM_Table[q->selection]->Name);
+	} else if (q->property != None && !AtomValid(q->property))
+	{
+		Bad(BadAtom, q->property, X_ConvertSelection, "_(W:%lX,'%s','%s'):\n"
+			"          invalid property.", q->requestor, ATOM_Table[q->selection]->Name, ATOM_Table[q->target]->Name);
+	} else
+	{
+		ATOM *slct = ATOM_Table[q->selection];
+
+		DEBUG(X_ConvertSelection, " '%s' with '%s' for W:%lX(%s)", slct->Name,
+			  (q->property == None
+			   ? "<none>" : (char *) ATOM_Table[q->property]->Name), q->requestor, ATOM_Table[q->target]->Name);
+
+		if (slct->SelOwner)
+		{
+			EvntSelectionRequest(slct->SelOwner, q->time,
+								 slct->SelWind->Id, q->requestor, q->selection, q->target, q->property);
+		} else
+		{
+			EvntSelectionNotify(clnt, q->time, q->requestor, q->selection, q->target, None);
 		}
 	}
 }
