@@ -19,7 +19,6 @@
 #include "clnt.h"
 #include "x_printf.h"
 
-#include <X11/X.h>
 #include <X11/Xatom.h>
 
 
