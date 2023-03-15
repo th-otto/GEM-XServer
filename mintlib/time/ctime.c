@@ -26,13 +26,13 @@ static char             *month[] =
 #define _TWODIG(mptr,mval)		\
 {					\
         long _i = (long)(mval);		\
-     __asm__ volatile("
-	divu	#10,%1;
-	addb	#48,%1;
-	moveb	%1,%0@+;
-	swap	%1;
-	addb	#48,%1;
-	moveb	%1,%0@+"			\
+     __asm__ volatile( \
+	"\tdivu	#10,%1\n" \
+	"\taddb	#48,%1\n" \
+	"\tmoveb	%1,%0@+\n" \
+	"\tswap	%1\n" \
+	"\taddb	#48,%1\n" \
+	"\tmoveb	%1,%0@+"			\
 	      : "=a"(mptr), "=d"(_i)		\
 	      : "1"(_i), "0"(mptr));		\
 }

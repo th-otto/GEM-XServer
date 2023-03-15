@@ -417,7 +417,7 @@ extern int vsprintf __P ((char *__restrict __s,
 
 #ifdef	__OPTIMIZE__
 extern __inline int
-vprintf (const char *__restrict __fmt, __gnuc_va_list __arg) __THROW
+vprintf (const char *__restrict __fmt, __gnuc_va_list __arg)
 {
   return vfprintf (stdout, __fmt, __arg);
 }
@@ -486,7 +486,7 @@ extern int vsscanf __P ((__const char *__s, __const char *__format,
 
 #ifdef	__OPTIMIZE__
 extern __inline int
-vscanf (const char *__fmt, __gnuc_va_list __arg) __THROW
+vscanf (const char *__fmt, __gnuc_va_list __arg)
 {
   return vfscanf (stdin, __fmt, __arg);
 }
@@ -518,7 +518,7 @@ extern int getchar __P ((void));
 
 #ifdef	__OPTIMIZE__
 extern __inline int
-getchar (void) __THROW
+getchar (void)
 {
   return __getc (stdin);
 }
@@ -531,13 +531,13 @@ extern int getchar_unlocked __P ((void));
 
 # ifdef __OPTIMIZE__
 extern __inline int
-getc_unlocked (FILE *__stream) __THROW
+getc_unlocked (FILE *__stream)
 {
   return __getc (__stream);
 }
 
 extern __inline int
-getchar_unlocked (void) __THROW
+getchar_unlocked (void)
 {
   return __getc (stdin);
 }
@@ -566,7 +566,7 @@ extern int putchar __P ((int __c));
 
 #ifdef __OPTIMIZE__
 extern __inline int
-putchar (int __c) __THROW
+putchar (int __c)
 {
   return __putc (__c, stdout);
 }
@@ -578,7 +578,7 @@ extern int fputc_unlocked __P ((int __c, FILE *__stream));
 
 # ifdef __OPTIMIZE__
 extern __inline int
-fputc_unlocked (int __c, FILE *__stream) __THROW
+fputc_unlocked (int __c, FILE *__stream)
 {
   return __putc (__c, __stream);
 }
@@ -592,13 +592,13 @@ extern int putchar_unlocked __P ((int __c));
 
 # ifdef __OPTIMIZE__
 extern __inline int
-putc_unlocked (int __c, FILE *__stream) __THROW
+putc_unlocked (int __c, FILE *__stream)
 {
   return __putc (__c, __stream);
 }
 
 extern __inline int
-putchar_unlocked (int __c) __THROW
+putchar_unlocked (int __c)
 {
   return __putc (__c, stdout);
 }
@@ -649,7 +649,7 @@ ssize_t getline __P ((char **__lineptr, size_t *__n, FILE *__stream));
 
 #ifdef	__OPTIMIZE__
 extern __inline ssize_t
-getline (char **__lineptr, size_t *__n, FILE *__stream) __THROW
+getline (char **__lineptr, size_t *__n, FILE *__stream)
 {
   return __getdelim (__lineptr, __n, '\n', __stream);
 }

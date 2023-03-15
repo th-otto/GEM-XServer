@@ -196,6 +196,7 @@ __EXTERN int matherr	__PROTO((struct __exception *));
 #else
 __EXTERN int matherr	__PROTO((struct exception *));
 #endif
+#if 0
 __EXTERN double cabs	__PROTO((COMPLEX));
 __EXTERN COMPLEX cmult	__PROTO((COMPLEX, COMPLEX));
 __EXTERN COMPLEX csqrt	__PROTO((COMPLEX));
@@ -216,6 +217,7 @@ __EXTERN COMPLEX ccos	__PROTO((COMPLEX));
 __EXTERN COMPLEX csin	__PROTO((COMPLEX));
 __EXTERN COMPLEX cdiv	__PROTO((COMPLEX, COMPLEX));
 __EXTERN COMPLEX csubt	__PROTO((COMPLEX,COMPLEX));
+#endif
 
 __EXTERN int pmlcfs	__PROTO((int, int));
 __EXTERN int pmlcnt	__PROTO((void));

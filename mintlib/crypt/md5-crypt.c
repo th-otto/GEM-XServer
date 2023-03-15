@@ -26,6 +26,9 @@
 #include <sys/param.h>
 
 #include "md5.h"
+#include "ufc-crypt.h"
+#include "crypt.h"
+#include "crypt-private.h"
 
 
 /* Define our magic string to mark salt for MD5 "encryption"
@@ -44,28 +47,15 @@ static const char b64t[64] =
 #endif
 
 /* Prototypes for local functions.  */
-#ifndef __MSHORT__
-__EXTERN char *__md5_crypt_r __P ((const char *key, const char *salt,
-				   char *buffer, int buflen));
-#else
 __EXTERN char *__md5_crypt_r __P ((const char *key, const char *salt,
 				   char *buffer, long int buflen));
-#endif
 extern char *__md5_crypt __P ((const char *key, const char *salt));
 
 
 /* This entry point is equivalent to the `crypt' function in Unix
    libcs.  */
 char *
-__md5_crypt_r (key, salt, buffer, buflen)
-     const char *key;
-     const char *salt;
-     char *buffer;
-#ifndef __MSHORT__
-     int buflen;
-#else
-     long int buflen;
-#endif
+__md5_crypt_r (const char *key, const char *salt, char *buffer, long int buflen)
 {
   unsigned char alt_result[16];
   struct md5_ctx ctx;
@@ -239,8 +229,8 @@ __md5_crypt (const char *key, const char *salt)
      password.  We can compute the size of the result in advance and
      so we can prepare the buffer we pass to `md5_crypt_r'.  */
   static char *buffer = NULL;
-  static int buflen = 0;
-  int needed = 3 + strlen (salt) + 1 + 26 + 1;
+  static size_t buflen = 0;
+  size_t needed = 3 + strlen (salt) + 1 + 26 + 1;
 
   if (buflen < needed)
     {

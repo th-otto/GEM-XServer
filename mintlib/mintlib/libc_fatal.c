@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
 
 /* Abort with an error message.
    This function should write MESSAGE out in the most reliable way.

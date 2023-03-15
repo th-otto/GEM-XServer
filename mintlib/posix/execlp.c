@@ -16,15 +16,8 @@
    first.
 */
 
-#ifdef __STDC__
-int execlp (const char *name, ...)
-#else
-int execlp (name)
-     char* name;
-#endif
+int
+execlp (const char *file, const char *arg, ...)
 {
-  va_list args;
-
-  va_start (args, name);
-  return execvp (name, (char **)args);
+	return execvp(file, (char **) &arg);
 }

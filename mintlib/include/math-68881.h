@@ -519,16 +519,17 @@ drem (double x, double y)
 }
 
 __inline static double
-scalb (double x, int n) __const_attribute;
+scalb (double x, double n) __const_attribute;
 __inline static double
-scalb (double x, int n)
+scalb (double x, double n)
 {
   double value;
+  long exp = (long)(n);
 
   __asm ("fscale%.l %2,%0"
 	 : "=f" (value)
 	 : "0" (x),
-	   "dmi" (n));
+	   "dmi" (exp));
   return value;
 }
 

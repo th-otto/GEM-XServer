@@ -30,8 +30,9 @@ endif
 endif
 
 DIRSTEM=$(notdir $(<D))
+GCCINCLUDE := $(shell $(CC) -print-file-name=include)
 
-INCLUDES = -nostdinc -I$$(<$(top_srcdir)/includepath) -I$(<D) -I$(top_srcdir) \
+INCLUDES = -nostdinc -I$(GCCINCLUDE) -I$(GCCINCLUDE)-fixed -I$(<D) -I$(top_srcdir) \
 -I$(top_srcdir)/include -I$(top_srcdir)/mintlib -I$(top_srcdir)/stdlib
 DEFS += -DHAVE_CONFIG_H -D_LIBC -D_REENTRANT
 
@@ -147,15 +148,8 @@ DEP_FILES := $(addprefix $(top_srcdir)/.deps/,$(patsubst %.o,%.P,$(OBJS)))
 
 endif  # not top_distdir.
 
-all-here: $(top_srcdir)/CFILES $(top_srcdir)/includepath $(LIBS)
+all-here: $(top_srcdir)/CFILES $(LIBS)
 
-$(top_srcdir)/includepath: $(top_srcdir)/configvars
-	@echo "Generating $@"; \
-	local= ; \
-	installdir=`$(CC) --print-search-dirs | awk '{ print $$2; exit; }'`; \
-	case $$installdir in /usr/local*) local=/local;; esac; \
-	echo "$${installdir}include -I/usr$$local/m68k-atari-mint/include" >$@
-	
 install-include:
 
 install-man:

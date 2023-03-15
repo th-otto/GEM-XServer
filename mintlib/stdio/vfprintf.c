@@ -1188,7 +1188,7 @@ vfprintf (FILE *s, const CHAR_T *format, va_list ap)
   /* Find the first format specifier.  */
   f = lead_str_end = find_spec (format, &mbstate);
 #else
-  f = lead_str_end = find_spec (format);
+  f = lead_str_end = (const UCHAR_T *)find_spec (format);
 #endif
 
   /* Lock stream.  */
@@ -1427,7 +1427,7 @@ vfprintf (FILE *s, const CHAR_T *format, va_list ap)
 #ifndef __MINT__
       f = find_spec ((end_of_spec = ++f), &mbstate);
 #else
-      f = find_spec ((end_of_spec = ++f));
+      f = (const UCHAR_T *)find_spec ((const char *)(end_of_spec = ++f));
 #endif
 
       /* Write the following constant string.  */
@@ -1483,7 +1483,7 @@ do_positional:
       }
 #endif
 
-    for (f = lead_str_end; *f != '\0'; f = specs[nspecs++].next_fmt)
+    for (f = lead_str_end; *f != '\0'; f = (const UCHAR_T *)specs[nspecs++].next_fmt)
       {
 	if (nspecs >= nspecs_max)
 	  {
@@ -1570,7 +1570,7 @@ do_positional:
 	  break
 
 	T (PA_CHAR, pa_char, int); /* Promoted.  */
-	T (PA_WCHAR, pa_wchar, wint_t);
+	T (PA_WCHAR, pa_wchar, __WINT_TYPE__);
 	T (PA_INT|PA_FLAG_SHORT, pa_short_int, int); /* Promoted.  */
 	T (PA_INT, pa_int, int);
 	T (PA_INT|PA_FLAG_LONG, pa_long_int, long int);

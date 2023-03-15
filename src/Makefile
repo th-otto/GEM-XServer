@@ -3,10 +3,10 @@ include $(top_srcdir)/CONFIGVARS
 
 CCOPTS += -funsigned-char #-DNODEBUG
 CFLAGS += -I. -I$(top_srcdir)/include
-WARN += -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wshadow -Wpointer-arith -Werror
+WARN += -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wshadow -Wpointer-arith
 ifeq ($(WITH_INCLUDED_MINTLIB),yes)
 GCCINCLUDE := $(shell $(CC) -print-file-name=include)
-CFLAGS += -nostdinc -I$(top_srcdir)/mintlib/include -I$(GCCINCLUDE)
+CFLAGS += -nostdinc -I$(top_srcdir)/mintlib/include -I$(GCCINCLUDE) -I$(GCCINCLUDE)-fixed
 endif
 
 #SHELL  = /bin/ash

@@ -14,25 +14,22 @@
    Library General Public License for more details.
 
    You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   License along with the GNU C Library; if not, see
+   <https://www.gnu.org/licenses/>.  */
 
+#include <alloca.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <memcopy.h>
 #include <errno.h>
 
-static void msort_with_tmp __P ((void *b, size_t n, size_t s,
-				 __compar_fn_t cmp, char *t));
+static void msort_with_tmp (void *b, size_t n, size_t s,
+			    __compar_fn_t cmp, char *t);
 
 static void
-msort_with_tmp (b, n, s, cmp, t)
-     void *b;
-     size_t n;
-     size_t s;
-     __compar_fn_t cmp;
-     char *t;
+msort_with_tmp (void *b, size_t n, size_t s, __compar_fn_t cmp,
+		char *t)
 {
   char *tmp;
   char *b1, *b2;
@@ -58,12 +55,16 @@ msort_with_tmp (b, n, s, cmp, t)
 	if ((*cmp) (b1, b2) <= 0)
 	  {
 	    --n1;
-	    *((op_t *) tmp)++ = *((op_t *) b1)++;
+	    *((op_t *) tmp) = *((op_t *) b1);
+	    tmp += sizeof (op_t);
+	    b1 += sizeof (op_t);
 	  }
 	else
 	  {
 	    --n2;
-	    *((op_t *) tmp)++ = *((op_t *) b2)++;
+	    *((op_t *) tmp) = *((op_t *) b2);
+	    tmp += sizeof (op_t);
+	    b2 += sizeof (op_t);
 	  }
       }
   else
@@ -88,11 +89,7 @@ msort_with_tmp (b, n, s, cmp, t)
 }
 
 void
-qsort (b, n, s, cmp)
-     void *b;
-     size_t n;
-     size_t s;
-     __compar_fn_t cmp;
+qsort (void *b, size_t n, size_t s, __compar_fn_t cmp)
 {
   const size_t size = n * s;
 

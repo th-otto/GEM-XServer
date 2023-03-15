@@ -219,8 +219,8 @@ int __ioctl(fd, cmd, arg)
                 return -1;
                 break;
 	      }
-	    case TIOCSETP:
 /*
+	    case TIOCSETP:
 	      if (__mint <= 0x10a) {
 		r = Fcntl(fd, arg, cmd);
 		if (r != -ENOSYS)

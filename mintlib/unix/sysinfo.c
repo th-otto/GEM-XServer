@@ -225,7 +225,6 @@ si_release (buf, bufsize)
   static char* osrelease = NULL;
   static char osrelease_buf[13];
   static long osrelease_len;
-  static long mintversion;
 
   if (osrelease == NULL) {
     unsigned long main_rev = 0;
@@ -274,8 +273,6 @@ si_release (buf, bufsize)
       sprintf (osrelease_buf, "%lu.%lu%s", main_rev, sub_rev, betatag);
     osrelease = osrelease_buf;
     osrelease_len = strlen (osrelease) + 1;
-    mintversion = (main_rev << 24) | (sub_rev << 16) 
-        | (patch_level << 8) | betatag[0];
   }
 
   fast_strncpy (buf, osrelease, bufsize);
@@ -438,7 +435,7 @@ si_platform (buf, bufsize)
 {
   if (platform == NULL) {
     long _mch = 0;  /* = AtariST */
-    long hi, lo;
+    long hi;
     
     /* If we find the Hades cookie ignore the rest.  */
     if (Getcookie (C_hade, &_mch) == 0) {
@@ -447,7 +444,6 @@ si_platform (buf, bufsize)
     } else {
       (void) Getcookie (C__MCH, &_mch);
       hi = (_mch & 0xffff0000) >> 16;
-      lo = (_mch & 0xffff);
 
       switch (hi) {
         case 0:

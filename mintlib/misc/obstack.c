@@ -41,6 +41,7 @@
    files, it is simpler to just do this in the source for each such file.  */
 
 #include <stdio.h>		/* Random thing to get __GNU_LIBRARY__.  */
+#include <stdlib.h>
 #ifndef atarist
 #if !defined (_LIBC) && defined (__GNU_LIBRARY__) && __GNU_LIBRARY__ > 1
 #include <gnu-versions.h>

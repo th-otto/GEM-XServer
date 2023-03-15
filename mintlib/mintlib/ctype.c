@@ -101,7 +101,7 @@ static int _myctype[UCHAR_MAX + 1] =
 	_CTc, _CTc, _CTc, _CTc, _CTc, _CTc, _CTc, /* _CTc, */ /* 0x80..0xFF */
 	};
 
-unsigned int* _ctype = &(_myctype[0]);
+unsigned int* _ctype = (unsigned int*) &(_myctype[0]);
 
 int isalnum (c)
      register int c;

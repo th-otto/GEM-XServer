@@ -100,7 +100,7 @@ parse_printf_format (fmt, n, argtypes)
 #ifndef __MINT__
       nargs += parse_one_spec (fmt, nargs, &spec, &max_ref_arg, &mbstate);
 #else
-      nargs += parse_one_spec (fmt, nargs, &spec, &max_ref_arg);
+      nargs += parse_one_spec ((const UCHAR_T *)fmt, nargs, &spec, &max_ref_arg);
 #endif
       /* If the width is determined by an argument this is an int.  */
       if (spec.width_arg != -1 && (size_t) spec.width_arg < n)

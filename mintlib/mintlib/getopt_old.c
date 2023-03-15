@@ -18,6 +18,7 @@
 #include <stdio.h>
 #define _AVOID_GPL  /* This will rename FUNC to __FUNC_old.  */
 #include <unistd.h>
+#include <string.h>
 
 #ifdef  SYSV
 #define index(s, c)  strchr(s, c)

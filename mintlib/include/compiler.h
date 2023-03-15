@@ -85,7 +85,7 @@
 #  define _WCHAR_T __WCHAR_TYPEDEF__
 #endif
 #endif
-#if (__GNUC__ == 2) && (__GNUC_MINOR__ >= 5) /* false for gcc < 2.5 */
+#if __GNUC_PREREQ(2, 5)
 #define __NORETURN __attribute__ ((noreturn))
 #define __EXITING void
 #else
@@ -315,14 +315,6 @@ typedef char void;	/* so that (void *) is the same as (char *) */
 
 #ifdef __GNUC__
 
-/* GCC can always grok prototypes.  For C++ programs we add throw()
-   to help it optimize the function calls.  But this works only with
-   gcc 2.8.x and egcs.  */
-# if defined __cplusplus && (__GNUC__ >= 3 || __GNUC_MINOR__ >= 8)
-#  define __THROW	throw ()
-# else
-#  define __THROW
-# endif
 # define __MALLOC_P(args)	args __THROW
 /* This macro will be used for functions which might take C++ callback
    functions.  */

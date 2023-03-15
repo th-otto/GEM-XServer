@@ -34,6 +34,7 @@
 #if defined (_LIBC)
 # include <string.h>
 #endif
+#include <stdlib.h>
 
 #if defined (HAVE_LIMITS_H) || defined (_LIBC)
 # include <limits.h>

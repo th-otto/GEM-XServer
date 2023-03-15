@@ -809,7 +809,7 @@ void lineaf(void);
 		.word   0xA000"						\
 	: "=g"(__xaline), "=g"(__xfonts), "=g"(__xfuncs)  /* outputs */	\
 	: 						  /* inputs  */	\
-	: "d0", "d1", "d2", "a0", "a1", "a2"       /* clobbered regs */	\
+	: __CLOBBER_RETURN("a0") __CLOBBER_RETURN("a1") __CLOBBER_RETURN("a2") "d0", "d1", "d2"       /* clobbered regs */	\
 	);								\
 	__aline = __xaline;						\
 	__fonts = __xfonts;						\

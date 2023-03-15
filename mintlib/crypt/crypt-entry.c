@@ -54,13 +54,8 @@ void _ufc_clearmem (char *start, int cnt);
 #else
 #define _ufc_clearmem(start, cnt)   memset(start, 0, cnt)
 #endif
-#ifndef __MSHORT__
-extern char *__md5_crypt_r (const char *key, const char *salt, char *buffer,
-			    int buflen);
-#else
 extern char *__md5_crypt_r (const char *key, const char *salt, char *buffer,
 			    long int buflen);
-#endif
 extern char *__md5_crypt (const char *key, const char *salt);
 #endif
 

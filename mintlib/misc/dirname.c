@@ -11,7 +11,7 @@
 #include <libgen.h>
 #include <string.h>
 
-#define my_tolower(c) ((c >= 'A' && c <= 'Z') ? c += ('a' - 'A') : c)
+#define my_tolower(c) ((c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c)
 
 extern int __mint;
 

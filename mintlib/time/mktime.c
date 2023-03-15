@@ -144,15 +144,20 @@ void __timesub(const time_t* timep, long offset, register const struct state* sp
 
 /* Simplified normalize logic courtesy Paul Eggert (eggert@twinsun.com).  */
 static int
-__increment_overflow (number, delta)
-     int* number;
-     long  delta;
+__increment_overflow (int *ip, long delta)
 {
-  long number0;
+	long const i = *ip;
 
-  number0 = *number;
-  *number += delta;
-  return (*number < number0) != (delta < 0);
+	/*
+	 ** If i >= 0 there can only be overflow if i + j > LONG_MAX
+	 ** or if j > LONG_MAX - i; given i >= 0, LONG_MAX - i cannot overflow.
+	 ** If i < 0 there can only be overflow if i + j < LONG_MIN
+	 ** or if j < LONG_MIN - i; given i < 0, LONG_MIN - i cannot overflow.
+	 */
+	if ((i >= 0) ? (delta > LONG_MAX - i) : (delta < LONG_MIN - i))
+		return 1;
+	*ip += delta;
+	return 0;
 }
 
 static int __normalize_overflow (int* tensptr, int* unitsptr, long base)

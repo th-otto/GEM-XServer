@@ -59,7 +59,7 @@ endif
 WITH_INCLUDED_MINTLIB = yes
 
 # Define this to the warning level you want.
-WARN    = -Wall #-Wcast-qual
+WARN    = -Wall -Werror #-Wcast-qual
 
 # Target CPU to build for
 CPU = -m68020-60

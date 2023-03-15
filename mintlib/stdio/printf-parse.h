@@ -423,15 +423,15 @@ parse_one_spec (const UCHAR_T *format, size_t posn, struct printf_spec *spec,
 
   if (spec->info.spec == L'\0')
     /* Format ended before this spec was complete.  */
-    spec->end_of_fmt = spec->next_fmt = format - 1;
+    spec->end_of_fmt = spec->next_fmt = (const char *)format - 1;
   else
     {
       /* Find the next format spec.  */
-      spec->end_of_fmt = format;
+      spec->end_of_fmt = (const char *)format;
 #ifndef __MINT__
       spec->next_fmt = find_spec (format, ps);
 #else
-      spec->next_fmt = find_spec (format);
+      spec->next_fmt = find_spec ((const char *)format);
 #endif
     }
 

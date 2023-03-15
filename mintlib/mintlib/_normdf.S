@@ -312,4 +312,4 @@ oflow:
 #endif
 	rts
 
-#endif __M68881__
+#endif /* __M68881__ */

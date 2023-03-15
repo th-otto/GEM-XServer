@@ -10,7 +10,7 @@
 
 
 #define SOCKDEV "u:\\dev\\socket"
-#define UN_OFFSET ((short)((struct sockaddr_un *)0)->sun_path)
+#define UN_OFFSET ((short)(long)((struct sockaddr_un *)0)->sun_path)
 
 
 /* perform a socket system call, via ioctl() */
