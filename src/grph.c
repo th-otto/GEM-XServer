@@ -457,8 +457,7 @@ void GrphCombine(GRECT *a, const GRECT *b)
 /* ============================================================================== */
 void GrphError(void)
 {
-	const char txt[] = "[3]"
-		"[ X Server:" "|===========" "| " "|Unsupported screen format!" "|(%i planes)]" "[ Abort ]";
+	static char const txt[] = "[3][ X Server:|===========| |Unsupported screen format!|(%i planes)][ Abort ]";
 	char buf[sizeof(txt) + 10];
 
 	sprintf(buf, txt, GRPH_Depth);

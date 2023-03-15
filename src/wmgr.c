@@ -197,7 +197,6 @@ BOOL WmgrInit(BOOL initNreset)
 			WmgrIntro(xFalse);
 			form_alert(1, "[3][Can't load RSC file!][ Quit ]");
 			ok = xFalse;
-
 		} else
 		{
 			OBJECT *tree;
@@ -976,7 +975,7 @@ BOOL WmgrMenu(short title, short entry, short meta)
 			trigger = xTrue;
 		} else
 		{
-			const char *question = "[2]" "[Really quit the server|and all runng clients?]" "[ quit |continue]";
+			static char const question[] = "[2][Really quit the server|and all runng clients?][ quit |continue]";
 
 			trigger = form_alert(1, question) == 1;
 		}
