@@ -53,13 +53,13 @@ static BOOL _Clnt__EvalSelect(CLIENT *clnt, xReq *q)
 		PRINT(0, "Invalid extension request '%0x'.", q->reqType);
 		x_printf("!!! %p %p \n", q, clnt->iBuf.Mem);
 		exit(1);
-		longjmp(CLNT_Error, 2);
+		longjmp(CLNT_Error, 6);
 	}
 	if (q->length > CNFG_MaxReqLength || !q->length)
 	{
 		PRINT(0, "\033pError\033q Bad request length %u/%lu in '%s'.",
 			  q->length, CNFG_MaxReqLength, RequestTable[q->reqType].Name);
-		longjmp(CLNT_Error, 2);
+		longjmp(CLNT_Error, 6);
 	}
 #if 0
 	if (q->reqType != X_GetInputFocus)

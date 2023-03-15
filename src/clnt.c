@@ -216,7 +216,19 @@ static BOOL _Clnt_ConnRW(p_CONNECTION conn, BOOL rd, BOOL wr)
 
 	if ((left = setjmp(CLNT_Error)))
 	{
-		x_printf("aborted at #%i \n", left);
+		const char *where;
+
+		switch (left)
+		{
+			case 1: where = "ConnRw (no data available)"; break;
+			case 2: where = "EvalInit (invalid protocol version)"; break;
+			case 3: where = "ClntOutBuffer (memory exhausted)"; break;
+			case 4: where = "PmapVdi (cannot create pixmap)"; break;
+			case 5: where = "ConnRw (cannot write data)"; break;
+			case 6: where = "Clnt__EvalSelect (Invalid extension request)"; break;
+			default: where = "???"; break;
+		}
+		x_printf("aborted at #%s \n", where);
 		ClntDelete(CLNT_Requestor);
 	} else
 	{
@@ -256,7 +268,7 @@ static BOOL _Clnt_ConnRW(p_CONNECTION conn, BOOL rd, BOOL wr)
 
 			if (n < 0)
 			{
-				longjmp(CLNT_Error, 1);
+				longjmp(CLNT_Error, 5);
 			} else
 			{
 				O_BUFF *buf = &CLNT_Requestor->oBuf;
@@ -302,7 +314,6 @@ void ClntInit(BOOL initNreset)
 	if (initNreset)
 	{
 		XrscPoolInit(CLNT_Pool);
-
 	} else
 	{
 		int i;
@@ -311,7 +322,7 @@ void ClntInit(BOOL initNreset)
 		{
 			p_CLIENT c;
 
-			while ((c = XrscPOOLITEM(CLNT_Pool, i)))
+			while ((c = XrscPOOLITEM(CLNT_Pool, i)) != NULL)
 			{
 				c->CloseDown = DestroyAll;
 				ClntDelete(c);
@@ -327,7 +338,7 @@ int ClntCreate(int fd, const char *name, const char *addr, int port)
 
 	x_printf("[%s:%i] Request from %s (at %i)\n", addr, port, name, fd);
 
-	if (clnt)
+	if (clnt != NULL)
 	{
 		clnt->Next = CLNT_Base;
 		CLNT_Base = clnt;
@@ -359,7 +370,6 @@ int ClntCreate(int fd, const char *name, const char *addr, int port)
 			clnt->iBuf.Left = sizeof(xConnClientPrefix);
 			clnt->iBuf.Done = 0;
 			WmgrClntInsert(clnt);
-
 		} else
 		{
 			ClntDelete(clnt);
@@ -367,7 +377,7 @@ int ClntCreate(int fd, const char *name, const char *addr, int port)
 			clnt = NULL;
 		}
 	}
-	if (!clnt)
+	if (clnt == NULL)
 	{
 		x_printf("[%s:%i] \033pERROR\033q Memory exhausted.\n", addr, port);
 		if (fd >= 0)
