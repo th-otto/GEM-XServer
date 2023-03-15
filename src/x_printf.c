@@ -32,7 +32,7 @@ static struct PR_ENT **pr_ent_end = &pr_ent_beg;
 int (*pr_out)(const char *, va_list) = vprintf;
 
 /* ------------------------------------------------------------------------------ */
-static int pr_flush(const char *format, va_list args)
+static void flush_buffered(void)
 {
 	pr_out = vprintf;
 
@@ -40,12 +40,17 @@ static int pr_flush(const char *format, va_list args)
 	{
 		struct PR_ENT *next = pr_ent_beg->next;
 
-		fputs( pr_ent_beg->text, stdout);
+		fputs(pr_ent_beg->text, stdout);
 		free(pr_ent_beg);
 		pr_ent_beg = next;
 	}
 	pr_ent_end = &pr_ent_beg;
+}
 
+/* ------------------------------------------------------------------------------ */
+static int pr_flush(const char *format, va_list args)
+{
+	flush_buffered();
 	return vprintf(format, args);
 }
 
@@ -81,7 +86,13 @@ static int pr_buffer(const char *format, va_list args)
 /* ============================================================================== */
 void set_printf(BOOL buffer)
 {
-	pr_out = buffer ? pr_buffer : pr_flush;
+	if (!buffer)
+	{
+		flush_buffered();
+	} else
+	{
+		pr_out = pr_buffer;
+	}
 }
 
 /* ============================================================================== */

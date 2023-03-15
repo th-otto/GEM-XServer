@@ -295,7 +295,6 @@ int main(int argc, char *argv[])
 				{
 					SrvrUngrab(NULL);
 					set_printf(xFalse);
-					x_printf("-------------------END-BUFFERED-------------------\n");
 					_MAIN_Xcons = 0;
 				}
 			}
@@ -313,7 +312,6 @@ static void sig_child(int sig)
 	{
 		SrvrUngrab(NULL);
 		set_printf(xFalse);
-		x_printf("%s", "");
 		_MAIN_Xcons = 0;
 	}
 	Pwaitpid(-1, 0, &rusage);
