@@ -149,7 +149,6 @@ int main(int argc, char *argv[])
 		{
 			CARD32 t_start = clock() * (1000 / CLOCKS_PER_SEC);
 			BOOL run = xTrue;
-			CARD8 *kb_shift = (CARD8 *) Ssystem(S_OSHEADER, 0x0024, 0);
 			clock_t kb_tmout = 0x7FFFFFFF;
 
 			WmgrActivate(xTrue);		/*(_app == 0); */
@@ -173,8 +172,8 @@ int main(int argc, char *argv[])
 				short msg[8];
 				BOOL reset = xFalse;
 				short event = evnt_multi_fast(&ev_i, msg, &ev_o);
-				CARD8 meta = (*kb_shift & (K_RSHIFT | K_LSHIFT | K_CAPSLOCK | K_CTRL | K_ALT))
-					| (*kb_shift & K_ALTGR ? 0x20 : 0);
+				CARD8 meta = (ev_o.emo_kmeta & (K_RSHIFT | K_LSHIFT | K_CAPSLOCK | K_CTRL | K_ALT))
+					| (ev_o.emo_kmeta & K_ALTGR ? K_XALTGR : 0);
 				short chng;
 
 				MAIN_TimeStamp = (clock() * (1000 / CLOCKS_PER_SEC) - t_start);
@@ -232,8 +231,8 @@ int main(int argc, char *argv[])
 							WindMctrl(xFalse);
 						}
 						MAIN_But_Mask = PntrMap(ev_o.emo_mbutton) >> 8;
-						meta = (*kb_shift & (K_RSHIFT | K_LSHIFT | K_CAPSLOCK | K_CTRL | K_ALT))
-							| (*kb_shift & K_ALTGR ? 0x20 : 0);
+						meta = (ev_o.emo_kmeta & (K_RSHIFT | K_LSHIFT | K_CAPSLOCK | K_CTRL | K_ALT))
+							| (ev_o.emo_kmeta & K_ALTGR ? K_XALTGR : 0);
 						if (meta != KYBD_PrvMeta && (chng = KybdEvent(0, meta) & (K_ALT | K_CTRL)) && WMGR_Cursor)
 						{
 							WmgrKeybd(chng);
