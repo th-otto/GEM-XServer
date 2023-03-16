@@ -56,7 +56,7 @@ endif
 endif
 
 # Define this if you want to build with included mintlib
-WITH_INCLUDED_MINTLIB = yes
+WITH_INCLUDED_MINTLIB = no
 
 # Define this to the warning level you want.
 WARN    = -Wall -Werror #-Wcast-qual

@@ -20,13 +20,14 @@ LDFLAGS = $(CCOPTS) -Wl,-stack,128k -s
 all:: $(PRG)
 
 SRCS = Atom.c Cursor.c Pointer.c Property.c Prop_ICCC.c Request.c \
-      clnt.c clnt_swap.c colormap.c drawable.c draw_img.c \
-      event.c font.c font_init.c fontable.c gcontext.c grph.c keyboard.c \
-      main.c pixmap.c pixm_mono.c selection.c server.c \
-      window.c wind_draw.c wind_grab.c wind_pntr.c wind_save.c wind_util.c \
-      wmgr.c wmgr_draw.c wmgr_prog.c x_gem.c x_printf.c xrsc.c \
-      config.c version.c
+	clnt.c clnt_swap.c colormap.c drawable.c draw_img.c \
+	event.c font.c font_init.c fontable.c gcontext.c grph.c keyboard.c \
+	main.c pixmap.c pixm_mono.c selection.c server.c \
+	window.c wind_draw.c wind_grab.c wind_pntr.c wind_save.c wind_util.c \
+	wmgr.c wmgr_draw.c wmgr_prog.c x_gem.c x_printf.c xrsc.c \
+	config.c version.c
 
+CFLAGS-main.c = -O0
 
 OBJS = $(SRCS:.c=.o)
 
@@ -50,12 +51,14 @@ clean::
 .SUFFIXES:
 .SUFFIXES: .c .o .S .s
 
+COMPILE = $(CC) $(CFLAGS) $(CFLAGS-$(<F))
+
 .c.o:
-	$(AM_V_CC)$(CC) $(CFLAGS) -Wp,-MD,.deps/$(@:.o=.P) -c $< -o $@
+	$(AM_V_CC)$(COMPILE) -Wp,-MD,.deps/$(@:.o=.P) -c $< -o $@
 
 .S.o:
-	$(AM_V_AS)$(CC) $(CFLAGS) -Wp,-MD,.deps/$(@:.o=.P) -c $< -o $@
+	$(AM_V_AS)$(COMPILE) -Wp,-MD,.deps/$(@:.o=.P) -c $< -o $@
 
 .s.o:
-	$(AM_V_AS)$(CC) $(CFLAGS) -Wp,-MD,.deps/$(@:.o=.P) -c $< -o $@
+	$(AM_V_AS)$(COMPILE) -Wp,-MD,.deps/$(@:.o=.P) -c $< -o $@
 
