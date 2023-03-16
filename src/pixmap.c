@@ -12,10 +12,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <setjmp.h>
 
 #include "pixmap_P.h"
-#include "clnt_P.h"
+#include "clnt.h"
 #include "grph.h"
 #include "colormap.h"
 #include "x_gem.h"
@@ -37,7 +36,6 @@ void PmapInit(BOOL initNreset)
 	{
 		XrscPoolInit(_PMAP_Orphaned);
 		memset(_PMAP_Offscreen, 0, sizeof(_PMAP_Offscreen));
-
 	} else
 	{
 		int i;
@@ -125,7 +123,7 @@ short PmapVdi(p_PIXMAP pmap, p_GC gc, BOOL fonts)
 			CARD8 t = ((xReq *) (CLNT_Requestor->iBuf.Mem))->reqType & 0x7F;
 
 			x_printf("\033pError\033q Can't initialize VDI offscreen bitmap for P:%X (%s)!\n", pmap->Id, RequestTable[t].Name);
-			longjmp(CLNT_Error, 4);
+			ClntAbort(4);
 		}
 		pmap->Vdi = hdl;
 		vsf_perimeter(hdl, PERIMETER_OFF);

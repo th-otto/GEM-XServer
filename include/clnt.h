@@ -12,13 +12,15 @@
 #ifndef __CLNT_H__
 #define __CLNT_H__
 
+#include "main.h"
 #include "xrsc.h"
 #include <stdarg.h>
+
 #include <X11/Xproto.h>
 
-
-struct _xReq;
-typedef struct _xReq *p_xReq;
+#ifndef FirstExtensionError
+#define FirstExtensionError 128
+#endif
 
 
 #define CLNTENTLEN        32
@@ -41,7 +43,7 @@ typedef struct
 
 
 /* --- Request Callback Functions --- */
-typedef void (*RQSTCB)(p_CLIENT, p_xReq);
+typedef void (*RQSTCB)(p_CLIENT, xReq *xReq);
 
 typedef struct
 {
@@ -95,6 +97,10 @@ extern CLIENT *CLNT_Requestor;
 typedef XRSCPOOL(CLIENT, CLNT_POOL, 4);
 extern CLNT_POOL CLNT_Pool;
 
+void Clnt_EvalSelect_MSB(CLIENT *, xReq *xReq);
+void Clnt_EvalSelect_LSB(CLIENT *, xReq *xReq);
+
+
 static inline CLIENT *ClntFind(CARD32 id)
 {
 	return Xrsc(CLIENT, RID_Base(id), CLNT_Pool);
@@ -107,6 +113,7 @@ int ClntDelete(CLIENT *);
 void *ClntSwap(void *buf, const char *form);
 void ClntPrint(CLIENT *, int req, const char *form, ...) __attribute__((format(printf, 3, 4)));
 void ClntError(CLIENT *, int err, CARD32 val, int req, const char *form, ...) __attribute__((format(printf, 5, 6)));
+void ClntAbort(int code) __attribute__((__noreturn__));
 
 void *ClntOutBuffer(O_BUFF *buf, size_t need, size_t copy_n, BOOL refuse);
 

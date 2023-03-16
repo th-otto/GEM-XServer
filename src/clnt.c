@@ -14,8 +14,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
+#include <setjmp.h>
 
-#include "clnt_P.h"
+#include "clnt.h"
 #include "server.h"
 #include "selection.h"
 #include "event.h"
@@ -28,6 +29,7 @@
 #include "x_gem.h"
 #include "x_mint.h"
 #include "x_printf.h"
+#include "tools.h"
 #include "Request.h"
 
 
@@ -41,8 +43,9 @@ CLIENT *CLNT_Base = NULL;
 CARD16 CLNT_BaseNum = 0;
 
 CLIENT *CLNT_Requestor = NULL;
-jmp_buf CLNT_Error;
 CLNT_POOL CLNT_Pool;
+
+static jmp_buf CLNT_Error;
 
 
 static void FT_Clnt_reply_MSB(p_CLIENT, CARD32 size, const char *form);
@@ -116,6 +119,13 @@ static void _Clnt_EvalAuth(CLIENT *clnt, xConnClientPrefix *q)
 }
 
 /* ------------------------------------------------------------------------------ */
+
+void ClntAbort(int code)
+{
+	longjmp(CLNT_Error, code);
+}
+
+/* ------------------------------------------------------------------------------ */
 static void _Clnt_EvalInit(CLIENT *clnt, xConnClientPrefix *q)
 {
 	switch (q->byteOrder)
@@ -135,24 +145,22 @@ static void _Clnt_EvalInit(CLIENT *clnt, xConnClientPrefix *q)
 		break;
 	default:
 		PRINT(0, "Invalid byte order value '%02x'.\n", q->byteOrder);
-		longjmp(CLNT_Error, 2);
+		ClntAbort(2);
 	}
 	if (q->majorVersion != X_PROTOCOL)
 	{
 		PRINT(0, "Invalid version %i.%i.\n", q->majorVersion, q->minorVersion);
-		longjmp(CLNT_Error, 2);
+		ClntAbort(2);
 	}
 	clnt->iBuf.Left = Align(q->nbytesAuthProto) + Align(q->nbytesAuthString);
 	if (clnt->iBuf.Left)
 	{
 		clnt->Eval = (RQSTCB) _Clnt_EvalAuth;
-
 	} else
 	{
 		_Clnt_EvalAuth(clnt, q);
 	}
 }
-
 
 /* ------------------------------------------------------------------------------ */
 static size_t _CLNT_MaxObuf = 0;
@@ -188,7 +196,7 @@ static BOOL _Clnt_ConnRW(p_CONNECTION conn, BOOL rd, BOOL wr)
 
 			if (n < 0)
 			{
-				longjmp(CLNT_Error, 1);
+				ClntAbort(1);
 			} else
 			{
 				NETBUF *buf = &CLNT_Requestor->iBuf;
@@ -216,7 +224,7 @@ static BOOL _Clnt_ConnRW(p_CONNECTION conn, BOOL rd, BOOL wr)
 
 			if (n < 0)
 			{
-				longjmp(CLNT_Error, 5);
+				ClntAbort(5);
 			} else
 			{
 				O_BUFF *buf = &CLNT_Requestor->oBuf;
@@ -463,7 +471,7 @@ void *ClntOutBuffer(O_BUFF *buf, size_t need, size_t copy_n, BOOL refuse)
 			CLIENT *clnt = (CLIENT *) ((char *) buf - offsetof(CLIENT, oBuf));
 
 			ClntPrint(clnt, 0, "\033pERROR:\033q memory exhausted in output buffer (%li).", buf->Size + need);
-			longjmp(CLNT_Error, 3);
+			ClntAbort(3);
 
 		} else
 		{
