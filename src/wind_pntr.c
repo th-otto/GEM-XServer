@@ -458,7 +458,6 @@ void WindPointerMove(const PXY *pointer_xy)
 	if (pointer_xy)
 	{									/* called internal, not from main */
 		r_xy = *pointer_xy;
-
 	} else if (wind)
 	{
 		r_xy = *MAIN_PointerPos;
@@ -490,7 +489,7 @@ void WindPointerMove(const PXY *pointer_xy)
 		{
 			break;
 		}
-	} while ((wind = wind->Parent));
+	} while ((wind = wind->Parent) != NULL);
 }
 
 

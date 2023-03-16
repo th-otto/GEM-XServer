@@ -68,7 +68,7 @@ typedef struct s_WINDOW
 		WINDEVNT Event;					/* Mask >= 0: use this */
 		struct
 		{
-			long AllMasks;				/* in both cases, holds all ORed event masks */
+			INT32 AllMasks;				/* in both cases, holds all ORed event masks */
 			struct
 			{
 				CARD16 Length;

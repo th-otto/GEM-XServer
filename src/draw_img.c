@@ -559,7 +559,7 @@ void RQ_CopyArea(CLIENT *clnt, xCopyAreaReq *q)
 				PXY orig;
 
 				nSct = WindClipLock(wind, 0, &work, 1, &orig, &sect, gc->SubwindMode);
-				if (!nSct)
+				if (nSct == 0)
 				{
 					/*
 					 * if no visible region of the whole source rectangle exists no
@@ -616,10 +616,8 @@ void RQ_CopyArea(CLIENT *clnt, xCopyAreaReq *q)
 					WindPutImg(dst_d.Window, gc, rect, PmapMFDB(src_d.Pixmap), orig, sect, nSct);
 				}
 				debug = xFalse;
-
 			} else
 			{							/* destination is pixmap */
-
 				if (action == (CPsrcP | CPdstP))
 				{
 					if (src_d.p->Depth == 1)
@@ -643,7 +641,7 @@ void RQ_CopyArea(CLIENT *clnt, xCopyAreaReq *q)
 		if (gc->GraphExpos)
 		{
 			if (nExp)
-				EvntGraphExp(clnt, dst_d, X_CopyArea, nExp, exps);
+				EvntGraphExpose(clnt, dst_d, X_CopyArea, nExp, exps);
 			else
 				EvntNoExposure(clnt, dst_d.p->Id, X_CopyArea);
 		}

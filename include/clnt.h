@@ -88,7 +88,7 @@ typedef struct
 	const char *Name;
 	const char *Form;
 } REQUEST;
-extern const REQUEST RequestTable[ /*FirstExtensionError */ ];
+extern const REQUEST RequestTable[FirstExtensionError];
 
 extern CLIENT *CLNT_Base;
 extern CARD16 CLNT_BaseNum;
