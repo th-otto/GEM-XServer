@@ -154,17 +154,13 @@
    run in pedantic mode if the uses are carefully marked using the
    `__extension__' keyword.  But this is not generally available before
    version 2.8.  */
-#if !defined __GNUC__ || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 8)
-
+#if !__GNUC_PREREQ (2,8)
 # define __extension__		/* Ignore */
-
 #endif
 
 /* __restrict is known in EGCS 1.2 and above. */
-#if !defined __GNUC__ || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 92)
-
+#if !__GNUC_PREREQ (2,92)
 # define __restrict	/* Ignore */
-
 #endif
 
 #endif	 /* sys/cdefs.h */

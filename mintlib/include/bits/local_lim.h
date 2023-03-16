@@ -10,12 +10,13 @@
 
 /* These are the MiNT specific limits.  */
 
-#define NGROUPS_MAX 0		/* No supplementary groups.  */
+#define NGROUPS_MAX 8		/* 8 supplementary groups.  */
 #define ARG_MAX 32767
 #define CHILD_MAX 999
 #define OPEN_MAX 32
 #define LINK_MAX 32767
-#define MAX_CANON 64		/* Non conforming, should be 256.  */
+#define MAX_CANON 256
+#define PIPE_BUF 1024
 
 /* For SVR3, this is 14.  For SVR4, it is 255, at least on ufs
    file systems, even though the System V limits.h incorrectly

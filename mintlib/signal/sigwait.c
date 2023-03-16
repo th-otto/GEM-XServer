@@ -14,9 +14,8 @@
    Library General Public License for more details.
 
    You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   License along with the GNU C Library; if not, see
+   <https://www.gnu.org/licenses/>.  */
 
 #include <errno.h>
 #include <signal.h>
@@ -41,18 +40,18 @@ __sigwait (const sigset_t *set, int *sig)
   int this;
 
   /* Prepare set.  */
-  __sigfillset (&tmp_mask);
+  (void) __sigfillset (&tmp_mask);
 
   /* Unblock all signals in the SET and register our nice handler.  */
   action.sa_handler = ignore_signal;
   action.sa_flags = 0;
-  __sigfillset (&action.sa_mask);	/* Block all signals for handler.  */
+  (void) __sigfillset (&action.sa_mask);	/* Block all signals for handler.  */
 
   /* Make sure we recognize error conditions by setting WAS_SIG to a
      value which does not describe a legal signal number.  */
   was_sig = -1;
 
-  for (this = 1; this < NSIG; ++this)
+  for (this = 1; this < __NSIG; ++this)
     if (__sigismember (set, this))
       {
 	/* Unblock this signal.  */

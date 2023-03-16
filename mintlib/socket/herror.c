@@ -16,8 +16,6 @@ char	*h_errlist[] = {
 };
 int	h_nerr = { sizeof (h_errlist)/sizeof (h_errlist[0]) };
 
-extern int	h_errno;
-
 void
 herror (s)
 	const char *s;

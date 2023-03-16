@@ -12,14 +12,14 @@
    Library General Public License for more details.
 
    You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   License along with the GNU C Library; if not, see
+   <https://www.gnu.org/licenses/>.  */
 
 /* Modified for MiNTLib by Guido Flohr <guido@freemint.de>.  */
 
 #include <ctype.h>
 #include <limits.h>
+#include <stdio.h>
 #include <printf.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -37,6 +37,10 @@
 # include <sys/types.h>
 __EXTERN char* __strerror_r __PROTO ((int errnum, char* buf, size_t buflen));
 __EXTERN void* __mempcpy __PROTO ((void* dstpp, const void* srcpp, size_t len));
+#endif
+
+#if __GNUC_PREREQ(7, 0)
+# pragma GCC diagnostic ignored "-Wnonnull-compare"
 #endif
 
 /* This code is shared between the standard stdio implementation found

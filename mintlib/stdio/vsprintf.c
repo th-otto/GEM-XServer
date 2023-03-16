@@ -12,10 +12,8 @@
    Library General Public License for more details.
 
    You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, 
-   USA.  */
+   License along with the GNU C Library; if not, see
+   <https://www.gnu.org/licenses/>.  */
 
 /* Modified (linker warning) for MiNTLib by Guido Flohr <guido@freemint.de>.  */
 
@@ -29,10 +27,7 @@
 /* Write formatted output to S according to the format string
    FORMAT, using the argument list in ARG.  */
 int
-vsprintf (s, format, arg)
-     char *s;
-     const char *format;
-     va_list arg;
+vsprintf (char *s, const char *format, va_list arg)
 {
   int done;
   FILE f;

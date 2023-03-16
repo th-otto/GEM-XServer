@@ -140,7 +140,7 @@ LIBIIO_ADDOBJS = err.o error.o doprnt.o dprintf.o fscanf.o scanf.o vscanf.o \
 vsscanf.o obstream.o printf.o vasprintf.o vdprintf.o vprintf.o vsnprintf.o \
 vsprintf.o sscanf.o
 
-DEP_FILES := $(addprefix $(top_srcdir)/.deps/,$(patsubst %.o,%.P,$(OBJS)))
+DEP_FILES := $(addprefix .deps/,$(patsubst %.o,%.P,$(OBJS)))
 
 # These are automatically remade, no need for make to worry about
 # them.

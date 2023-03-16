@@ -3,7 +3,9 @@
  *	++jrb
  */
 
+#ifndef __NO_INLINE__
 #define __NO_INLINE__
+#endif
 #include <linea.h>
 
 #ifdef __GNUC__

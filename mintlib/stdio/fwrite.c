@@ -12,22 +12,21 @@
    Library General Public License for more details.
 
    You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   License along with the GNU C Library; if not, see
+   <https://www.gnu.org/licenses/>.  */
 
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 
 
+#if __GNUC_PREREQ(7, 0)
+# pragma GCC diagnostic ignored "-Wnonnull-compare"
+#endif
+
 /* Write NMEMB chunks of SIZE bytes each from PTR onto STREAM.  */
 size_t
-fwrite (ptr, size, nmemb, stream)
-     const void *ptr;
-     size_t size;
-     size_t nmemb;
-     register FILE *stream;
+fwrite (const void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
   register const unsigned char *p = (const unsigned char *) ptr;
   register size_t to_write = size * nmemb;
@@ -81,7 +80,7 @@ fwrite (ptr, size, nmemb, stream)
     /* This is an unbuffered stream using the standard output
        buffer-flushing function, so we just do a straight write.  */
     {
-      int count = (stream->__io_funcs.__write == NULL ? to_write :
+      ssize_t count = (stream->__io_funcs.__write == NULL ? to_write :
 		   (*stream->__io_funcs.__write) (stream->__cookie,
 						  (const char *) p,
 						  to_write));

@@ -16,12 +16,12 @@
    write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#include <float.h>
+#include <stdlib.h>
 #include "gmp.h"
 #include "gmp-impl.h"
 #include "longlong.h"
 #include <ieee754.h>
-#include <float.h>
-#include <stdlib.h>
 
 /* Convert a `double' in IEEE754 standard double-precision format to a
    multi-precision integer representing the significand scaled up by its

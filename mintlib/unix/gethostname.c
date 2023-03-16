@@ -15,9 +15,7 @@
 #include <sys/types.h>
 
 int
-__gethostname(buf, len)
-	char *buf;
-	size_t len;
+__gethostname (char *buf, size_t len)
 {
     char *foo = 0;
     char xbuf[MAXHOSTNAMELEN + 1];
@@ -56,6 +54,10 @@ __gethostname(buf, len)
     /* Changed by Guido Flohr: Warn if buffer was too small.  */
     real_length = strlen (foo ? foo : "unknown");
     
+#if __GNUC_PREREQ(8, 0)
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
+#endif
+
     strncpy(buf, foo ? foo : "unknown", len < MAXHOSTNAMELEN  ? 
 	    len : MAXHOSTNAMELEN);
     
@@ -70,9 +72,7 @@ weak_alias (__gethostname, gethostname)
 
 /* New stubs function:  sethostname.  */
 int
-__sethostname (name, length)
-    const char* name;
-    size_t length;
+__sethostname (char* name, size_t length)
 {
     __set_errno (ENOSYS);
     return -1;

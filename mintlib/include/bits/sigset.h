@@ -1,5 +1,6 @@
 /* __sig_atomic_t, __sigset_t, and related definitions.  Generic/BSD version.
-   Copyright (C) 1991, 1992, 1994, 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1991, 1992, 1994, 1996, 1997, 2007
+   Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -13,9 +14,8 @@
    Library General Public License for more details.
 
    You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   License along with the GNU C Library; if not, see
+   <https://www.gnu.org/licenses/>.  */
 
 /* Modified for MiNTLib by Guido Flohr <guido@freemint.de>.  */
 
@@ -42,10 +42,6 @@ typedef unsigned long int __sigset_t;
 
 #if !defined _SIGSET_H_fns && defined _SIGNAL_H
 #define _SIGSET_H_fns 1
-
-#ifndef _EXTERN_INLINE
-# define _EXTERN_INLINE extern __inline
-#endif
 
 /* Return a mask that includes SIG only.  The cast to `sigset_t' avoids
    overflow if `sigset_t' is wider than `int'.  */

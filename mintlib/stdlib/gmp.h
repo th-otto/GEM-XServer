@@ -15,9 +15,8 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Library General Public
 License for more details.
 
 You should have received a copy of the GNU Library General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library; if not, see
+<https://www.gnu.org/licenses/>. */
 
 #ifndef __GMP_H__
 
@@ -33,18 +32,8 @@ MA 02111-1307, USA. */
 #define __gmp_const
 #endif
 
-#if defined (__GNUC__)
-#define __gmp_inline __inline__
-#else
-#define __gmp_inline
-#endif
-
 #ifndef _EXTERN_INLINE
-#ifdef __GNUC__
-#define _EXTERN_INLINE extern __inline__
-#else
-#define _EXTERN_INLINE static
-#endif
+#include <features.h>
 #endif
 
 #ifdef _SHORT_LIMB
@@ -350,8 +339,6 @@ void mpf_ui_sub _PROTO ((mpf_ptr, unsigned long int, mpf_srcptr));
 /************ Low level positive-integer (i.e. N) routines.  ************/
 
 /* This is ugly, but we need to make usr calls reach the prefixed function.  */
-#define mpn_add			__MPN(add)
-#define mpn_add_1		__MPN(add_1)
 #define mpn_add_n		__MPN(add_n)
 #define mpn_addmul_1		__MPN(addmul_1)
 #define mpn_bdivmod		__MPN(bdivmod)
@@ -379,8 +366,6 @@ void mpf_ui_sub _PROTO ((mpf_ptr, unsigned long int, mpf_srcptr));
 #define mpn_scan1		__MPN(scan1)
 #define mpn_set_str		__MPN(set_str)
 #define mpn_sqrtrem		__MPN(sqrtrem)
-#define mpn_sub			__MPN(sub)
-#define mpn_sub_1		__MPN(sub_1)
 #define mpn_sub_n		__MPN(sub_n)
 #define mpn_submul_1		__MPN(submul_1)
 #define mpn_udiv_w_sdiv		__MPN(udiv_w_sdiv)
@@ -388,8 +373,6 @@ void mpf_ui_sub _PROTO ((mpf_ptr, unsigned long int, mpf_srcptr));
 #if defined (__cplusplus)
 extern "C" {
 #endif
-mp_limb_t mpn_add _PROTO ((mp_ptr, mp_srcptr, mp_size_t, mp_srcptr,mp_size_t));
-mp_limb_t mpn_add_1 _PROTO ((mp_ptr, mp_srcptr, mp_size_t, mp_limb_t));
 mp_limb_t mpn_add_n _PROTO ((mp_ptr, mp_srcptr, mp_srcptr, mp_size_t));
 mp_limb_t mpn_addmul_1 _PROTO ((mp_ptr, mp_srcptr, mp_size_t, mp_limb_t));
 mp_limb_t mpn_bdivmod _PROTO ((mp_ptr, mp_ptr, mp_size_t, mp_srcptr, mp_size_t, unsigned long int));
@@ -417,16 +400,14 @@ unsigned long int mpn_scan0 _PROTO ((mp_srcptr, unsigned long int));
 unsigned long int mpn_scan1 _PROTO ((mp_srcptr, unsigned long int));
 mp_size_t mpn_set_str _PROTO ((mp_ptr, const unsigned char *, size_t, int));
 mp_size_t mpn_sqrtrem _PROTO ((mp_ptr, mp_ptr, mp_srcptr, mp_size_t));
-mp_limb_t mpn_sub _PROTO ((mp_ptr, mp_srcptr, mp_size_t, mp_srcptr,mp_size_t));
-mp_limb_t mpn_sub_1 _PROTO ((mp_ptr, mp_srcptr, mp_size_t, mp_limb_t));
 mp_limb_t mpn_sub_n _PROTO ((mp_ptr, mp_srcptr, mp_srcptr, mp_size_t));
 mp_limb_t mpn_submul_1 _PROTO ((mp_ptr, mp_srcptr, mp_size_t, mp_limb_t));
 #if defined (__cplusplus)
 }
 #endif
 
-#if defined (__GNUC__) || defined (_FORCE_INLINES)
-_EXTERN_INLINE mp_limb_t
+#if defined (__GNUC__)
+static __inline mp_limb_t
 #if defined (__STDC__) || defined (__cplusplus)
 mpn_add_1 (register mp_ptr res_ptr,
 	   register mp_srcptr s1_ptr,
@@ -468,7 +449,7 @@ mpn_add_1 (res_ptr, s1_ptr, s1_size, s2_limb)
   return 0;
 }
 
-_EXTERN_INLINE mp_limb_t
+static __inline mp_limb_t
 #if defined (__STDC__) || defined (__cplusplus)
 mpn_add (register mp_ptr res_ptr,
 	 register mp_srcptr s1_ptr,
@@ -497,7 +478,7 @@ mpn_add (res_ptr, s1_ptr, s1_size, s2_ptr, s2_size)
   return cy_limb;
 }
 
-_EXTERN_INLINE mp_limb_t
+static __inline mp_limb_t
 #if defined (__STDC__) || defined (__cplusplus)
 mpn_sub_1 (register mp_ptr res_ptr,
 	   register mp_srcptr s1_ptr,
@@ -539,7 +520,7 @@ mpn_sub_1 (res_ptr, s1_ptr, s1_size, s2_limb)
   return 0;
 }
 
-_EXTERN_INLINE mp_limb_t
+static __inline mp_limb_t
 #if defined (__STDC__) || defined (__cplusplus)
 mpn_sub (register mp_ptr res_ptr,
 	 register mp_srcptr s1_ptr,

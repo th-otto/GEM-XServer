@@ -14,11 +14,9 @@
 #define MAXLEN 127
 
 int
-__getdomainname(buf, len)
-    char *buf;
-    size_t len;
+__getdomainname(char *buf, size_t len)
 {
-    char *foo = 0;
+	char *foo = 0;
     char xbuf[MAXLEN+1];
     int fd, r;
     size_t real_length;
@@ -52,6 +50,10 @@ __getdomainname(buf, len)
     /* Changed by Guido Flohr: Warn if buffer was too small.  */
     real_length = foo ? strlen (foo) : 1;
     
+#if __GNUC_PREREQ(8, 0)
+#pragma GCC diagnostic ignored "-Wstringop-truncation"
+#endif
+
     strncpy(buf, foo ? foo : "", len < MAXLEN  ? 
 	    len : MAXLEN);
     
@@ -66,9 +68,7 @@ weak_alias (__getdomainname, getdomainname)
 
 /* Stubs function: setdomainname.  */
 int
-__setdomainname (name, length)
-    const char* name;
-    size_t length;
+__setdomainname (const char* name, size_t length)
 {
     __set_errno (ENOSYS);
     return -1;

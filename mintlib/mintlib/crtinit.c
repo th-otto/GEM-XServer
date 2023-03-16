@@ -293,7 +293,7 @@ void _crtinit()
 	/* not reached normally */
 
 notenough:
-	Cconws("Fatal error: insufficient memory\r\n");
+	(void) Cconws("Fatal error: insufficient memory\r\n");
 		Pterm(-1);
 }
 

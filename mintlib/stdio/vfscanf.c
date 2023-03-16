@@ -12,9 +12,8 @@
    Library General Public License for more details.
 
    You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   License along with the GNU C Library; if not, see
+   <https://www.gnu.org/licenses/>.  */
 
 /* Modified for MiNTLib by Guido Flohr <guido@freemint.de>.  */
 #define vfscanf vfscanf_optimized
@@ -179,6 +178,10 @@
 #endif
 #endif
 
+
+#if __GNUC_PREREQ(7, 0)
+# pragma GCC diagnostic ignored "-Wnonnull-compare"
+#endif
 
 /* Read formatted input from S according to the format string
    FORMAT, using the argument list in ARG.
@@ -475,8 +478,8 @@ vfscanf (FILE *s, const char *format, va_list argptr)
 	  else
 	    flags |= SHORT;
 	  break;
-#ifndef ONLY_INTEGER_IO
 	case 'l':
+#ifndef ONLY_INTEGER_IO
 	  if (*f == 'l')
 	    {
 	      /* A double `l' is equivalent to an `L'.  */
@@ -484,9 +487,11 @@ vfscanf (FILE *s, const char *format, va_list argptr)
 	      flags |= LONGDBL;
 	    }
 	  else
+#endif /* not ONLY_INTEGER_IO */
 	    /* ints are long ints.  */
 	    flags |= LONG;
 	  break;
+#ifndef ONLY_INTEGER_IO
 	case 'q':
 	case 'L':
 	  /* doubles are long doubles, and ints are long long ints.  */

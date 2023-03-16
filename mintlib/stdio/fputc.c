@@ -12,20 +12,21 @@
    Library General Public License for more details.
 
    You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   License along with the GNU C Library; if not, see
+   <https://www.gnu.org/licenses/>.  */
 
 /* Modified for MiNTLib by Guido Flohr <guido@freemint.de>.  */
 
 #include <errno.h>
 #include <stdio.h>
 
+#if __GNUC_PREREQ(7, 0)
+# pragma GCC diagnostic ignored "-Wnonnull-compare"
+#endif
+
 /* Write the character C to STREAM.  */
 int
-fputc (c, stream)
-     int c;
-     FILE *stream;
+fputc (int c, FILE *stream)
 {
   if (!__validfp (stream) || !stream->__mode.__write)
     {

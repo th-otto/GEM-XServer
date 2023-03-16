@@ -1,5 +1,5 @@
 /*  wait4.c -- MiNTLib.
-    Copyright (C) 1999 Guido Flohr <gufl0000@stud.uni-sb.de>
+    Copyright (C) 1999 Guido Flohr <guido@freemint.de>
 
     This file is part of the MiNTLib project, and may only be used
     modified and distributed under the terms of the MiNTLib project
@@ -8,30 +8,18 @@
     understand and accept it fully.
 */
 
-#include <signal.h>
 #include <errno.h>
+#include <signal.h>
 #include <string.h>
-#include <mintbind.h>
+#include <mint/mintbind.h>
+#include <sys/wait.h>
+#include <sys/types.h>
+#include <sys/resource.h>
 
-#ifdef __TURBOC__
-# include <sys\wait.h>
-# include <sys\types.h>
-# include <sys\resource.h>
-#else
-# include <sys/wait.h>
-# include <sys/types.h>
-# include <sys/resource.h>
-#endif
-
-static short have_Pwaitpid = 1;
 
 extern long __waitval, __waittime;
 
-pid_t __wait4 (pid, stat_loc, options, usage)
-  pid_t pid;
-  __WP stat_loc;
-  int options;
-  struct rusage* usage;
+pid_t __wait4 (pid_t pid, __WP stat_loc, int options, struct rusage *usage)
 {
   extern int __mint;
   long retval;
@@ -42,13 +30,9 @@ pid_t __wait4 (pid, stat_loc, options, usage)
                     */
   pid_t child_pid;
   
-  if (have_Pwaitpid) {
-    retval = Pwaitpid (pid, options, lusage);
-    if (retval == -ENOSYS)
-      have_Pwaitpid = 0;
-  }
+  retval = Pwaitpid (pid, options, lusage);
   
-  if (!have_Pwaitpid) {
+  if (retval == -ENOSYS) {
     retval = __waitval;
     __waitval = -ECHILD;
     lusage[0] = __waittime;
@@ -80,7 +64,7 @@ pid_t __wait4 (pid, stat_loc, options, usage)
     /* Previous kernel versions had been confused by programs that
        terminate with bogus exit codes (i. e. more than 8 bits). 
        We try our best to fix that here.  */
-    if (__mint < 0x110)
+    if (__mint < 0x10f)
       {
         if ((retval & 0x7f) == 0x7f)
           {
@@ -156,5 +140,4 @@ pid_t __wait4 (pid, stat_loc, options, usage)
   
   return child_pid;
 }
-
 weak_alias (__wait4, wait4)

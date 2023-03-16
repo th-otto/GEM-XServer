@@ -1,5 +1,9 @@
 include $(top_srcdir)/../CONFIGVARS
 
+ifeq (yes,$(shell test "$$($(CC) -dumpversion | cut -d . -f 1)" -ge 4 && echo yes || echo no))
+CFLAGS += -fgnu89-inline
+endif
+
 # This file is being included into all Makefiles and into the
 # installation script "libinstall".  Please make sure that it can
 # serve both as input to "make" and a Bourne shell.

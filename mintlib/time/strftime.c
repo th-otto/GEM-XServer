@@ -31,11 +31,7 @@ extern char **_LC_Day_name;
  */
 
 size_t
-strftime(str, maxsize, fmt, ts)
-        char *str;
-        size_t maxsize;
-        const char *fmt;
-        const struct tm *ts;
+strftime(char *str, size_t maxsize, const char *fmt, const struct tm *ts)
 {
         long	num = 0;
         long    len;

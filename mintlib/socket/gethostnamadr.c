@@ -146,8 +146,6 @@ typedef union {
     char ac;
 } align;
 
-int h_errno;
-
 static void
 dotrimdomain(c)
 char *c;

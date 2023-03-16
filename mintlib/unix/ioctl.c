@@ -1,43 +1,32 @@
 /*
- * $Id: ioctl.c,v 1.4 2001/01/18 02:05:55 fna Exp $
- * 
  * ioctl() emulation for MiNT; written by Eric R. Smith and placed
  * in the public domain
  */
 
 #include <errno.h>
-#include <mintbind.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <linea.h>	/* for TIOCGWINSZ under TOS */
 #include <support.h>
 
-#ifdef __TURBOC__
-# include <mint\ssystem.h>
-# include <sys\ioctl.h>
-# include <sys\types.h>
-# include <sys\stat.h>
-#else
-# include <mint/ssystem.h>
-# include <sys/ioctl.h>
-# include <sys/types.h>
-# include <sys/stat.h>
-#endif
+#include <linea.h>					/* for TIOCGWINSZ under TOS */
+#include <mint/mintbind.h>
+#include <mint/ssystem.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
-#include "lib.h"	/* for __open_stat */
+#include "lib.h"
 
 extern int __mint;	/* MiNT version */
 extern int __has_no_ssystem;
-int _ttydisc = NTTYDISC;
-int _ldisc = LLITOUT;
+static int _ttydisc = NTTYDISC;
+static int _ldisc = LLITOUT;
 
 /* in read.c */
 extern struct tchars __tchars;
 extern struct ltchars __ltchars;
 
-int __ioctl(fd, cmd, arg)
-	int fd, cmd;
-	void *arg;
+int __ioctl(int fd, int cmd, void *arg)
 {
 	long r;
 	int istty = isatty(fd);
@@ -48,29 +37,27 @@ int __ioctl(fd, cmd, arg)
 	if (istty) {
 	    switch (cmd) {
 		case TIOCGETD:
-			*((int *)arg) = _ttydisc;
+			*((long *)arg) = _ttydisc;
 			return 0;
 			break;
 		case TIOCSETD:
-			_ttydisc = *((int *)arg);
+			_ttydisc = *((long *)arg);
 			return 0;
 			break;
 		case TIOCLGET:
-			*((int *)arg) = _ldisc;
+			*((long *)arg) = _ldisc;
 			return 0;
 			break;
 		case TIOCLSET:
-			_ldisc = *((int *)arg);
+			_ldisc = *((long *)arg);
 			return 0;
 			break;
 		case TIOCLBIS:
-			_ldisc |= *((int *)arg);
+			_ldisc |= *((long *)arg);
 			return 0;
-			break;
 		case TIOCLBIC:
-			_ldisc &= ~(*((int *)arg));
+			_ldisc &= ~(*((long *)arg));
 			return 0;
-			break;
 		case TIOCSWINSZ:
 			if (__mint < 9)
 				return 0;
@@ -78,11 +65,7 @@ int __ioctl(fd, cmd, arg)
 		case TIOCGWINSZ:
 			if (__mint < 9) {
 				struct winsize *win = (struct winsize *)arg;
-#ifndef __SOZOBON__
-				(void)linea0();
-#else /* __SOZOBON__ */
 				linea0();
-#endif /* __SOZOBON__ */
 				win->ws_row = V_CEL_MY + 1;
 				win->ws_col = V_CEL_MX + 1;
 				win->ws_xpixel = V_X_MAX;
@@ -207,7 +190,7 @@ int __ioctl(fd, cmd, arg)
 		  if (__has_no_ssystem) {
                   	ssp = Super(0L);
                   	m = *mfp & 0xff;
-                  	Super(ssp);
+                  	SuperToUser(ssp);
 		  } else
 		  	m = (short)(Ssystem(S_TIOCMGET, (u_long)mfp, NULL));
                   *msig |= ((m & (1 << 1)) ? 0 : TIOCM_CAR);

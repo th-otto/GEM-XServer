@@ -10,8 +10,7 @@
 extern int __has_no_ssystem;
 
 long
-get_sysvar(var)
-	void *var;
+get_sysvar(void *var)
 {
     long ret;
     long save_ssp;
@@ -21,7 +20,7 @@ get_sysvar(var)
     	/* note: dont remove volatile, otherwise gcc will reorder these
        	statements and we get bombs */
     		ret = *((volatile long *)var);
-    		(void)Super((void *) save_ssp);
+    		(void)SuperToUser((void *) save_ssp);
     		return ret;
 	}
 	else
@@ -29,16 +28,14 @@ get_sysvar(var)
 }
 
 void
-set_sysvar_to_long(var, val)
-	void *var;
-	long val;
+set_sysvar_to_long(void *var, long val)
 {
     long save_ssp;
 
 	if(__has_no_ssystem) {
     		save_ssp = (long) Super((void *) 0L);
     		*((volatile long *)var) = val;
-    		(void)Super((void *) save_ssp);
+    		(void)SuperToUser((void *) save_ssp);
 	}
 	else
 		(void)Ssystem(S_SETLVAL, var, val); /* note: root only! */

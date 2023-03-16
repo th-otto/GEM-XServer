@@ -301,9 +301,18 @@
 #endif
 
 /* Decide whether we can define 'extern inline' functions in headers.  */
-#if defined __GNUC__ && (__GNUC__ > 2 || __GNUC__ == 2 && __GNUC_MINOR__ >= 7)\
-    && defined __OPTIMIZE__ && !defined __OPTIMIZE_SIZE__
+#if __GNUC_PREREQ (2, 7) && defined __OPTIMIZE__ \
+    && !defined __OPTIMIZE_SIZE__ && !defined __NO_INLINE__
 # define __USE_EXTERN_INLINES	1
+# if (defined __GNUC_STDC_INLINE__ && __GNUC_STDC_INLINE__) || \
+     defined __cplusplus || \
+     (defined __clang__ && (defined __GNUC_STDC_INLINE__ || defined __GNUC_GNU_INLINE__))
+#   define _EXTERN_INLINE extern __inline __attribute__((__gnu_inline__))
+# else
+#   define _EXTERN_INLINE extern __inline
+# endif
+#else
+# define _EXTERN_INLINE extern
 #endif
 
 #endif	/* features.h  */

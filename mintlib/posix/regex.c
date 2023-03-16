@@ -15,9 +15,8 @@
    Library General Public License for more details.
 
    You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   License along with the GNU C Library; if not, see
+   <https://www.gnu.org/licenses/>.  */
 
 /* Modified for MiNTLib by Guido Flohr <guido@freemint.de>.  */
 
@@ -46,10 +45,6 @@
 #else
 /* We need this for `regex.h', and perhaps for the Emacs include files.  */
 # include <sys/types.h>
-#endif
-
-#ifdef __MINT__
-__EXTERN void __bzero PARAMS ((void*, size_t));
 #endif
 
 #define WIDE_CHAR_SUPPORT (HAVE_WCTYPE_H && HAVE_WCHAR_H && HAVE_BTOWC)
@@ -122,39 +117,7 @@ char *malloc ();
 char *realloc ();
 # endif
 
-/* When used in Emacs's lib-src, we need to get bzero and bcopy somehow.
-   If nothing else has been done, use the method below.  */
-# ifdef INHIBIT_STRING_HEADER
-#  if !(defined HAVE_BZERO && defined HAVE_BCOPY)
-#   if !defined bzero && !defined bcopy
-#    undef INHIBIT_STRING_HEADER
-#   endif
-#  endif
-# endif
-
-/* This is the normal way of making sure we have a bcopy and a bzero.
-   This is used in most programs--a few other programs avoid this
-   by defining INHIBIT_STRING_HEADER.  */
-# ifndef INHIBIT_STRING_HEADER
-#  if defined HAVE_STRING_H || defined STDC_HEADERS || defined _LIBC
-#   include <string.h>
-#   ifndef bzero
-#    ifndef _LIBC
-#     define bzero(s, n)	(memset (s, '\0', n), (s))
-#    else
-#     define bzero(s, n)	__bzero (s, n)
-#    endif
-#   endif
-#  else
-#   include <strings.h>
-#   ifndef memcmp
-#    define memcmp(s1, s2, n)	bcmp (s1, s2, n)
-#   endif
-#   ifndef memcpy
-#    define memcpy(d, s, n)	(bcopy (s, d, n), (d))
-#   endif
-#  endif
-# endif
+# include <string.h>
 
 /* Define the syntax stuff for \<, \>, etc.  */
 
@@ -176,11 +139,11 @@ char *realloc ();
 #include <regex.h>
 
 #ifdef __MINT__
-__EXTERN int __re_search_2
+extern int __re_search_2
   _RE_ARGS ((struct re_pattern_buffer *buffer, const char *string1,
              int length1, const char *string2, int length2,
              int start, int range, struct re_registers *regs, int stop));
-__EXTERN void* __mempcpy _RE_ARGS ((void* __dest, const void* __src, size_t __n));
+extern void* __mempcpy _RE_ARGS ((void* __dest, const void* __src, size_t __n));
 #endif
 
 /* isalpha etc. are used for the character classes.  */
@@ -263,7 +226,7 @@ extern char *re_syntax_table;
 static char re_syntax_table[CHAR_SET_SIZE];
 
 static void
-init_syntax_once ()
+init_syntax_once (void)
 {
    register int c;
    static int done = 0;
@@ -1001,8 +964,7 @@ reg_syntax_t re_syntax_options;
    defined in regex.h.  We return the old syntax.  */
 
 reg_syntax_t
-re_set_syntax (syntax)
-    reg_syntax_t syntax;
+re_set_syntax (reg_syntax_t syntax)
 {
   reg_syntax_t ret = re_syntax_options;
 
@@ -1698,7 +1660,7 @@ static reg_errcode_t compile_range _RE_ARGS ((const char **p_ptr,
    being larger than MAX_BUF_SIZE, then flag memory exhausted.  */
 #define EXTEND_BUFFER()							\
   do { 									\
-    unsigned char *old_buffer = bufp->buffer;				\
+    long old_buffer = (long)bufp->buffer;				\
     if (bufp->allocated == MAX_BUF_SIZE) 				\
       return REG_ESIZE;							\
     bufp->allocated <<= 1;						\
@@ -1708,16 +1670,16 @@ static reg_errcode_t compile_range _RE_ARGS ((const char **p_ptr,
     if (bufp->buffer == NULL)						\
       return REG_ESPACE;						\
     /* If the buffer moved, move all the pointers into it.  */		\
-    if (old_buffer != bufp->buffer)					\
+    if (old_buffer != (long)bufp->buffer)					\
       {									\
-        b = (b - old_buffer) + bufp->buffer;				\
-        begalt = (begalt - old_buffer) + bufp->buffer;			\
+        b = ((long)b - old_buffer) + bufp->buffer;				\
+        begalt = ((long)begalt - old_buffer) + bufp->buffer;			\
         if (fixup_alt_jump)						\
-          fixup_alt_jump = (fixup_alt_jump - old_buffer) + bufp->buffer;\
+          fixup_alt_jump = ((long)fixup_alt_jump - old_buffer) + bufp->buffer;\
         if (laststart)							\
-          laststart = (laststart - old_buffer) + bufp->buffer;		\
+          laststart = ((long)laststart - old_buffer) + bufp->buffer;		\
         if (pending_exact)						\
-          pending_exact = (pending_exact - old_buffer) + bufp->buffer;	\
+          pending_exact = ((long)pending_exact - old_buffer) + bufp->buffer;	\
       }									\
   } while (0)
 
@@ -1893,11 +1855,7 @@ static boolean group_in_compile_stack _RE_ARGS ((compile_stack_type
   return (free (compile_stack.stack), value)
 
 static reg_errcode_t
-regex_compile (pattern, size, syntax, bufp)
-     const char *pattern;
-     size_t size;
-     reg_syntax_t syntax;
-     struct re_pattern_buffer *bufp;
+regex_compile (const char *pattern, size_t size, reg_syntax_t syntax, struct re_pattern_buffer *bufp)
 {
   /* We fetch characters from PATTERN here.  Even though PATTERN is
      `char *' (i.e., signed), we declare these variables as unsigned, so
@@ -3010,10 +2968,7 @@ regex_compile (pattern, size, syntax, bufp)
 /* Store OP at LOC followed by two-byte integer parameter ARG.  */
 
 static void
-store_op1 (op, loc, arg)
-    re_opcode_t op;
-    unsigned char *loc;
-    int arg;
+store_op1 (re_opcode_t op, unsigned char *loc, int arg)
 {
   *loc = (unsigned char) op;
   STORE_NUMBER (loc + 1, arg);
@@ -3023,10 +2978,7 @@ store_op1 (op, loc, arg)
 /* Like `store_op1', but for two two-byte parameters ARG1 and ARG2.  */
 
 static void
-store_op2 (op, loc, arg1, arg2)
-    re_opcode_t op;
-    unsigned char *loc;
-    int arg1, arg2;
+store_op2 (re_opcode_t op, unsigned char *loc, int arg1, int arg2)
 {
   *loc = (unsigned char) op;
   STORE_NUMBER (loc + 1, arg1);
@@ -3038,11 +2990,7 @@ store_op2 (op, loc, arg1, arg2)
    for OP followed by two-byte integer parameter ARG.  */
 
 static void
-insert_op1 (op, loc, arg, end)
-    re_opcode_t op;
-    unsigned char *loc;
-    int arg;
-    unsigned char *end;
+insert_op1 (re_opcode_t op, unsigned char *loc, int arg, unsigned char *end)
 {
   register unsigned char *pfrom = end;
   register unsigned char *pto = end + 3;
@@ -3057,11 +3005,7 @@ insert_op1 (op, loc, arg, end)
 /* Like `insert_op1', but for two two-byte parameters ARG1 and ARG2.  */
 
 static void
-insert_op2 (op, loc, arg1, arg2, end)
-    re_opcode_t op;
-    unsigned char *loc;
-    int arg1, arg2;
-    unsigned char *end;
+insert_op2 (re_opcode_t op, unsigned char *loc, int arg1, int arg2, unsigned char *end)
 {
   register unsigned char *pfrom = end;
   register unsigned char *pto = end + 5;
@@ -3078,9 +3022,7 @@ insert_op2 (op, loc, arg1, arg2, end)
    least one character before the ^.  */
 
 static boolean
-at_begline_loc_p (pattern, p, syntax)
-    const char *pattern, *p;
-    reg_syntax_t syntax;
+at_begline_loc_p (const char *pattern, const char *p, reg_syntax_t syntax)
 {
   const char *prev = p - 2;
   boolean prev_prev_backslash = prev > pattern && prev[-1] == '\\';
@@ -3097,9 +3039,7 @@ at_begline_loc_p (pattern, p, syntax)
    at least one character after the $, i.e., `P < PEND'.  */
 
 static boolean
-at_endline_loc_p (p, pend, syntax)
-    const char *p, *pend;
-    reg_syntax_t syntax;
+at_endline_loc_p (const char *p, const char *pend, reg_syntax_t syntax)
 {
   const char *next = p;
   boolean next_backslash = *next == '\\';
@@ -3119,9 +3059,7 @@ at_endline_loc_p (p, pend, syntax)
    false if it's not.  */
 
 static boolean
-group_in_compile_stack (compile_stack, regnum)
-    compile_stack_type compile_stack;
-    regnum_t regnum;
+group_in_compile_stack (compile_stack_type compile_stack, regnum_t regnum)
 {
   int this_element;
 
@@ -3147,11 +3085,7 @@ group_in_compile_stack (compile_stack, regnum)
    `regex_compile' itself.  */
 
 static reg_errcode_t
-compile_range (p_ptr, pend, translate, syntax, b)
-    const char **p_ptr, *pend;
-    RE_TRANSLATE_TYPE translate;
-    reg_syntax_t syntax;
-    unsigned char *b;
+compile_range (const char **p_ptr, const char *pend, RE_TRANSLATE_TYPE translate, reg_syntax_t syntax, unsigned char *b)
 {
   unsigned this_char;
 
@@ -3209,8 +3143,7 @@ compile_range (p_ptr, pend, translate, syntax, b)
    Returns 0 if we succeed, -2 if an internal error.   */
 
 int
-re_compile_fastmap (bufp)
-     struct re_pattern_buffer *bufp;
+re_compile_fastmap (struct re_pattern_buffer *bufp)
 {
   int j, k;
 #ifdef MATCH_MAY_ALLOCATE
@@ -3515,11 +3448,7 @@ weak_alias (__re_compile_fastmap, re_compile_fastmap)
    freeing the old data.  */
 
 void
-re_set_registers (bufp, regs, num_regs, starts, ends)
-    struct re_pattern_buffer *bufp;
-    struct re_registers *regs;
-    unsigned num_regs;
-    regoff_t *starts, *ends;
+re_set_registers (struct re_pattern_buffer *bufp, struct re_registers *regs, unsigned num_regs, regoff_t *starts, regoff_t *ends)
 {
   if (num_regs)
     {
@@ -3545,11 +3474,7 @@ weak_alias (__re_set_registers, re_set_registers)
    doesn't let you say where to stop matching. */
 
 int
-re_search (bufp, string, size, startpos, range, regs)
-     struct re_pattern_buffer *bufp;
-     const char *string;
-     int size, startpos, range;
-     struct re_registers *regs;
+re_search (struct re_pattern_buffer *bufp, const char *string, int size, int startpos, int range, struct re_registers *regs)
 {
   return re_search_2 (bufp, NULL, 0, string, size, startpos, range,
 		      regs, size);
@@ -3581,14 +3506,7 @@ weak_alias (__re_search, re_search)
    stack overflow).  */
 
 int
-re_search_2 (bufp, string1, size1, string2, size2, startpos, range, regs, stop)
-     struct re_pattern_buffer *bufp;
-     const char *string1, *string2;
-     int size1, size2;
-     int startpos;
-     int range;
-     struct re_registers *regs;
-     int stop;
+re_search_2 (struct re_pattern_buffer *bufp, const char *string1, int size1, const char *string2, int size2, int startpos, int range, struct re_registers *regs, int stop)
 {
   int val;
   register char *fastmap = bufp->fastmap;
@@ -3806,11 +3724,7 @@ weak_alias (__re_search_2, re_search_2)
 /* re_match is like re_match_2 except it takes only a single string.  */
 
 int
-re_match (bufp, string, size, pos, regs)
-     struct re_pattern_buffer *bufp;
-     const char *string;
-     int size, pos;
-     struct re_registers *regs;
+re_match (struct re_pattern_buffer *bufp, const char *string, int size, int pos, struct re_registers *regs)
 {
   int result = re_match_2_internal (bufp, NULL, 0, string, size,
 				    pos, regs, size);
@@ -3852,13 +3766,7 @@ static int bcmp_translate _RE_ARGS ((const char *s1, const char *s2,
    matched substring.  */
 
 int
-re_match_2 (bufp, string1, size1, string2, size2, pos, regs, stop)
-     struct re_pattern_buffer *bufp;
-     const char *string1, *string2;
-     int size1, size2;
-     int pos;
-     struct re_registers *regs;
-     int stop;
+re_match_2 (struct re_pattern_buffer *bufp, const char *string1, int size1, const char *string2, int size2, int pos, struct re_registers *regs, int stop)
 {
   int result = re_match_2_internal (bufp, string1, size1, string2, size2,
 				    pos, regs, stop);
@@ -3876,13 +3784,7 @@ weak_alias (__re_match_2, re_match_2)
 /* This is a separate function so that we can force an alloca cleanup
    afterwards.  */
 static int
-re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
-     struct re_pattern_buffer *bufp;
-     const char *string1, *string2;
-     int size1, size2;
-     int pos;
-     struct re_registers *regs;
-     int stop;
+re_match_2_internal (struct re_pattern_buffer *bufp, const char *string1, int size1, const char *string2, int size2, int pos, struct re_registers *regs, int stop)
 {
   /* General temporaries.  */
   int mcnt;
@@ -4931,8 +4833,8 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
             POP_FAILURE_POINT (sdummy, pdummy,
                                dummy_low_reg, dummy_high_reg,
                                reg_dummy, reg_dummy, reg_info_dummy);
-            (void)sdummy;
-            (void)pdummy;
+            (void) sdummy;
+            (void) pdummy;
           }
 	  /* Note fall through.  */
 
@@ -5270,9 +5172,7 @@ re_match_2_internal (bufp, string1, size1, string2, size2, pos, regs, stop)
    We don't handle duplicates properly (yet).  */
 
 static boolean
-group_match_null_string_p (p, end, reg_info)
-    unsigned char **p, *end;
-    register_info_type *reg_info;
+group_match_null_string_p (unsigned char **p, unsigned char *end, register_info_type *reg_info)
 {
   int mcnt;
   /* Point to after the args to the start_memory.  */
@@ -5379,9 +5279,7 @@ group_match_null_string_p (p, end, reg_info)
    byte past the last. The alternative can contain groups.  */
 
 static boolean
-alt_match_null_string_p (p, end, reg_info)
-    unsigned char *p, *end;
-    register_info_type *reg_info;
+alt_match_null_string_p (unsigned char *p, unsigned char *end, register_info_type *reg_info)
 {
   int mcnt;
   unsigned char *p1 = p;
@@ -5416,9 +5314,7 @@ alt_match_null_string_p (p, end, reg_info)
    Sets P to one after the op and its arguments, if any.  */
 
 static boolean
-common_op_match_null_string_p (p, end, reg_info)
-    unsigned char **p, *end;
-    register_info_type *reg_info;
+common_op_match_null_string_p (unsigned char **p, unsigned char *end, register_info_type *reg_info)
 {
   int mcnt;
   boolean ret;
@@ -5504,10 +5400,7 @@ common_op_match_null_string_p (p, end, reg_info)
    bytes; nonzero otherwise.  */
 
 static int
-bcmp_translate (s1, s2, len, translate)
-     const char *s1, *s2;
-     register int len;
-     RE_TRANSLATE_TYPE translate;
+bcmp_translate (const char *s1, const char *s2, int len, RE_TRANSLATE_TYPE translate)
 {
   register const unsigned char *p1 = (const unsigned char *) s1;
   register const unsigned char *p2 = (const unsigned char *) s2;
@@ -5531,10 +5424,7 @@ bcmp_translate (s1, s2, len, translate)
    We call regex_compile to do the actual compilation.  */
 
 const char *
-re_compile_pattern (pattern, length, bufp)
-     const char *pattern;
-     size_t length;
-     struct re_pattern_buffer *bufp;
+re_compile_pattern (const char *pattern, size_t length, struct re_pattern_buffer *bufp)
 {
   reg_errcode_t ret;
 
@@ -5575,8 +5465,7 @@ char *
    regcomp/regexec below without link errors.  */
 weak_function
 #endif
-re_comp (s)
-    const char *s;
+re_comp (const char *s)
 {
   reg_errcode_t ret;
 
@@ -5621,8 +5510,7 @@ int
 #ifdef _LIBC
 weak_function
 #endif
-re_exec (s)
-    const char *s;
+re_exec (const char *s)
 {
   const int len = strlen (s);
   return
@@ -5671,10 +5559,7 @@ re_exec (s)
    the return codes and their meanings.)  */
 
 int
-regcomp (preg, pattern, cflags)
-    regex_t *preg;
-    const char *pattern;
-    int cflags;
+regcomp (regex_t *preg, const char *pattern, int cflags)
 {
   reg_errcode_t ret;
   reg_syntax_t syntax
@@ -5762,12 +5647,7 @@ weak_alias (__regcomp, regcomp)
    We return 0 if we find a match and REG_NOMATCH if not.  */
 
 int
-regexec (preg, string, nmatch, pmatch, eflags)
-    const regex_t *preg;
-    const char *string;
-    size_t nmatch;
-    regmatch_t pmatch[];
-    int eflags;
+regexec (const regex_t *preg, const char *string, size_t nmatch, regmatch_t pmatch[], int eflags)
 {
   int ret;
   struct re_registers regs;
@@ -5829,11 +5709,7 @@ weak_alias (__regexec, regexec)
    from either regcomp or regexec.   We don't use PREG here.  */
 
 size_t
-regerror (errcode, preg, errbuf, errbuf_size)
-    int errcode;
-    const regex_t *preg;
-    char *errbuf;
-    size_t errbuf_size;
+regerror (int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
 {
   const char *msg;
   size_t msg_size;
@@ -5876,8 +5752,7 @@ weak_alias (__regerror, regerror)
 /* Free dynamically allocated space used by PREG.  */
 
 void
-regfree (preg)
-    regex_t *preg;
+regfree (regex_t *preg)
 {
   if (preg->buffer != NULL)
     free (preg->buffer);

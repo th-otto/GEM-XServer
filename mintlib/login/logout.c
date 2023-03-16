@@ -13,11 +13,10 @@
    Library General Public License for more details.
 
    You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   License along with the GNU C Library; if not, see
+   <https://www.gnu.org/licenses/>.  */
 
-/* Adapted to MiNTLib by Guido Flohr <gufl0000@stud.uni-sb.de>,
+/* Adapted to MiNTLib by Guido Flohr <guido@freemint.de>,
    12 Sep 1999.  */
 
 #include <errno.h>
@@ -25,6 +24,10 @@
 #include <utmp.h>
 #include <time.h>
 #include <sys/time.h>
+
+#if __GNUC_PREREQ(8, 0)
+# pragma GCC diagnostic ignored "-Wstringop-truncation"
+#endif
 
 int
 logout (const char *line)

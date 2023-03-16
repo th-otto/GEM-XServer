@@ -16,13 +16,13 @@
    write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#include <float.h>
+#include <math.h>
+#include <stdlib.h>
 #include "gmp.h"
 #include "gmp-impl.h"
 #include "longlong.h"
 #include <ieee754.h>
-#include <float.h>
-#include <math.h>
-#include <stdlib.h>
 
 #ifndef __NO_LONG_DOUBLE_MATH
 

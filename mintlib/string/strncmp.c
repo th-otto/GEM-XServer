@@ -20,10 +20,16 @@ size_t n;
 	register long count;  /* FIXME!!! Has to be size_t but that requires
 				a rewrite (Guido).  */
 
+#if !__GNUC_PREREQ(4, 0)
+	/*
+	 * Newer compilers will remove that check anyway.
+	 * GCC >= 7 even complains about it.
+	 */
 	if (!scan1) {
 		return scan2 ? -1 : 0;
 	}
 	if (!scan2) return 1;
+#endif
 	count = n;
 	do {
 		c1 = (unsigned char) *scan1++; c2 = (unsigned char) *scan2++;

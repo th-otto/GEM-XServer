@@ -14,9 +14,8 @@
    Library General Public License for more details.
 
    You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   License along with the GNU C Library; if not, see
+   <https://www.gnu.org/licenses/>.  */
 
 /* Modified for MiNTLib by Guido Flohr <guido@freemint.de>.  */
 
@@ -85,11 +84,11 @@
 # undef _NL_CURRENT
 # define _NL_CURRENT(category, item) \
   (current->values[_NL_ITEM_INDEX (item)].string)
+# define LOCALE_PARAM_DECL , __locale_t loc
 # define LOCALE_PARAM , loc
-# define LOCALE_PARAM_DECL __locale_t loc;
 #else
-# define LOCALE_PARAM
 # define LOCALE_PARAM_DECL
+# define LOCALE_PARAM
 #endif
 
 #ifndef __MINT__
@@ -107,6 +106,11 @@
 # include <wctype.h>
 # define STRING_TYPE wchar_t
 # define CHAR_TYPE wint_t
+/* We should get wint_t from <stddef.h>, but not all GCC versions define it
+   there.  So define it ourselves if it remains undefined.  */
+#ifndef _WINT_T
+  typedef unsigned int wint_t;
+#endif
 # define L_(Ch) L##Ch
 # ifdef USE_IN_EXTENDED_LOCALE_MODEL
 #  define ISSPACE(Ch) __iswspace_l ((Ch), loc)
@@ -298,7 +302,7 @@ round_and_return (mp_limb_t *retval, int exponent, int negative,
       && (more_bits || (retval[0] & 1) != 0
           || (round_limb & ((((mp_limb_t) 1) << round_bit) - 1)) != 0))
     {
-      mp_limb_t cy = __mpn_add_1 (retval, retval, RETURN_LIMB_SIZE, 1);
+      mp_limb_t cy = mpn_add_1 (retval, retval, RETURN_LIMB_SIZE, 1);
 
       if (((MANT_DIG % BITS_PER_MP_LIMB) == 0 && cy) ||
           ((MANT_DIG % BITS_PER_MP_LIMB) != 0 &&
@@ -354,7 +358,7 @@ str_to_mpn (const STRING_TYPE *str, int digcnt, mp_limb_t *n, mp_size_t *nsize,
 	    {
 	      mp_limb_t cy;
 	      cy = __mpn_mul_1 (n, n, *nsize, MAX_FAC_PER_LIMB);
-	      cy += __mpn_add_1 (n, n, *nsize, low);
+	      cy += mpn_add_1 (n, n, *nsize, low);
 	      if (cy != 0)
 		{
 		  n[*nsize] = cy;
@@ -394,7 +398,7 @@ str_to_mpn (const STRING_TYPE *str, int digcnt, mp_limb_t *n, mp_size_t *nsize,
     {
       mp_limb_t cy;
       cy = __mpn_mul_1 (n, n, *nsize, start);
-      cy += __mpn_add_1 (n, n, *nsize, low);
+      cy += mpn_add_1 (n, n, *nsize, low);
       if (cy != 0)
 	n[(*nsize)++] = cy;
     }
@@ -444,11 +448,7 @@ __mpn_lshift_1 (mp_limb_t *ptr, mp_size_t size, unsigned int count,
    return 0.0.  If the number is too big to be represented, set `errno' to
    ERANGE and return HUGE_VAL with the appropriate sign.  */
 FLOAT
-INTERNAL (STRTOF) (nptr, endptr, group LOCALE_PARAM)
-     const STRING_TYPE *nptr;
-     STRING_TYPE **endptr;
-     int group;
-     LOCALE_PARAM_DECL
+INTERNAL (STRTOF) (const STRING_TYPE *nptr, STRING_TYPE **endptr, int group LOCALE_PARAM_DECL)
 {
   int negative;			/* The sign of the number.  */
   MPN_VAR (num);		/* MP representation of the number.  */
@@ -486,11 +486,6 @@ INTERNAL (STRTOF) (nptr, endptr, group LOCALE_PARAM)
   /* Contains the last character read.  */
   CHAR_TYPE c;
 
-/* We should get wint_t from <stddef.h>, but not all GCC versions define it
-   there.  So define it ourselves if it remains undefined.  */
-#ifndef _WINT_T
-  typedef unsigned int wint_t;
-#endif
   /* The radix character of the current locale.  */
   wchar_t decimal;
   /* The thousands character of the current locale.  */
@@ -1462,10 +1457,7 @@ FLOAT
 #ifdef weak_function
 weak_function
 #endif
-STRTOF (nptr, endptr LOCALE_PARAM)
-     const STRING_TYPE *nptr;
-     STRING_TYPE **endptr;
-     LOCALE_PARAM_DECL
+STRTOF (const STRING_TYPE *nptr, STRING_TYPE **endptr LOCALE_PARAM_DECL)
 {
   return INTERNAL (STRTOF) (nptr, endptr, 0 LOCALE_PARAM);
 }

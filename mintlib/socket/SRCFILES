@@ -22,6 +22,7 @@ SRCFILES = \
 	getsockname.c \
 	getsockopt.c \
 	herror.c \
+	herrno.c \
 	hton.c \
 	ident_sock.c \
 	inet_addr.c \

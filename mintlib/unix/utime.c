@@ -33,9 +33,7 @@
 #include "lib.h"
 
 int
-__utime (_filename, _tset)
-      const char *_filename;
-      const struct utimbuf *_tset;
+__utime (const char *_filename, const struct utimbuf *_tset)
 {
 	char filenamebuf[PATH_MAX];
 	char* filename = (char*) _filename;
@@ -58,12 +56,12 @@ __utime (_filename, _tset)
 	/* The FUTIME_UTC failed.  We have to convert the timestamp
 	   to GEMDOS format.  */   
 	if (_tset) {
-		*((unsigned long*) &(settime.modtime)) = 
-			__dostime (_tset->modtime);
-		*((unsigned long*) &(settime.actime)) = 
-			__dostime (_tset->actime);
+		unsigned long *tp = (unsigned long*) &(settime.modtime);
+		*tp =  __dostime (_tset->modtime);
+		tp = (unsigned long*) &(settime.actime);
+		*tp = __dostime (_tset->actime);
 		
-			tset = &settime;
+		tset = &settime;
 	}
 
 	/* Try again with FUTIME.  */
@@ -72,8 +70,8 @@ __utime (_filename, _tset)
 		if (retval < 0) {
 			if ((retval == -ENOTDIR) && (_enoent(filename)))
 				retval = -ENOENT;
-				__set_errno (-retval);
-				return -1;
+			__set_errno (-retval);
+			return -1;
 		}
 		return 0;
 	}
@@ -140,7 +138,7 @@ __utime (_filename, _tset)
 	}
 	
 	if (retval != 0) {
-		__set_errno (-fh);
+		__set_errno (-(int)retval);
 		return -1;
 	}
 	

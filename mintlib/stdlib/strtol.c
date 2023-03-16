@@ -13,9 +13,8 @@
    Library General Public License for more details.
 
    You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   License along with the GNU C Library; if not, see
+   <https://www.gnu.org/licenses/>.  */
 
 /* Modified for MiNTLib by Guido Flohr <guido@freemint.de>.  */
 
@@ -131,7 +130,7 @@
 # define STRTOL_LONG_MIN LONG_LONG_MIN
 # define STRTOL_LONG_MAX LONG_LONG_MAX
 # define STRTOL_ULONG_MAX ULONG_LONG_MAX
-# if __GNUC__ == 2 && __GNUC_MINOR__ < 7
+# if defined(__GNUC__) && !__GNUC_PREREQ(2,7)
    /* Work around gcc bug with using this constant.  */
    static const unsigned long long int maxquad = ULONG_LONG_MAX;
 #  undef STRTOL_ULONG_MAX
@@ -161,7 +160,7 @@
 # define _NL_CURRENT(category, item) \
   (current->values[_NL_ITEM_INDEX (item)].string)
 # define LOCALE_PARAM , loc
-# define LOCALE_PARAM_DECL __locale_t loc;
+# define LOCALE_PARAM_DECL __locale_t loc
 #else
 # define LOCALE_PARAM
 # define LOCALE_PARAM_DECL
@@ -228,12 +227,7 @@
    one converted is stored in *ENDPTR.  */
 
 INT
-INTERNAL (strtol) (nptr, endptr, base, group LOCALE_PARAM)
-     const STRING_TYPE *nptr;
-     STRING_TYPE **endptr;
-     int base;
-     int group;
-     LOCALE_PARAM_DECL
+INTERNAL (strtol) (const STRING_TYPE *nptr, STRING_TYPE **endptr, int base, int group LOCALE_PARAM_DECL)
 {
   int negative;
   register unsigned LONG int cutoff;
@@ -468,11 +462,7 @@ INT
 #ifdef weak_function
 weak_function
 #endif
-strtol (nptr, endptr, base LOCALE_PARAM)
-     const STRING_TYPE *nptr;
-     STRING_TYPE **endptr;
-     int base;
-     LOCALE_PARAM_DECL
+strtol (const STRING_TYPE *nptr, STRING_TYPE **endptr, int base LOCALE_PARAM_DECL)
 {
   return INTERNAL (strtol) (nptr, endptr, base, 0 LOCALE_PARAM);
 }

@@ -76,20 +76,7 @@ struct timespec
 #undef	__need_timespec
 
 #ifdef _TIME_H
-
-# ifndef __attribute__
-/* This feature is available in gcc versions 2.5 and later.  */
-#  if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5) || __STRICT_ANSI__
-#   define __attribute__(Spec) /* empty */
-#  endif
-/* The __-protected variants of `format' and `printf' attributes
-   are accepted by gcc versions 2.6.4 (effectively 2.7) and later.  */
-#  if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 7)
-#   define __format__ format
-#   define __printf__ printf
-#  endif
-# endif
-
+/* Used by other time functions.  */
 struct tm
   {
     int tm_sec;			/* Seconds.	[0-60] (1 leap second) */

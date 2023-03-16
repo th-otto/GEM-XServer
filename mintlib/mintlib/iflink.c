@@ -18,12 +18,16 @@
 #include <limits.h>
 #include "lib.h" /* _unx2dos */
 
+#if __GNUC_PREREQ(8, 0)
+# pragma GCC diagnostic ignored "-Wstringop-truncation"
+# pragma GCC diagnostic ignored "-Wsizeof-pointer-memaccess"
+#endif
+
 /*
  * link device to network interface.
  */
 int
-if_link (device, ifname)
-	char *device, *ifname;
+if_link (char *device, char *ifname)
 {
 	struct iflink ifl;
 	int sockfd;
@@ -49,9 +53,7 @@ if_link (device, ifname)
  * Get interface link level flags
  */
 int
-if_getlnkflags (ifname, flags)
-	char *ifname;
-	short *flags;
+if_getlnkflags (char *ifname, short *flags)
 {
 	struct ifreq ifr;
 	int sock;
@@ -74,9 +76,7 @@ if_getlnkflags (ifname, flags)
  * Set interface link level flags
  */
 int
-if_setlnkflags (ifname, flags)
-	char *ifname;
-	short flags;
+if_setlnkflags (char *ifname, short flags)
 {
 	struct ifreq ifr;
 	int sock;
@@ -99,9 +99,7 @@ if_setlnkflags (ifname, flags)
  * Get interface flags
  */
 int
-if_getifflags (ifname, flags)
-	char *ifname;
-	short *flags;
+if_getifflags (char *ifname, short *flags)
 {
 	struct ifreq ifr;
 	int sock;
@@ -124,9 +122,7 @@ if_getifflags (ifname, flags)
  * Set interface link level flags
  */
 int
-if_setifflags (ifname, flags)
-	char *ifname;
-	short flags;
+if_setifflags (char *ifname, short flags)
 {
 	struct ifreq ifr;
 	int sock;

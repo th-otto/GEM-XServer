@@ -10,15 +10,19 @@
  */
 
 int				/* <0 for <, 0 for ==, >0 for > */
-strcmp(scan1, scan2)
-register const char *scan1;
-register const char *scan2;
+strcmp(const char *scan1, const char *scan2)
 {
-	register unsigned char c1, c2;
+	unsigned char c1, c2;
 
+#if !__GNUC_PREREQ(4, 0)
+	/*
+	 * Newer compilers will remove that check anyway.
+	 * GCC >= 7 even complains about it.
+	 */
 	if (!scan1)
 		return scan2 ? -1 : 0;
 	if (!scan2) return 1;
+#endif
 
 	do {
 		c1 = (unsigned char) *scan1++; c2 = (unsigned char) *scan2++;

@@ -1,5 +1,5 @@
 /*  sysinfo.c -- MiNTLib.
-    Copyright (C) 1999 Guido Flohr <gufl0000@stud.uni-sb.de>
+    Copyright (C) 1999 Guido Flohr <guido@freemint.de>
 
     This file is part of the MiNTLib project, and may only be used
     modified and distributed under the terms of the MiNTLib project
@@ -8,67 +8,52 @@
     understand and accept it fully.
 */
 
-#ifdef __TURBOC__
-# include <sys\systeminfo.h>
-# include <sys\utsname.h>
-# include <sys\param.h>
-# include <mint\cookie.h>
-#else
-# include <sys/systeminfo.h>
-# include <sys/utsname.h>
-# include <sys/param.h>
-# include <mint/cookie.h>
-#endif
-
-#include <mintbind.h>
-#include <osbind.h>
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <sys/systeminfo.h>
+#include <sys/utsname.h>
+#include <sys/param.h>
+#include <mint/cookie.h>
+#include <mint/mintbind.h>
+
 extern unsigned long __mint;
 
-/* In case you still haven't got the prototype in stdlib.h where
-   it belongs.  */ 
-extern int putenv __PROTO ((const char* string));
-
 /* Helper functions.  */
-static void fast_strncpy __PROTO ((char* to, char* from, long bytes));
+static void fast_strncpy (char* to, const char* from, long bytes);
 
 /* Prototypes for sub-functions.  */
 
 /* Standard (more or less).  */
-static int si_sysname __PROTO ((char* buf, long bufsize));
-static int si_hostname __PROTO ((char* buf, long bufsize));
-static int si_set_hostname __PROTO ((char* buf, long bufsize));
-static int si_release __PROTO ((char* buf, long bufsize));
-static int si_version __PROTO ((char* buf, long bufsize));
-static int si_architecture __PROTO ((char* buf, long bufsize));
-static int si_isalist __PROTO ((char* buf, long bufsize));
-static int si_platform __PROTO ((char* buf, long bufsize));
-static int si_hw_provider __PROTO ((char* buf, long bufsize));
+static int si_sysname (char *buf, long bufsize);
+static int si_hostname (char *buf, long bufsize);
+static int si_set_hostname (char *buf, long bufsize);
+static int si_release (char *buf, long bufsize);
+static int si_version (char *buf, long bufsize);
+static int si_architecture (char *buf, long bufsize);
+static int si_isalist (char *buf, long bufsize);
+static int si_platform (char *buf, long bufsize);
+static int si_hw_provider (char *buf, long bufsize);
 
 /* Interface to Ssystem.  */
-static int mint_kernel_build_date __PROTO ((char* buf, long bufsize));
-static int mint_kernel_build_time __PROTO ((char* buf, long bufsize));
-static int mint_get_clock_mode __PROTO ((char* buf, long bufsize));
-static int mint_set_clock_mode __PROTO ((char* buf, long bufsize));
+static int mint_kernel_build_date (char *buf, long bufsize);
+static int mint_kernel_build_time (char *buf, long bufsize);
+static int mint_get_clock_mode (char *buf, long bufsize);
+static int mint_set_clock_mode (char *buf, long bufsize);
 
-int sysinfo (command, buf, bufsize)
-  enum __sysinfo_command command;
-  char* buf;
-  long bufsize;
+int sysinfo (enum __sysinfo_command command, char *buf, long bufsize)
 {
   int retval = -1;
-  
+
   /* Pathological cases first.  */
   if (buf == NULL && bufsize > 0) {
     __set_errno (EFAULT);
     return -1;
   }
-  
+
   switch (command) {
     case SI_SYSNAME:
       retval = si_sysname (buf, bufsize);
@@ -118,16 +103,13 @@ int sysinfo (command, buf, bufsize)
 
 /* Like strncpy but don't pad with nulls.  */
 static void
-fast_strncpy (to, from, bytes)
-  char* to;
-  char* from;
-  long bytes;
+fast_strncpy (char* to, const char* from, long bytes)
 {
   long count = 0;
-  
+
   if (bytes <= 0)
     return;
-    
+
   while (*from && ++count < bytes)
     *to++ = *from++;
   *to = '\0';
@@ -137,7 +119,7 @@ fast_strncpy (to, from, bytes)
  * SI_SYSNAME
  * FIXME: Should we look up information about MagiC too?
  */
- 
+
 static char* osname = NULL;  /* Cached result.  */
 static int osname_len = 0;   /* Cached result.  */
 
@@ -151,15 +133,13 @@ static char* osnames[] = {
 };
 
 static int
-si_sysname (buf, bufsize)
-  char* buf;
-  long bufsize;
+si_sysname (char* buf, long bufsize)
 {
   if (osname == NULL) {
     int index = OS_TOS;
     /* This is non-standard.  But it may be helpful.  */
     osname = getenv ("SYSTEMNAME");
-    
+
     if (osname == NULL) {
       if (__mint > 0x0000010cL)
         index = OS_FREEMINT;
@@ -169,7 +149,7 @@ si_sysname (buf, bufsize)
     }
     osname_len = strlen (osname) + 1;
   }
-  
+
   fast_strncpy (buf, osname, bufsize);
   return osname_len;
 }
@@ -180,12 +160,10 @@ si_sysname (buf, bufsize)
  * the result of the lookup is not cached.
  */
 static int
-si_hostname (buf, bufsize)
-  char* buf;
-  long bufsize;
+si_hostname (char* buf, long bufsize)
 {
   int saved_errno = errno;
-  
+
   __set_errno (0);
 
   if (gethostname (buf, bufsize) != 0) {
@@ -195,7 +173,7 @@ si_hostname (buf, bufsize)
     }
     return -1;
   }
-  
+
   __set_errno (saved_errno);
   return (strlen (buf) + 1);
 }
@@ -205,9 +183,7 @@ si_hostname (buf, bufsize)
  * Calls the stubs function sethostname().
  */
 static int
-si_set_hostname (buf, bufsize)
-  char* buf;
-  long bufsize;
+si_set_hostname (char* buf, long bufsize)
 {
   return (sethostname (buf, bufsize));
 }
@@ -217,9 +193,7 @@ si_set_hostname (buf, bufsize)
  */
 
 static int
-si_release (buf, bufsize)
-  char* buf;
-  long bufsize;
+si_release (char* buf, long bufsize)
 {
   /* Cached results.  */
   static char* osrelease = NULL;
@@ -232,10 +206,10 @@ si_release (buf, bufsize)
     unsigned long patch_level = 0;
     char betatag[2] = "";
     int gotcha = 0;
-    unsigned long ver = Ssystem (2, 0, 0);
-    
+    long ver = Ssystem (2, 0, 0);
+
     if (ver == -ENOSYS) {
-      /* This is actually a bug in Ssystem () because the return code 
+      /* This is actually a bug in Ssystem () because the return code
        * of -32 would also describe version 255.255.255<greak alpha>.
        */
       /* Fall thru'.  */
@@ -252,13 +226,13 @@ si_release (buf, bufsize)
       }
       gotcha = 1;
     }
-    
+
     if (!gotcha && __mint) {
       main_rev = (__mint & 0xff00) >> 8;
       sub_rev = __mint & 0xff;
     } else if (!gotcha) {
       unsigned long ver = Sversion ();
-      
+
       /* OK, this is actually bogus for GEMDOS because SUB_REV is
        * really the main revision and PATCH_LEVEL is really the
        * sub revision but it works and the user won't see our
@@ -287,9 +261,7 @@ si_release (buf, bufsize)
  */
 
 static int
-si_version (buf, bufsize)
-  char* buf;
-  long bufsize;
+si_version (char* buf, long bufsize)
 {
   /* Cached results.  */
   static char* osversion = NULL;
@@ -306,7 +278,7 @@ si_version (buf, bufsize)
     hi = (tosversion & 0xff00) >> 8;
     lo = (tosversion & 0xff);
     
-    (void) Super ((void*) save_stk);
+    (void) SuperToUser ((void*) save_stk);
     sprintf (osversion_buf, "%d.%d", (int) hi, (int) lo);
     osversion = osversion_buf;
     osversion_len = strlen (osversion) + 1;
@@ -552,7 +524,7 @@ mint_kernel_build_date (buf, bufsize)
         mon = 1;
       else if (mon > 12)
         mon = 12;
-      sprintf (kernel_build_date, "%.02u %s %.04u",
+      sprintf (kernel_build_date_buf, "%.02u %s %.04u",
           (unsigned) day, 
           abbrev_month_names[mon - 1], 
           (unsigned) *year);          
@@ -593,7 +565,7 @@ mint_kernel_build_time (buf, bufsize)
     } else {
       char* rbuf = (char*) &retval;
       kernel_build_time = kernel_build_time_buf;
-      sprintf (kernel_build_time, "%.02u:%.02u:%.02u",
+      sprintf (kernel_build_time_buf, "%.02u:%.02u:%.02u",
           (unsigned) rbuf[1], (unsigned) rbuf[2], (unsigned) rbuf[3]);
     }
   }

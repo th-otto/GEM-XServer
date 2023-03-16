@@ -11,6 +11,10 @@
 #include <string.h>
 #include <utmp.h>
 
+#if __GNUC_PREREQ(8, 0)
+# pragma GCC diagnostic ignored "-Wstringop-truncation"
+#endif
+
 link_warning (_write_wtmp,
 	      "using `_write_wtmp' is obsolete and dangerous")
 

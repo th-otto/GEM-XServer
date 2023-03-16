@@ -24,7 +24,7 @@ __EXTERN char* _itoa __PROTO((unsigned long long int value, char* buflim,
 #ifdef __TURBOC__
 static char*
 #else
-extern __inline char* __attribute__ ((unused))
+static __inline char* __attribute__ ((unused))
 #endif
 _itoa_word (unsigned long value, char *buflim,
 	    unsigned int base, int upper_case)
@@ -57,7 +57,7 @@ _itoa_word (unsigned long value, char *buflim,
 #ifdef __TURBOC__
 static char*
 #else
-extern __inline char* __attribute__ ((unused))
+static __inline char* __attribute__ ((unused))
 #endif
 _fitoa_word (unsigned long value, char* buf, unsigned int base, int upper_case)
 {
@@ -71,7 +71,7 @@ _fitoa_word (unsigned long value, char* buf, unsigned int base, int upper_case)
 #ifdef __TURBOC__
 static char*
 #else
-extern __inline char* __attribute__ ((unused))
+static __inline char* __attribute__ ((unused))
 #endif
 _fitoa (unsigned long long value, char* buf, unsigned int base, int upper_case)
 {
