@@ -13,8 +13,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "pixmap_P.h"
+#include "main.h"
 #include "clnt.h"
+#include "gcontext.h"
+#include "pixmap.h"
 #include "grph.h"
 #include "colormap.h"
 #include "x_gem.h"
