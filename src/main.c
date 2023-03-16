@@ -290,7 +290,6 @@ int main(int argc, char *argv[])
 						WindUpdate(xFalse);
 					}
 					SrvrReset();
-
 				} else if (_MAIN_Xcons && WIND_ChngTrigger)
 				{
 					SrvrUngrab(NULL);

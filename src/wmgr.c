@@ -1139,7 +1139,7 @@ BOOL WmgrMessage(short *msg)
 					EvntClientMsg(clnt, wind->Id, WM_PROTOCOLS, 32, data);
 				} else
 				{
-					reset = (!ClntDelete(clnt) && !WMGR_Active);
+					reset = !ClntDelete(clnt) && !WMGR_Active;
 				}
 			}
 		}

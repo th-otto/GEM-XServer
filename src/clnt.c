@@ -154,58 +154,6 @@ static void _Clnt_EvalInit(CLIENT *clnt, xConnClientPrefix *q)
 }
 
 
-#if defined(__GNUC__) && (__GNUC__ <= 2)
-/*
- * gcc 2.95.3 complains about __retvalue being clobbered by longjmp
- */
-#undef trap_1_ww /* used for Finstat & Foutstat */
-#define trap_1_ww(n, a)							\
-__extension__								\
-({									\
-	long __retvalue;				\
-	short _a = (short)(a);						\
-	    								\
-	__asm__ volatile						\
-	(\
-		"\tmovw	%2,sp@-\n" \
-		"\tmovw    %1,sp@-\n" \
-		"\ttrap    #1\n" \
-		"\taddqw   #4,sp\n"						\
-		"\tmove.l  %%d0,%0\n"						\
-	: "=r"(__retvalue)			/* outputs */		\
-	: "g"(n), "r"(_a)			/* inputs  */		\
-	: "d0", "d1", "d2", "a0", "a1", "a2"    /* clobbered regs */	\
-	  AND_MEMORY							\
-	);								\
-	__retvalue;							\
-})
-#undef trap_1_wwll /* used by Fread/Fwrite */
-#define trap_1_wwll(n, a, b, c)						\
-__extension__								\
-({									\
-	long __retvalue;				\
-	short _a = (short)(a);						\
-	long  _b = (long) (b);						\
-	long  _c = (long) (c);						\
-	    								\
-	__asm__ volatile						\
-	(\
-		"\tmovl    %4,sp@-\n" \
-		"\tmovl    %3,sp@-\n" \
-		"\tmovw    %2,sp@-\n" \
-		"\tmovw    %1,sp@-\n" \
-		"\ttrap    #1\n"	\
-		"\tlea	sp@(12),sp\n"					\
-		"\tmove.l  %%d0,%0\n"						\
-	: "=r"(__retvalue)			/* outputs */		\
-	: "g"(n), "r"(_a), "r"(_b), "r"(_c)     /* inputs  */		\
-	: "d0", "d1", "d2", "a0", "a1", "a2"    /* clobbered regs */	\
-	  AND_MEMORY							\
-	);								\
-	__retvalue;							\
-})
-#endif
-
 /* ------------------------------------------------------------------------------ */
 static size_t _CLNT_MaxObuf = 0;
 static BOOL _Clnt_ConnRW(p_CONNECTION conn, BOOL rd, BOOL wr)
@@ -723,7 +671,7 @@ void RQ_KillClient(CLIENT *clnt, xKillClientReq *q)
 				}
 			}
 		}
-	} else if (!c_id)
+	} else if (c_id == 0)
 	{
 		int owner = -1;
 

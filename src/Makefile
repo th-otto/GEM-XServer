@@ -62,3 +62,4 @@ COMPILE = $(CC) $(CFLAGS) $(CFLAGS-$(<F))
 .s.o:
 	$(AM_V_AS)$(COMPILE) -Wp,-MD,.deps/$(@:.o=.P) -c $< -o $@
 
+-include $(DEP_FILES) /dev/null
