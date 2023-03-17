@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <setjmp.h>
+#include <stdarg.h>
 
 #include "clnt.h"
 #include "server.h"
@@ -48,28 +49,28 @@ CLNT_POOL CLNT_Pool;
 static jmp_buf CLNT_Error;
 
 
-static void FT_Clnt_reply_MSB(p_CLIENT, CARD32 size, const char *form);
-static void FT_Clnt_reply_LSB(p_CLIENT, CARD32 size, const char *form);
+static void FT_Clnt_reply_Unswapped(p_CLIENT, CARD32 size, const char *form);
+static void FT_Clnt_reply_Swapped(p_CLIENT, CARD32 size, const char *form);
 
-static void FT_Clnt_error_MSB(p_CLIENT, CARD8 code, CARD8 majOp, CARD16 minOp, CARD32 val);
-static void FT_Clnt_error_LSB(p_CLIENT, CARD8 code, CARD8 majOp, CARD16 minOp, CARD32 val);
+static void FT_Clnt_error_Unswapped(p_CLIENT, CARD8 code, CARD8 majOp, CARD16 minOp, CARD32 val);
+static void FT_Clnt_error_Swapped(p_CLIENT, CARD8 code, CARD8 majOp, CARD16 minOp, CARD32 val);
 
-static FUNCTABL _CLNT_Functabl_MSB = {
-	FT_Clnt_reply_MSB,
-	FT_Clnt_error_MSB,
-	FT_Evnt_send_MSB,
-	FT_Grph_ShiftArc_MSB,
-	FT_Grph_ShiftPnt_MSB,
-	FT_Grph_ShiftR2P_MSB
+static FUNCTABL _CLNT_Functabl_Unswapped = {
+	FT_Clnt_reply_Unswapped,
+	FT_Clnt_error_Unswapped,
+	FT_Evnt_send_Unswapped,
+	FT_Grph_ShiftArc_Unswapped,
+	FT_Grph_ShiftPnt_Unswapped,
+	FT_Grph_ShiftR2P_Unswapped
 };
 
-static FUNCTABL _CLNT_Functabl_LSB = {
-	FT_Clnt_reply_LSB,
-	FT_Clnt_error_LSB,
-	FT_Evnt_send_LSB,
-	FT_Grph_ShiftArc_LSB,
-	FT_Grph_ShiftPnt_LSB,
-	FT_Grph_ShiftR2P_LSB
+static FUNCTABL _CLNT_Functabl_Swapped = {
+	FT_Clnt_reply_Swapped,
+	FT_Clnt_error_Swapped,
+	FT_Evnt_send_Swapped,
+	FT_Grph_ShiftArc_Swapped,
+	FT_Grph_ShiftPnt_Swapped,
+	FT_Grph_ShiftR2P_Swapped
 };
 
 
@@ -77,7 +78,7 @@ static FUNCTABL _CLNT_Functabl_LSB = {
 static void _Clnt_EvalAuth(CLIENT *clnt, xConnClientPrefix *q)
 {
 	PRINT(0, "ByteOrder = %s, Version = X%i.%i",
-		  (clnt->DoSwap ? "IntelCrap" : "MSB"), q->majorVersion, q->minorVersion);
+		  clnt->DoSwap ? "IntelCrap" : "MSB", q->majorVersion, q->minorVersion);
 
 	if (q->nbytesAuthProto || q->nbytesAuthString)
 	{
@@ -111,7 +112,7 @@ static void _Clnt_EvalAuth(CLIENT *clnt, xConnClientPrefix *q)
 	clnt->oBuf.Done = 0;
 	MAIN_FDSET_wr |= 1uL << clnt->Fd;
 
-	clnt->Eval = (clnt->DoSwap ? Clnt_EvalSelect_LSB : Clnt_EvalSelect_MSB);
+	clnt->Eval = clnt->DoSwap ? Clnt_EvalSelect_Swapped : Clnt_EvalSelect_Unswapped;
 	clnt->iBuf.Left = sizeof(xReq);
 	clnt->iBuf.Done = 0;
 
@@ -132,11 +133,11 @@ static void _Clnt_EvalInit(CLIENT *clnt, xConnClientPrefix *q)
 	{
 	case 0x42:
 		/* that's nice :-) */
-		clnt->Fnct = &_CLNT_Functabl_MSB;
+		clnt->Fnct = &_CLNT_Functabl_Unswapped;
 		clnt->DoSwap = xFalse;
 		break;
 	case 0x6C:
-		clnt->Fnct = &_CLNT_Functabl_LSB;
+		clnt->Fnct = &_CLNT_Functabl_Swapped;
 		clnt->DoSwap = xTrue;
 		q->majorVersion = Swap16(q->majorVersion);
 		q->minorVersion = Swap16(q->minorVersion);
@@ -484,7 +485,7 @@ void *ClntOutBuffer(O_BUFF *buf, size_t need, size_t copy_n, BOOL refuse)
 }
 
 /* ------------------------------------------------------------------------------ */
-static void FT_Clnt_reply_MSB(CLIENT *clnt, CARD32 size, const char *_unused)
+static void FT_Clnt_reply_Unswapped(CLIENT *clnt, CARD32 size, const char *_unused)
 {
 	O_BUFF *b = &clnt->oBuf;
 	xGenericReply *r = (xGenericReply *) (b->Mem + b->Done + b->Left);
@@ -498,7 +499,7 @@ static void FT_Clnt_reply_MSB(CLIENT *clnt, CARD32 size, const char *_unused)
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-static void FT_Clnt_reply_LSB(CLIENT *clnt, CARD32 size, const char *form)
+static void FT_Clnt_reply_Swapped(CLIENT *clnt, CARD32 size, const char *form)
 {
 	O_BUFF *b = &clnt->oBuf;
 	xGenericReply *r = (xGenericReply *) (b->Mem + b->Done + b->Left);
@@ -517,7 +518,7 @@ static void FT_Clnt_reply_LSB(CLIENT *clnt, CARD32 size, const char *form)
 /* ------------------------------------------------------------------------------ */
 #define xErrorReply    xError
 #define sz_xErrorReply sz_xError
-static void FT_Clnt_error_MSB(p_CLIENT clnt, CARD8 code, CARD8 majOp, CARD16 minOp, CARD32 val)
+static void FT_Clnt_error_Unswapped(p_CLIENT clnt, CARD8 code, CARD8 majOp, CARD16 minOp, CARD32 val)
 {
 	ClntReplyPtr(Error, e, 0);
 
@@ -533,7 +534,7 @@ static void FT_Clnt_error_MSB(p_CLIENT clnt, CARD8 code, CARD8 majOp, CARD16 min
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-static void FT_Clnt_error_LSB(p_CLIENT clnt, CARD8 code, CARD8 majOp, CARD16 minOp, CARD32 val)
+static void FT_Clnt_error_Swapped(p_CLIENT clnt, CARD8 code, CARD8 majOp, CARD16 minOp, CARD32 val)
 {
 	ClntReplyPtr(Error, e, 0);
 
@@ -548,9 +549,7 @@ static void FT_Clnt_error_LSB(p_CLIENT clnt, CARD8 code, CARD8 majOp, CARD16 min
 	MAIN_FDSET_wr |= clnt->FdSet;
 }
 
-
 /* ============================================================================== */
-#include <stdarg.h>
 void ClntPrint(CLIENT *clnt, int req, const char *form, ...)
 {
 	va_list vlst;

@@ -14,7 +14,7 @@
 
 #include "types.h"
 
-
+#ifndef __mcoldfire__
 static inline CARD16 Swap16(CARD16 val)
 {
 	__asm__ volatile (
@@ -73,6 +73,20 @@ static inline void SwapRCT(GRECT * dst, const GRECT * src)
 	);
 }
 
+#else
+
+static inline CARD16 Swap16(CARD16 val)
+{
+	return ((val & 0xFF) << 8) | ((val >> 8) & 0xFF);
+}
+
+static inline CARD32 Swap32(CARD32 val)
+{
+	return ((val >> 24) & 0xFF) | ((val >> 8) & 0xFF00) | ((val & 0xFF00) << 8) | ((val & 0xFF) << 24);
+}
+
+#endif
+
 
 static inline BOOL PXYinRect(const PXY *p, const GRECT *r)
 {
@@ -85,10 +99,8 @@ static inline BOOL RectIntersect(const GRECT *a, const GRECT *b)
 }
 
 
-#define SWAP16(v)   ( (((v) & 0xFF)<<8) | (((v)>>8) & 0xFF) )
-#define SWAP32(v)   ( (((v)>>24) & 0xFF)  | (((v)>>8) & 0xFF00) | (((v) & 0xFF00)<<8) | (((v) & 0xFF)<<24) )
-#define Units(n)    (((n) +3) /4)
-#define Align(n)    (((n) +3) & ~3ul)
+#define Units(n)    (((n) + 3) / 4)
+#define Align(n)    (((n) + 3) & ~3ul)
 
 
 #define numberof(array)   (sizeof(array) / sizeof(*array))

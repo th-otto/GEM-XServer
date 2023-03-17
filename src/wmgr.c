@@ -84,16 +84,16 @@ static struct
 
 static void FT_Wmgr_reply(p_CLIENT, CARD32 size, const char *form);
 static void FT_Wmgr_error(p_CLIENT, CARD8 code, CARD8, CARD16, CARD32 val);
-static void FT_Wmgr_event(p_CLIENT, p_WINDOW, CARD16 evnt, va_list);
+static void FT_Wmgr_event(p_CLIENT, p_WINDOW, const xEvent *ev);
 static xReply _WMGR_Obuf;
 
 static FUNCTABL _WMGR_Table = {
 	FT_Wmgr_reply,
 	FT_Wmgr_error,
 	FT_Wmgr_event,
-	FT_Grph_ShiftArc_MSB,
-	FT_Grph_ShiftPnt_MSB,
-	FT_Grph_ShiftR2P_MSB
+	FT_Grph_ShiftArc_Unswapped,
+	FT_Grph_ShiftPnt_Unswapped,
+	FT_Grph_ShiftR2P_Unswapped
 };
 
 static CLIENT _WMGR_Client = {
@@ -1135,7 +1135,7 @@ BOOL WmgrMessage(short *msg)
 			{
 				if (wind->Properties && wind->Properties->ProtoDelWind)
 				{
-					Atom data[5] = { WM_DELETE_WINDOW };
+					static Atom const data[5] = { WM_DELETE_WINDOW, 0, 0, 0, 0 };
 					EvntClientMsg(clnt, wind->Id, WM_PROTOCOLS, 32, data);
 				} else
 				{
@@ -1606,9 +1606,9 @@ static void FT_Wmgr_error(p_CLIENT c, CARD8 code, CARD8 majOp, CARD16 minOp, CAR
 }
 
 /* ------------------------------------------------------------------------------ */
-static void FT_Wmgr_event(p_CLIENT c, p_WINDOW w, CARD16 evnt, va_list vap)
+static void FT_Wmgr_event(p_CLIENT c, p_WINDOW w, const xEvent *ev)
 {
-	FT_Evnt_send_MSB(&_WMGR_Client, w, evnt, vap);
+	FT_Evnt_send_Unswapped(&_WMGR_Client, w, ev);
 	_WMGR_Client.oBuf.Done = _WMGR_Client.oBuf.Left;
 	_WMGR_Client.oBuf.Left = 0;
 }

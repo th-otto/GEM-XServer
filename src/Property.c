@@ -387,7 +387,7 @@ void RQ_GetProperty(CLIENT *clnt, xGetPropertyReq *q)
 
 		ClntReply(GetProperty, len, "all");
 
-		if (prop && q->delete && !r->bytesAfter)
+		if (prop && q->c_delete && !r->bytesAfter)
 		{
 			if (wind->u.List.AllMasks & PropertyChangeMask)
 			{

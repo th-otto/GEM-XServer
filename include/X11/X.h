@@ -212,6 +212,7 @@ are reserved in the protocol for errors and replies. */
 #define ColormapNotify		32
 #define ClientMessage		33
 #define MappingNotify		34
+#define GenericEvent		35
 #define LASTEvent		35	/* must be bigger than any event # */
 
 

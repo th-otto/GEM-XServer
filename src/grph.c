@@ -1079,7 +1079,7 @@ static BOOL _r_get_32(MFDB *mfdb, PRECT *pxy, MFDB *ptr)
 /* Byte order dependent Callback Functions */
 
 /* ------------------------------------------------------------------------------ */
-void FT_Grph_ShiftArc_MSB(const PXY *origin, xArc *arc, size_t num, short mode)
+void FT_Grph_ShiftArc_Unswapped(const PXY *origin, xArc *arc, size_t num, short mode)
 {
 	while (num--)
 	{
@@ -1102,7 +1102,7 @@ void FT_Grph_ShiftArc_MSB(const PXY *origin, xArc *arc, size_t num, short mode)
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-void FT_Grph_ShiftArc_LSB(const PXY *origin, xArc *arc, size_t num, short mode)
+void FT_Grph_ShiftArc_Swapped(const PXY *origin, xArc *arc, size_t num, short mode)
 {
 	while (num--)
 	{
@@ -1127,7 +1127,7 @@ void FT_Grph_ShiftArc_LSB(const PXY *origin, xArc *arc, size_t num, short mode)
 }
 
 /* ------------------------------------------------------------------------------ */
-void FT_Grph_ShiftPnt_MSB(const PXY *origin, PXY *pxy, size_t num, short mode)
+void FT_Grph_ShiftPnt_Unswapped(const PXY *origin, PXY *pxy, size_t num, short mode)
 {
 	if (!num)
 		return;
@@ -1159,7 +1159,7 @@ void FT_Grph_ShiftPnt_MSB(const PXY *origin, PXY *pxy, size_t num, short mode)
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-void FT_Grph_ShiftPnt_LSB(const PXY *origin, PXY *pxy, size_t num, short mode)
+void FT_Grph_ShiftPnt_Swapped(const PXY *origin, PXY *pxy, size_t num, short mode)
 {
 	if (!num)
 		return;
@@ -1202,7 +1202,7 @@ void FT_Grph_ShiftPnt_LSB(const PXY *origin, PXY *pxy, size_t num, short mode)
 }
 
 /* ------------------------------------------------------------------------------ */
-void FT_Grph_ShiftR2P_MSB(const PXY *origin, GRECT *rct, size_t num)
+void FT_Grph_ShiftR2P_Unswapped(const PXY *origin, GRECT *rct, size_t num)
 {
 	if (origin)
 	{
@@ -1224,7 +1224,7 @@ void FT_Grph_ShiftR2P_MSB(const PXY *origin, GRECT *rct, size_t num)
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-void FT_Grph_ShiftR2P_LSB(const PXY *origin, GRECT *rct, size_t num)
+void FT_Grph_ShiftR2P_Swapped(const PXY *origin, GRECT *rct, size_t num)
 {
 	if (origin)
 	{

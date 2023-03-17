@@ -22,6 +22,9 @@
 
 #include <X11/Xproto.h>
 
+#ifndef GenericEvent
+#define GenericEvent 35
+#endif
 
 /* ------------------------------------------------------------------------------ */
 #ifdef TRACE
@@ -79,7 +82,6 @@ BOOL EvntSet(WINDOW *wind, CLIENT *clnt, CARD32 mask)
 			dst = NULL;
 		else
 			dst->Mask |= mask;
-
 	} else
 	{
 		src = &wind->u.Event;
@@ -96,7 +98,7 @@ BOOL EvntSet(WINDOW *wind, CLIENT *clnt, CARD32 mask)
 		}
 	}
 
-	if (!dst)
+	if (dst == NULL)
 	{
 		size_t len = sizeof(WINDEVNT) * num;
 
@@ -370,7 +372,7 @@ void EvntGraphExpose(CLIENT *clnt, p_DRAWABLE draw, CARD16 major, short len, con
 }
 
 /* ============================================================================== */
-void EvntClientMsg(CLIENT *clnt, Window id, Atom type, BYTE format, void *data)
+void EvntClientMsg(CLIENT *clnt, Window id, Atom type, BYTE format, const void *data)
 {
 	xEvent *evn = Evnt_Buffer(&clnt->oBuf, sizeof(xEvent));
 
@@ -392,27 +394,39 @@ void EvntClientMsg(CLIENT *clnt, Window id, Atom type, BYTE format, void *data)
 		}
 		if (format == 32)
 		{
-			CARD32 *src = data;
+			const CARD32 *src = data;
 			INT32 *dst = &evn->u.clientMessage.u.l.longs0;
-			int num = 5;
 
-			do
-			{
-				*dst++ = Swap32(*src++);
-			} while (--num);
+			*dst++ = Swap32(*src++);
+			*dst++ = Swap32(*src++);
+			*dst++ = Swap32(*src++);
+			*dst++ = Swap32(*src++);
+			*dst++ = Swap32(*src++);
 		} else if (format == 16)
 		{
-			CARD16 *src = data;
+			const CARD16 *src = data;
 			INT16 *dst = &evn->u.clientMessage.u.s.shorts0;
-			int num = 10;
 
-			do
-			{
-				*dst++ = Swap16(*src++);
-			} while (--num);
+			*dst++ = Swap16(*src++);
+			*dst++ = Swap16(*src++);
+			*dst++ = Swap16(*src++);
+			*dst++ = Swap16(*src++);
+			*dst++ = Swap16(*src++);
+			*dst++ = Swap16(*src++);
+			*dst++ = Swap16(*src++);
+			*dst++ = Swap16(*src++);
+			*dst++ = Swap16(*src++);
+			*dst++ = Swap16(*src++);
 		} else
 		{
-			memcpy(evn->u.clientMessage.u.b.bytes, data, 20);
+			const CARD32 *src = data;
+			INT32 *dst = &evn->u.clientMessage.u.l.longs0;
+
+			*dst++ = *src++;
+			*dst++ = *src++;
+			*dst++ = *src++;
+			*dst++ = *src++;
+			*dst++ = *src++;
 		}
 		clnt->oBuf.Left += sizeof(xEvent);
 		MAIN_FDSET_wr |= clnt->FdSet;
@@ -444,9 +458,7 @@ BOOL EvntPropagate(WINDOW *wind, CARD32 mask, BYTE event, Window c_id, PXY r_xy,
 			ev.u.keyButtonPointer.state = MAIN_KeyButMask;
 			ev.u.keyButtonPointer.sameScreen = xTrue;
 			ev.u.keyButtonPointer.pad1 = 0;
-			(void)ev;
-			_Evnt_Window(wind, mask, event, chld, r_xy, e_xy, detail);
-			/* XXX */
+			_Evnt_Window(wind, mask, &ev);
 			exec = xTrue;
 			mask &= !wind->u.List.AllMasks;
 		}
@@ -570,21 +582,15 @@ void EvntMappingNotify(CARD8 request, CARD8 first, CARD8 count)
 
 
 /* ------------------------------------------------------------------------------ */
-static const char *_EVNT_Form[];
 
-void _Evnt_Window(WINDOW *wind, CARD32 mask, CARD16 evnt, ...)
+void _Evnt_Window(WINDOW *wind, CARD32 mask, const xEvent *ev)
 {
 	CARD16 num = wind->u.List.AllMasks < 0 ? wind->u.List.p->Length : 1;
 	WINDEVNT *lst = num > 1 ? wind->u.List.p->Event : &wind->u.Event;
 
-	if (evnt < 2 || evnt >= LASTEvent)
+	if (ev->u.u.type < 2 || ev->u.u.type >= LASTEvent)
 	{
-		x_printf("\033pERROR\033q invalid event value %u for W:%X.\n", evnt, wind->Id);
-		return;
-	}
-	if (!_EVNT_Form[evnt])
-	{
-		x_printf("\033pERROR\033q undefined event set at %u for W:%X.\n", evnt, wind->Id);
+		x_printf("\033pERROR\033q invalid event value %u for W:%X.\n", ev->u.u.type, wind->Id);
 		return;
 	}
 	if (mask & ~AllEventMask)
@@ -597,30 +603,20 @@ void _Evnt_Window(WINDOW *wind, CARD32 mask, CARD16 evnt, ...)
 	{
 		if (lst->Mask & mask)
 		{
-			va_list vap;
-
-			va_start(vap, evnt);
-			lst->Client->Fnct->event_send(lst->Client, wind, evnt, vap);
-			va_end(vap);
+			lst->Client->Fnct->event_send(lst->Client, wind, ev);
 		}
 		lst++;
 	}
 }
 
 /* ------------------------------------------------------------------------------ */
-void _Evnt_Struct(WINDOW *wind, CARD16 evnt, ...)
+void _Evnt_Struct(WINDOW *wind, const xEvent *ev)
 {
-	if (evnt < 2 || evnt >= LASTEvent)
+	if (ev->u.u.type < 2 || ev->u.u.type >= LASTEvent)
 	{
-		x_printf("\033pERROR\033q invalid event value %u for W:%X.\n", evnt, wind->Id);
+		x_printf("\033pERROR\033q invalid event value %u for W:%X.\n", ev->u.u.type, wind->Id);
 		return;
 	}
-	if (!_EVNT_Form[evnt])
-	{
-		x_printf("\033pERROR\033q undefined event set at %u for W:%X.\n", evnt, wind->Id);
-		return;
-	}
-
 	if (wind->u.List.AllMasks & StructureNotifyMask)
 	{
 		CARD16 num = wind->u.List.AllMasks < 0 ? wind->u.List.p->Length : 1;
@@ -630,11 +626,7 @@ void _Evnt_Struct(WINDOW *wind, CARD16 evnt, ...)
 		{
 			if (lst->Mask & StructureNotifyMask)
 			{
-				va_list vap;
-
-				va_start(vap, evnt);
-				lst->Client->Fnct->event_send(lst->Client, wind, evnt, vap);
-				va_end(vap);
+				lst->Client->Fnct->event_send(lst->Client, wind, ev);
 			}
 			lst++;
 		}
@@ -648,11 +640,7 @@ void _Evnt_Struct(WINDOW *wind, CARD16 evnt, ...)
 		{
 			if (lst->Mask & SubstructureNotifyMask)
 			{
-				va_list vap;
-
-				va_start(vap, evnt);
-				lst->Client->Fnct->event_send(lst->Client, wind, evnt, vap);
-				va_end(vap);
+				lst->Client->Fnct->event_send(lst->Client, wind, ev);
 			}
 			lst++;
 		}
@@ -660,178 +648,43 @@ void _Evnt_Struct(WINDOW *wind, CARD16 evnt, ...)
 }
 
 /* ------------------------------------------------------------------------------ */
-void _Evnt_Client(CLIENT *clnt, CARD16 evnt, ...)
+void _Evnt_Client(CLIENT *clnt, const xEvent *ev)
 {
-	if (evnt < 2 || evnt >= LASTEvent)
+	if (ev->u.u.type < 2 || ev->u.u.type >= LASTEvent)
 	{
-		x_printf("\033pERROR\033q invalid event value %u.\n", evnt);
-	} else if (!_EVNT_Form[evnt])
-	{
-		x_printf("\033pERROR\033q undefined event set at %u.\n", evnt);
+		x_printf("\033pERROR\033q invalid event value %u.\n", ev->u.u.type);
 	} else
 	{
-		va_list vap;
-
-		va_start(vap, evnt);
-		clnt->Fnct->event_send(clnt, NULL, evnt, vap);
-		va_end(vap);
+		clnt->Fnct->event_send(clnt, NULL, ev);
 	}
 }
 
 
 /*
  *==============================================================================
- * w   - Window
- * d   - Drawable
- * a   - Atom
- * l   - CARD32 ('long')
- * s   - CARD16 ('short')
- * b/c - BOOL / CARD8 ('char')
- * p   - PXY coordinates (not pointer of!)
- * r   - GRECT*
- * D   - detail, CARD8
- * S   - global TIMESTAMP
- * M   - global SETofKEYBUTMASK
- * W   - Id from parameter WINDOW*
- * X   - RootWindow Id
- * T/F - xTrue / xFalse, constant CARD8 (mainly for 'same-screen')
- * *   - unused long, jump over
  */
-static const char *_EVNT_Form[LASTEvent] = {
-	NULL, NULL,							/* starts at #2 */
-	"SXWwppMTD", "SXWwppMTD",			/* KeyPress,        KeyRelease */ /* OK */
-	"SXWwppMTD", "SXWwppMTD",			/* ButtonPress,     ButtonRelease */ /* OK */
-	"SwWwppMT",							/* MotionNotify, */ /* OK */
-	"SwWwppMccD", "SwWwppMccD",			/* EnterNotify,     LeaveNotify */ /* OK */
-	"WcD", "WcD",						/* FocusIn,         FocusOut */ /* OK */
-	"",									/* KeymapNotify */
-	"Wrs", "drssc", "dsc",				/* Expose,        GraphicsExpose, NoExpose */ /* OK */
-	"Wc",								/* VisibilityNotify */ /* OK */
-	"Wwrsb", "Ww",						/* CreateNotify,     DestroyNotify */ /* OK */
-	"Wwb", "Wwb", "Ww",					/* UnmapNotify,    MapNotify,   MapRequest */ /* OK */
-	"Wwwpb",							/* ReparentNotify */ /* OK */
-	"Wwwrsb", "wWwrssD",				/* ConfigureNotify,  ConfigureRequest */ /* OK */
-	"Wwp", "Wss",						/* GravityNotify,    ResizeRequest */ /* OK */
-	"Ww*c", "Ww*c",						/* CirculateNotify,  CirculateRequest */ /* OK */
-	"WaSb", "Swa",						/* PropertyNotify,   SelectionClear */
-	"lwwaaa", "lwaaa",					/* SelectionRequest, SelectionNotify */
-	"Wlbc",								/* ColormapNotify */
-	"WaD",								/* ClientMessage */
-	"cc",								/* MappingNotify */
-};
-
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-void FT_Evnt_send_MSB(CLIENT *clnt, WINDOW *wind, CARD16 evnt, va_list vap)
+void FT_Evnt_send_Unswapped(CLIENT *clnt, WINDOW *wind, const xEvent *ev)
 {
-	const char *frm = _EVNT_Form[evnt];
 	xEvent *evn = Evnt_Buffer(&clnt->oBuf, sizeof(xEvent));
 
 	if (evn)
 	{
-		/* XXX */
-		char *ptr = ((char *) evn) + 4; /* skip type, detail & sequenceNumber */
-
-#define ARG(t)   { *(t*)ptr = va_arg (vap, t); ptr += sizeof(t); }
-#define ARGINT(t)   { *(t*)ptr = va_arg (vap, int); ptr += sizeof(t); }
-
-		evn->u.u.type = evnt;
-		evn->u.u.detail = 0;
+		*evn = *ev;
 		evn->u.u.sequenceNumber = clnt->SeqNum;
-
-		while (*frm != '\0')
-		{
-			switch (*(frm++))
-			{
-			case 'W':
-				if (wind)
-				{
-					*(Window *) ptr = wind->Id;
-					ptr += sizeof(Window);
-					break;
-				}
-				/* fallthrough ??? doesn't make sense */
-			case 'w':
-				ARG(Window);
-				break;
-			case 'd':
-				ARG(Drawable);
-				break;
-			case 'a':
-				ARG(Atom);
-				break;
-			case 'l':
-				ARG(CARD32);
-				break;
-			case 's':
-				ARGINT(CARD16);
-				break;
-			case 'c':
-				ARGINT(CARD8);
-				break;
-			case 'b':
-				ARGINT(BOOL);
-				break;
-			case 'p':
-				ARG(PXY);
-				break;
-			case 'r':
-				*(GRECT *) ptr = *va_arg(vap, GRECT *);
-				ptr += sizeof(GRECT);
-				break;
-			case 'D':
-				evn->u.u.detail = va_arg(vap, int /* CARD8 */ );
-				break;
-			case 'X':
-				*(Window *) ptr = ROOT_WINDOW;
-				ptr += sizeof(Window);
-				break;
-			case 'S':
-				*(Time *) ptr = MAIN_TimeStamp;
-				ptr += sizeof(Time);
-				break;
-			case 'M':
-				*(KeyButMask *) ptr = MAIN_KeyButMask;
-				ptr += sizeof(KeyButMask);
-				break;
-			case 'T':
-				*ptr = xTrue;
-				ptr += sizeof(BOOL);
-				break;
-			case 'F':
-				*ptr = xFalse;
-				ptr += sizeof(BOOL);
-				break;
-			case '*':
-				ptr += 4;
-				break;
-			}
-		}
 		clnt->oBuf.Left += sizeof(xEvent);
 		MAIN_FDSET_wr |= clnt->FdSet;
-
-#undef ARG
-#undef ARGINT
 	}
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-void FT_Evnt_send_LSB(CLIENT *clnt, WINDOW *wind, CARD16 evnt, va_list vap)
+void FT_Evnt_send_Swapped(CLIENT *clnt, WINDOW *wind, const xEvent *ev)
 {
-	const char *frm = _EVNT_Form[evnt];
 	xEvent *evn = Evnt_Buffer(&clnt->oBuf, sizeof(xEvent));
 
 	if (evn)
 	{
-		char *ptr = ((char *) evn) + 4;
-		PXY pxy;
-
-#define ARG32(t) { *(t*)ptr = Swap32(va_arg (vap, t)); ptr += 4; }
-#define ARG16(t) { *(t*)ptr = Swap16(va_arg (vap, t)); ptr += 2; }
-#define ARG16INT(t) { *(t*)ptr = Swap16(va_arg (vap, int)); ptr += 2; }
-#define ARGINT(t)   { *(t*)ptr = va_arg (vap, int); ptr += sizeof(t); }
-
-		evn->u.u.type = evnt;
-		evn->u.u.detail = 0;
+		*evn = *ev;
 		evn->u.u.sequenceNumber = Swap16(clnt->SeqNum);
 
 		switch (evn->u.u.type)
@@ -1012,89 +865,10 @@ void FT_Evnt_send_LSB(CLIENT *clnt, WINDOW *wind, CARD16 evnt, va_list vap)
 		
 		case ClientMessage:
 			/* already swapped in EvntClientMsg */
-#if 0
-			evn->u.clientMessage.window = Swap32(evn->u.clientMessage.window);
-			evn->u.clientMessage.u.l.type = Swap32(evn->u.clientMessage.u.l.type);
-#endif
 			break;
-		}
-
-		while (*frm != '\0')
-		{
-			switch (*(frm++))
-			{
-			case 'W':
-				if (wind)
-				{
-					*(Window *) ptr = Swap32(wind->Id);
-					ptr += 4;
-					break;
-				}
-			case 'w':
-				ARG32(Window);
-				break;
-			case 'd':
-				ARG32(Drawable);
-				break;
-			case 'a':
-				ARG32(Atom);
-				break;
-			case 'l':
-				ARG32(CARD32);
-				break;
-			case 's':
-				ARG16INT(CARD16);
-				break;
-			case 'c':
-				ARGINT(CARD8);
-				break;
-			case 'b':
-				ARGINT(BOOL);
-				break;
-			case 'p':
-				pxy = va_arg(vap, PXY);
-				SwapPXY((PXY *) ptr, &pxy);
-				ptr += sizeof(PXY);
-				break;
-			case 'r':
-				SwapRCT((GRECT *) ptr, va_arg(vap, GRECT *));
-				ptr += sizeof(GRECT);
-				break;
-			case 'D':
-				evn->u.u.detail = va_arg(vap, int /*CARD8 */ );
-				break;
-			case 'X':
-				*(Window *) ptr = SWAP32(ROOT_WINDOW);
-				ptr += sizeof(Window);
-				break;
-			case 'S':
-				*(Time *) ptr = Swap32(MAIN_TimeStamp);
-				ptr += sizeof(Time);
-				break;
-			case 'M':
-				*(KeyButMask *) ptr = Swap16(MAIN_KeyButMask);
-				ptr += sizeof(KeyButMask);
-				break;
-			case 'T':
-				*ptr = xTrue;
-				ptr += sizeof(BOOL);
-				break;
-			case 'F':
-				*ptr = xFalse;
-				ptr += sizeof(BOOL);
-				break;
-			case '*':
-				ptr += 4;
-				break;
-			}
 		}
 		clnt->oBuf.Left += sizeof(xEvent);
 		MAIN_FDSET_wr |= clnt->FdSet;
-
-#undef ARG32
-#undef ARG16
-#undef ARG16INT
-#undef ARGINT
 	}
 }
 
@@ -1128,7 +902,7 @@ void RQ_SendEvent(CLIENT *clnt, xSendEventReq *q)
 	{
 		/* this is only correct if PointerRoot is an inferior of InputFocus !!! */
 		wind = _WIND_PointerRoot;
-	} else if (!(wind = WindFind(q->destination)))
+	} else if ((wind = WindFind(q->destination)) == NULL)
 	{
 		Bad(BadWindow, q->destination, X_SendEvent, "_");
 	}
@@ -1145,7 +919,7 @@ void RQ_SendEvent(CLIENT *clnt, xSendEventReq *q)
 
 		if (!q->eventMask)
 		{
-			if ((_lst.Client = ClntFind(wind->Id)))
+			if ((_lst.Client = ClntFind(wind->Id)) != NULL)
 			{
 				mask = _lst.Mask = AllEventMask;
 				num = 1;
@@ -1173,7 +947,7 @@ void RQ_SendEvent(CLIENT *clnt, xSendEventReq *q)
 				if (lst->Mask & mask)
 				{
 					EvntClientMsg(lst->Client, q->event.u.clientMessage.window,
-								  q->event.u.clientMessage.u.b.type,
+								  q->event.u.clientMessage.u.l.type,
 								  q->event.u.u.detail, q->event.u.clientMessage.u.b.bytes);
 				}
 				lst++;
@@ -1187,60 +961,263 @@ void RQ_SendEvent(CLIENT *clnt, xSendEventReq *q)
 					CLIENT *rcp = lst->Client;
 					xEvent *evn = Evnt_Buffer(&rcp->oBuf, sizeof(xEvent));
 
-					if (evn)
+					if (evn != NULL)
 					{
 						evn->u.u.type = q->event.u.u.type | 0x80;
 						evn->u.u.detail = q->event.u.u.detail;
-						evn->u.u.sequenceNumber = (rcp->DoSwap ? Swap16(rcp->SeqNum) : rcp->SeqNum);
+						evn->u.u.sequenceNumber = rcp->DoSwap ? Swap16(rcp->SeqNum) : rcp->SeqNum;
 						if (rcp->DoSwap == clnt->DoSwap)
 						{
 							memcpy(&evn->u.clientMessage.window, &q->event.u.clientMessage.window, 28);
 						} else
 						{
-							const char *frm = _EVNT_Form[q->event.u.u.type];
-							char *dst = ((char *) evn) + 4;
-							char *src = ((char *) &q->event) + 4;
-
-							while (*frm != '\0')
+							switch (q->event.u.u.type)
 							{
-								switch (*frm++)
+							case KeyPress:
+							case KeyRelease:
+							case ButtonPress:
+							case ButtonRelease:
+							case MotionNotify:
+								evn->u.keyButtonPointer.time = Swap32(q->event.u.keyButtonPointer.time);
+								evn->u.keyButtonPointer.root = Swap32(q->event.u.keyButtonPointer.root);
+								evn->u.keyButtonPointer.event = Swap32(q->event.u.keyButtonPointer.event);
+								evn->u.keyButtonPointer.child = Swap32(q->event.u.keyButtonPointer.child);
+								evn->u.keyButtonPointer.rootX = Swap16(q->event.u.keyButtonPointer.rootX);
+								evn->u.keyButtonPointer.rootY = Swap16(q->event.u.keyButtonPointer.rootY);
+								evn->u.keyButtonPointer.eventX = Swap16(q->event.u.keyButtonPointer.eventX);
+								evn->u.keyButtonPointer.eventY = Swap16(q->event.u.keyButtonPointer.eventY);
+								evn->u.keyButtonPointer.state = Swap16(q->event.u.keyButtonPointer.state);
+								evn->u.keyButtonPointer.sameScreen = q->event.u.keyButtonPointer.sameScreen;
+								break;
+							
+							case EnterNotify:
+							case LeaveNotify:
+								evn->u.enterLeave.time = Swap32(q->event.u.enterLeave.time);
+								evn->u.enterLeave.root = Swap32(q->event.u.enterLeave.root);
+								evn->u.enterLeave.event = Swap32(q->event.u.enterLeave.event);
+								evn->u.enterLeave.child = Swap32(q->event.u.enterLeave.child);
+								evn->u.enterLeave.rootX = Swap16(q->event.u.enterLeave.rootX);
+								evn->u.enterLeave.rootY = Swap16(q->event.u.enterLeave.rootY);
+								evn->u.enterLeave.eventX = Swap16(q->event.u.enterLeave.eventX);
+								evn->u.enterLeave.eventY = Swap16(q->event.u.enterLeave.eventY);
+								evn->u.enterLeave.state = Swap16(q->event.u.enterLeave.state);
+								evn->u.enterLeave.mode = q->event.u.enterLeave.mode;
+								evn->u.enterLeave.flags = q->event.u.enterLeave.flags;
+								break;
+							
+							case FocusIn:
+							case FocusOut:
+								evn->u.focus.window = Swap32(q->event.u.focus.window);
+								evn->u.focus.mode = q->event.u.focus.mode;
+								break;
+							
+							case KeymapNotify:
+								memcpy((char *)evn + 1, (const char *)q + 1, 31);
+								break;
+								
+							case Expose:
+								evn->u.expose.window = Swap32(q->event.u.expose.window);
+								evn->u.expose.x = Swap16(q->event.u.expose.x);
+								evn->u.expose.y = Swap16(q->event.u.expose.y);
+								evn->u.expose.width = Swap16(q->event.u.expose.width);
+								evn->u.expose.height = Swap16(q->event.u.expose.height);
+								evn->u.expose.count = Swap16(q->event.u.expose.count);
+								break;
+							
+							case GraphicsExpose:
+								evn->u.graphicsExposure.drawable = Swap32(q->event.u.graphicsExposure.drawable);
+								evn->u.graphicsExposure.x = Swap16(q->event.u.graphicsExposure.x);
+								evn->u.graphicsExposure.y = Swap16(q->event.u.graphicsExposure.y);
+								evn->u.graphicsExposure.width = Swap16(q->event.u.graphicsExposure.width);
+								evn->u.graphicsExposure.height = Swap16(q->event.u.graphicsExposure.height);
+								evn->u.graphicsExposure.minorEvent = Swap16(q->event.u.graphicsExposure.minorEvent);
+								evn->u.graphicsExposure.count = Swap16(q->event.u.graphicsExposure.count);
+								evn->u.graphicsExposure.majorEvent = q->event.u.graphicsExposure.majorEvent;
+								break;
+							
+							case NoExpose:
+								evn->u.noExposure.drawable = Swap32(q->event.u.noExposure.drawable);
+								evn->u.noExposure.minorEvent = Swap16(q->event.u.noExposure.minorEvent);
+								evn->u.noExposure.majorEvent = q->event.u.noExposure.majorEvent;
+								break;
+							
+							case VisibilityNotify:
+								evn->u.visibility.window = Swap32(q->event.u.visibility.window);
+								evn->u.visibility.state = q->event.u.visibility.state;
+								break;
+							
+							case CreateNotify:
+								evn->u.createNotify.parent = Swap32(q->event.u.createNotify.parent);
+								evn->u.createNotify.window = Swap32(q->event.u.createNotify.window);
+								evn->u.createNotify.x = Swap16(q->event.u.createNotify.x);
+								evn->u.createNotify.y = Swap16(q->event.u.createNotify.y);
+								evn->u.createNotify.width = Swap16(q->event.u.createNotify.width);
+								evn->u.createNotify.height = Swap16(q->event.u.createNotify.height);
+								evn->u.createNotify.borderWidth = Swap16(q->event.u.createNotify.borderWidth);
+								evn->u.createNotify.override = q->event.u.createNotify.override;
+								break;
+							
+							case DestroyNotify:
+								evn->u.destroyNotify.event = Swap32(q->event.u.destroyNotify.event);
+								evn->u.destroyNotify.window = Swap32(q->event.u.destroyNotify.window);
+								break;
+							
+							case UnmapNotify:
+								evn->u.unmapNotify.event = Swap32(q->event.u.unmapNotify.event);
+								evn->u.unmapNotify.window = Swap32(q->event.u.unmapNotify.window);
+								evn->u.unmapNotify.fromConfigure = q->event.u.unmapNotify.fromConfigure;
+								break;
+							
+							case MapNotify:
+								evn->u.mapNotify.event = Swap32(q->event.u.mapNotify.event);
+								evn->u.mapNotify.window = Swap32(q->event.u.mapNotify.window);
+								evn->u.mapNotify.override = q->event.u.mapNotify.override;
+								break;
+							
+							case MapRequest:
+								evn->u.mapRequest.parent = Swap32(q->event.u.mapRequest.parent);
+								evn->u.mapRequest.window = Swap32(q->event.u.mapRequest.window);
+								break;
+								
+							case ReparentNotify:
+								evn->u.reparent.event = Swap32(q->event.u.reparent.event);
+								evn->u.reparent.window = Swap32(q->event.u.reparent.window);
+								evn->u.reparent.parent = Swap32(q->event.u.reparent.parent);
+								evn->u.reparent.x = Swap16(q->event.u.reparent.x);
+								evn->u.reparent.y = Swap16(q->event.u.reparent.y);
+								evn->u.reparent.override = q->event.u.reparent.override;
+								break;
+							
+							case ConfigureNotify:
+								evn->u.configureNotify.event = Swap32(q->event.u.configureNotify.event);
+								evn->u.configureNotify.window = Swap32(q->event.u.configureNotify.window);
+								evn->u.configureNotify.aboveSibling = Swap32(q->event.u.configureNotify.aboveSibling);
+								evn->u.configureNotify.x = Swap16(q->event.u.configureNotify.x);
+								evn->u.configureNotify.y = Swap16(q->event.u.configureNotify.y);
+								evn->u.configureNotify.width = Swap16(q->event.u.configureNotify.width);
+								evn->u.configureNotify.height = Swap16(q->event.u.configureNotify.height);
+								evn->u.configureNotify.borderWidth = Swap16(q->event.u.configureNotify.borderWidth);
+								evn->u.configureNotify.override = q->event.u.configureNotify.override;
+								break;
+							
+							case ConfigureRequest:
+								evn->u.configureRequest.parent = Swap32(q->event.u.configureRequest.parent);
+								evn->u.configureRequest.window = Swap32(q->event.u.configureRequest.window);
+								evn->u.configureRequest.sibling = Swap32(q->event.u.configureRequest.sibling);
+								evn->u.configureRequest.x = Swap16(q->event.u.configureRequest.x);
+								evn->u.configureRequest.y = Swap16(q->event.u.configureRequest.y);
+								evn->u.configureRequest.width = Swap16(q->event.u.configureRequest.width);
+								evn->u.configureRequest.height = Swap16(q->event.u.configureRequest.height);
+								evn->u.configureRequest.borderWidth = Swap16(q->event.u.configureRequest.borderWidth);
+								evn->u.configureRequest.valueMask = Swap16(q->event.u.configureRequest.valueMask);
+								break;
+							
+							case GravityNotify:
+								evn->u.gravity.event = Swap32(q->event.u.gravity.event);
+								evn->u.gravity.window = Swap32(q->event.u.gravity.window);
+								evn->u.gravity.x = Swap16(q->event.u.gravity.x);
+								evn->u.gravity.y = Swap16(q->event.u.gravity.y);
+								break;
+							
+							case ResizeRequest:
+								evn->u.resizeRequest.window = Swap32(q->event.u.resizeRequest.window);
+								evn->u.resizeRequest.width = Swap16(q->event.u.resizeRequest.width);
+								evn->u.resizeRequest.height = Swap16(q->event.u.resizeRequest.height);
+								break;
+							
+							case CirculateNotify:
+							case CirculateRequest:
+								evn->u.circulate.event = Swap32(q->event.u.circulate.event);
+								evn->u.circulate.window = Swap32(q->event.u.circulate.window);
+								evn->u.circulate.parent = Swap32(q->event.u.circulate.parent);
+								evn->u.circulate.place = q->event.u.circulate.place;
+								break;
+							
+							case PropertyNotify:
+								evn->u.property.window = Swap32(q->event.u.property.window);
+								evn->u.property.atom = Swap32(q->event.u.property.atom);
+								evn->u.property.time = Swap32(q->event.u.property.time);
+								evn->u.property.state = q->event.u.property.state;
+								break;
+							
+							case SelectionClear:
+								evn->u.selectionClear.time = Swap32(q->event.u.selectionClear.time);
+								evn->u.selectionClear.window = Swap32(q->event.u.selectionClear.window);
+								evn->u.selectionClear.atom = Swap32(q->event.u.selectionClear.atom);
+								break;
+							
+							case SelectionRequest:
+								evn->u.selectionRequest.time = Swap32(q->event.u.selectionRequest.time);
+								evn->u.selectionRequest.owner = Swap32(q->event.u.selectionRequest.owner);
+								evn->u.selectionRequest.requestor = Swap32(q->event.u.selectionRequest.requestor);
+								evn->u.selectionRequest.selection = Swap32(q->event.u.selectionRequest.selection);
+								evn->u.selectionRequest.target = Swap32(q->event.u.selectionRequest.target);
+								evn->u.selectionRequest.property = Swap32(q->event.u.selectionRequest.property);
+								break;
+							
+							case SelectionNotify:
+								evn->u.selectionNotify.time = Swap32(q->event.u.selectionNotify.time);
+								evn->u.selectionNotify.requestor = Swap32(q->event.u.selectionNotify.requestor);
+								evn->u.selectionNotify.selection = Swap32(q->event.u.selectionNotify.selection);
+								evn->u.selectionNotify.target = Swap32(q->event.u.selectionNotify.target);
+								evn->u.selectionNotify.property = Swap32(q->event.u.selectionNotify.property);
+								break;
+							
+							case ColormapNotify:
+								evn->u.colormap.window = Swap32(q->event.u.colormap.window);
+								evn->u.colormap.colormap = Swap32(q->event.u.colormap.colormap);
+								evn->u.colormap.c_new = q->event.u.colormap.c_new;
+								evn->u.colormap.state = q->event.u.colormap.state;
+								break;
+							
+							case MappingNotify:
+								evn->u.mappingNotify.request = q->event.u.mappingNotify.request;
+								evn->u.mappingNotify.firstKeyCode = q->event.u.mappingNotify.firstKeyCode;
+								evn->u.mappingNotify.count = q->event.u.mappingNotify.count;
+								break;
+							
+							case ClientMessage:
+								evn->u.clientMessage.window = Swap32(q->event.u.clientMessage.window);
+								evn->u.clientMessage.u.l.type = Swap32(q->event.u.clientMessage.u.l.type);
+								if (q->event.u.u.detail == 32)
 								{
-								case 'c':
-								case 'b':
-								case 'T':
-								case 'F':
-									*(dst++) = *(src++);
-									break;
-								case 's':
-								case 'M':
-									*(short *) dst = Swap16(*(short *) src);
-									dst += 2;
-									src += 2;
-									break;
-								case 'X':
-								case 'W':
-								case 'w':
-								case 'd':
-								case 'a':
-								case 'l':
-								case 'S':
-									*(long *) dst = Swap32(*(long *) src);
-								case '*':
-									dst += 4;
-									src += 4;
-								case 'D':
-									break;
-								case 'p':
-									SwapPXY((PXY *) dst, (PXY *) src);
-									dst += 4;
-									src += 4;
-									break;
-								case 'r':
-									SwapRCT((GRECT *) dst, (GRECT *) src);
-									dst += 8;
-									src += 8;
-									break;
+									evn->u.clientMessage.u.l.longs0 = Swap32(q->event.u.clientMessage.u.l.longs0);
+									evn->u.clientMessage.u.l.longs1 = Swap32(q->event.u.clientMessage.u.l.longs1);
+									evn->u.clientMessage.u.l.longs2 = Swap32(q->event.u.clientMessage.u.l.longs2);
+									evn->u.clientMessage.u.l.longs3 = Swap32(q->event.u.clientMessage.u.l.longs3);
+									evn->u.clientMessage.u.l.longs4 = Swap32(q->event.u.clientMessage.u.l.longs4);
+								} else if (q->event.u.u.detail == 16)
+								{
+									evn->u.clientMessage.u.s.shorts0 = Swap16(q->event.u.clientMessage.u.s.shorts0);
+									evn->u.clientMessage.u.s.shorts1 = Swap16(q->event.u.clientMessage.u.s.shorts1);
+									evn->u.clientMessage.u.s.shorts2 = Swap16(q->event.u.clientMessage.u.s.shorts2);
+									evn->u.clientMessage.u.s.shorts3 = Swap16(q->event.u.clientMessage.u.s.shorts3);
+									evn->u.clientMessage.u.s.shorts4 = Swap16(q->event.u.clientMessage.u.s.shorts4);
+									evn->u.clientMessage.u.s.shorts5 = Swap16(q->event.u.clientMessage.u.s.shorts5);
+									evn->u.clientMessage.u.s.shorts6 = Swap16(q->event.u.clientMessage.u.s.shorts6);
+									evn->u.clientMessage.u.s.shorts7 = Swap16(q->event.u.clientMessage.u.s.shorts7);
+									evn->u.clientMessage.u.s.shorts8 = Swap16(q->event.u.clientMessage.u.s.shorts8);
+									evn->u.clientMessage.u.s.shorts9 = Swap16(q->event.u.clientMessage.u.s.shorts9);
+								} else
+								{
+									evn->u.clientMessage.u.l.longs0 = q->event.u.clientMessage.u.l.longs0;
+									evn->u.clientMessage.u.l.longs1 = q->event.u.clientMessage.u.l.longs1;
+									evn->u.clientMessage.u.l.longs2 = q->event.u.clientMessage.u.l.longs2;
+									evn->u.clientMessage.u.l.longs3 = q->event.u.clientMessage.u.l.longs3;
+									evn->u.clientMessage.u.l.longs4 = q->event.u.clientMessage.u.l.longs4;
 								}
+								break;
+							
+							case GenericEvent:
+								evn->u.clientMessage.window = Swap32(q->event.u.clientMessage.window); /* xGenericEvent.length */
+								evn->u.expose.x = Swap16(q->event.u.expose.x); /* xGenericEvent.evtype */
+								evn->u.expose.y = Swap16(q->event.u.expose.y); /* xGenericEvent.pad2 */
+								evn->u.clientMessage.u.l.longs0 = Swap32(q->event.u.clientMessage.u.l.longs0); /* xGenericEvent.pad3 */
+								evn->u.clientMessage.u.l.longs1 = Swap32(q->event.u.clientMessage.u.l.longs1); /* xGenericEvent.pad4 */
+								evn->u.clientMessage.u.l.longs2 = Swap32(q->event.u.clientMessage.u.l.longs2); /* xGenericEvent.pad5 */
+								evn->u.clientMessage.u.l.longs3 = Swap32(q->event.u.clientMessage.u.l.longs3); /* xGenericEvent.pad6 */
+								evn->u.clientMessage.u.l.longs4 = Swap32(q->event.u.clientMessage.u.l.longs4); /* xGenericEvent.pad7 */
+								break;
 							}
 						}
 						rcp->oBuf.Left += sizeof(xEvent);

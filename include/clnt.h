@@ -14,7 +14,6 @@
 
 #include "main.h"
 #include "xrsc.h"
-#include <stdarg.h>
 
 #include <X11/Xproto.h>
 
@@ -49,7 +48,7 @@ typedef struct
 {
 	void (*clnt_reply)(p_CLIENT, CARD32 size, const char *form);
 	void (*clnt_error)(p_CLIENT, CARD8 code, CARD8 majOp, CARD16 minOp, CARD32 val);
-	void (*event_send)(p_CLIENT, p_WINDOW, CARD16 evnt, va_list);
+	void (*event_send)(p_CLIENT, p_WINDOW, const xEvent *ev);
 	void (*grph_shift_arc)(const PXY *origin, xArc *arc, size_t num, short mode);
 	void (*grph_shift_pnt)(const PXY *origin, PXY *pxy, size_t num, short mode);
 	void (*grph_shift_r2p)(const PXY *origin, GRECT *rct, size_t num);
@@ -97,8 +96,8 @@ extern CLIENT *CLNT_Requestor;
 typedef XRSCPOOL(CLIENT, CLNT_POOL, 4);
 extern CLNT_POOL CLNT_Pool;
 
-void Clnt_EvalSelect_MSB(CLIENT *, xReq *xReq);
-void Clnt_EvalSelect_LSB(CLIENT *, xReq *xReq);
+void Clnt_EvalSelect_Unswapped(CLIENT *, xReq *xReq);
+void Clnt_EvalSelect_Swapped(CLIENT *, xReq *xReq);
 
 
 static inline CLIENT *ClntFind(CARD32 id)

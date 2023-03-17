@@ -21,17 +21,17 @@
 
 
 /* ------------------------------------------------------------------------------ */
-static void _Clnt_EvalFunction_MSB(CLIENT *clnt, xReq *q)
+static void _Clnt_EvalFunction_Unswapped(CLIENT *clnt, xReq *q)
 {
 	(*RequestTable[q->reqType].func) (clnt, q);
 
-	clnt->Eval = Clnt_EvalSelect_MSB;
+	clnt->Eval = Clnt_EvalSelect_Unswapped;
 	clnt->iBuf.Left = sizeof(xReq);
 	clnt->iBuf.Done = 0;
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
-static void _Clnt_EvalFunction_LSB(CLIENT *clnt, xReq *q)
+static void _Clnt_EvalFunction_Swapped(CLIENT *clnt, xReq *q)
 {
 	if (RequestTable[q->reqType].Form)
 	{
@@ -39,7 +39,7 @@ static void _Clnt_EvalFunction_LSB(CLIENT *clnt, xReq *q)
 	}
 	(*RequestTable[q->reqType].func) (clnt, q);
 
-	clnt->Eval = Clnt_EvalSelect_LSB;
+	clnt->Eval = Clnt_EvalSelect_Swapped;
 	clnt->iBuf.Left = sizeof(xReq);
 	clnt->iBuf.Done = 0;
 }
@@ -110,22 +110,22 @@ static BOOL _Clnt__EvalSelect(CLIENT *clnt, xReq *q)
 }
 
 /* ============================================================================== */
-void Clnt_EvalSelect_MSB(CLIENT *clnt, xReq *q)
+void Clnt_EvalSelect_Unswapped(CLIENT *clnt, xReq *q)
 {
 	if (_Clnt__EvalSelect(clnt, q))
 	{
 		if (clnt->iBuf.Left)
 		{
-			clnt->Eval = _Clnt_EvalFunction_MSB;
+			clnt->Eval = _Clnt_EvalFunction_Unswapped;
 		} else
 		{
-			_Clnt_EvalFunction_MSB(clnt, q);
+			_Clnt_EvalFunction_Unswapped(clnt, q);
 		}
 	}
 }
 
 /* ============================================================================== */
-void Clnt_EvalSelect_LSB(CLIENT *clnt, xReq *q)
+void Clnt_EvalSelect_Swapped(CLIENT *clnt, xReq *q)
 {
 	q->length = Swap16(q->length);
 
@@ -133,10 +133,10 @@ void Clnt_EvalSelect_LSB(CLIENT *clnt, xReq *q)
 	{
 		if (clnt->iBuf.Left)
 		{
-			clnt->Eval = _Clnt_EvalFunction_LSB;
+			clnt->Eval = _Clnt_EvalFunction_Swapped;
 		} else
 		{
-			_Clnt_EvalFunction_LSB(clnt, q);
+			_Clnt_EvalFunction_Swapped(clnt, q);
 		}
 	}
 }

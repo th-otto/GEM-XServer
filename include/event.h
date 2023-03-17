@@ -15,9 +15,13 @@
 #include "types.h"
 #include "window.h"
 
-#include <stdarg.h>
-
 #include <X11/X.h>
+
+#ifndef __cplusplus
+#  define c_new new
+#  define c_class class
+#  define c_delete delete
+#endif
 
 
 #define AllEventMask   0x01FFFFFFuL
@@ -67,7 +71,7 @@ void EvntMappingNotify(CARD8 request, CARD8 first, CARD8 count);
  * CARD8 focus:              focus
  */
 
-void EvntClientMsg(p_CLIENT clnt, Window w_id, Atom type, CARD8 format, void *data);
+void EvntClientMsg(p_CLIENT clnt, Window w_id, Atom type, CARD8 format, const void *data);
 void EvntExpose(p_WINDOW wind, short len, const GRECT *rect);
 
 /* ___________to_do_ */
@@ -76,9 +80,9 @@ void EvntExpose(p_WINDOW wind, short len, const GRECT *rect);
 
 /* ___Inline_Funktions__________ */
 
-void _Evnt_Struct(p_WINDOW wind, CARD16 event_type, ...);
-void _Evnt_Window(p_WINDOW wind, CARD32 event_mask, CARD16 event_type, ...);
-void _Evnt_Client(p_CLIENT, CARD16, ...);
+void _Evnt_Struct(p_WINDOW wind, const xEvent *ev);
+void _Evnt_Window(p_WINDOW wind, CARD32 event_mask, const xEvent *ev);
+void _Evnt_Client(p_CLIENT, const xEvent *ev);
 
 
 static inline void EvntKeyButMotion(p_CLIENT clnt, BYTE evnt_type, Window w_id, Window c_id, PXY r_xy, PXY e_xy, BYTE detail)
@@ -98,8 +102,7 @@ static inline void EvntKeyButMotion(p_CLIENT clnt, BYTE evnt_type, Window w_id, 
 	ev.u.keyButtonPointer.state = MAIN_KeyButMask;
 	ev.u.keyButtonPointer.sameScreen = xTrue;
 	ev.u.keyButtonPointer.pad1 = 0;
-	(void)ev;
-	_Evnt_Client(clnt, evnt_type, w_id, c_id, r_xy, e_xy, detail);
+	_Evnt_Client(clnt, &ev);
 }
 
 
@@ -120,8 +123,7 @@ static inline void EvntMotionNotify(p_WINDOW wind, Mask event_mask, Window w_id,
 	ev.u.keyButtonPointer.state = MAIN_KeyButMask;
 	ev.u.keyButtonPointer.sameScreen = xTrue;
 	ev.u.keyButtonPointer.pad1 = 0;
-	(void)ev;
-	_Evnt_Window(wind, event_mask, MotionNotify, w_id, c_id, r_xy, e_xy, detail);
+	_Evnt_Window(wind, event_mask, &ev);
 }
 
 
@@ -142,8 +144,7 @@ static inline void EvntEnterNotify(p_WINDOW wind, Window r_id, Window c_id, PXY 
 	ev.u.enterLeave.state = MAIN_KeyButMask;
 	ev.u.enterLeave.mode = mode;
 	ev.u.enterLeave.flags = focus;
-	(void)ev;
-	_Evnt_Window(wind, EnterWindowMask, EnterNotify, r_id, c_id, r_xy, e_xy, mode, focus, detail);
+	_Evnt_Window(wind, EnterWindowMask, &ev);
 }
 
 
@@ -164,8 +165,7 @@ static inline void EvntLeaveNotify(p_WINDOW wind, Window r_id, Window c_id, PXY 
 	ev.u.enterLeave.state = MAIN_KeyButMask;
 	ev.u.enterLeave.mode = mode;
 	ev.u.enterLeave.flags = focus;
-	(void)ev;
-	_Evnt_Window(wind, LeaveWindowMask, LeaveNotify, r_id, c_id, r_xy, e_xy, mode, focus, detail);
+	_Evnt_Window(wind, LeaveWindowMask, &ev);
 }
 
 
@@ -177,8 +177,7 @@ static inline void EvntFocusIn(p_WINDOW wind, BYTE mode, BYTE detail)
 	ev.u.u.detail = detail;
 	ev.u.focus.window = wind->Id;
 	ev.u.focus.mode = mode;
-	(void)ev;
-	_Evnt_Window(wind, FocusChangeMask, FocusIn, mode, detail);
+	_Evnt_Window(wind, FocusChangeMask, &ev);
 }
 
 
@@ -190,8 +189,7 @@ static inline void EvntFocusOut(p_WINDOW wind, BYTE mode, BYTE detail)
 	ev.u.u.detail = detail;
 	ev.u.focus.window = wind->Id;
 	ev.u.focus.mode = mode;
-	(void)ev;
-	_Evnt_Window(wind, FocusChangeMask, FocusOut, mode, detail);
+	_Evnt_Window(wind, FocusChangeMask, &ev);
 }
 
 
@@ -204,8 +202,7 @@ static inline void EvntNoExposure(p_CLIENT clnt, Drawable d_id, CARD8 major_opco
 	ev.u.noExposure.drawable = d_id;
 	ev.u.noExposure.minorEvent = 0;
 	ev.u.noExposure.majorEvent = major_opcode;
-	(void)ev;
-	_Evnt_Client(clnt, NoExpose, d_id, (CARD16) 0, major_opcode);
+	_Evnt_Client(clnt, &ev);
 }
 
 
@@ -217,8 +214,7 @@ static inline void EvntVisibilityNotify(p_WINDOW wind, BYTE mode)
 	ev.u.u.detail = 0;
 	ev.u.visibility.window = wind->Id;
 	ev.u.visibility.state = mode;
-	(void)ev;
-	_Evnt_Window(wind, VisibilityChangeMask, VisibilityNotify, mode);
+	_Evnt_Window(wind, VisibilityChangeMask, &ev);
 }
 
 
@@ -236,8 +232,7 @@ static inline void EvntCreateNotify(p_WINDOW wind, Window w_id, const GRECT *rec
 	ev.u.createNotify.height = rect->g_h;
 	ev.u.createNotify.borderWidth = border_width;
 	ev.u.createNotify.override = override_redirect;
-	(void)ev;
-	_Evnt_Window(wind, SubstructureNotifyMask, CreateNotify, w_id, rect, border_width, override_redirect);
+	_Evnt_Window(wind, SubstructureNotifyMask, &ev);
 }
 
 
@@ -249,8 +244,7 @@ static inline void EvntDestroyNotify(p_WINDOW wind, Window w_id)
 	ev.u.u.detail = 0;
 	ev.u.destroyNotify.event = wind->Id;
 	ev.u.destroyNotify.window = w_id;
-	(void)ev;
-	_Evnt_Struct(wind, DestroyNotify, w_id);
+	_Evnt_Struct(wind, &ev);
 }
 
 
@@ -263,8 +257,7 @@ static inline void EvntUnmapNotify(p_WINDOW wind, Window w_id, BOOL from_configu
 	ev.u.unmapNotify.event = wind->Id;
 	ev.u.unmapNotify.window = w_id;
 	ev.u.unmapNotify.fromConfigure = from_configure;
-	(void)ev;
-	_Evnt_Struct(wind, UnmapNotify, w_id, from_configure);
+	_Evnt_Struct(wind, &ev);
 }
 
 
@@ -277,8 +270,7 @@ static inline void EvntMapNotify(p_WINDOW wind, Window w_id, BOOL override_redir
 	ev.u.mapNotify.event = wind->Id;
 	ev.u.mapNotify.window = w_id;
 	ev.u.mapNotify.override = override_redirect;
-	(void)ev;
-	_Evnt_Struct(wind, MapNotify, w_id, override_redirect);
+	_Evnt_Struct(wind, &ev);
 }
 
 
@@ -290,8 +282,7 @@ static inline void EvntMapRequest(p_WINDOW wind, Window w_id)
 	ev.u.u.detail = 0;
 	ev.u.mapRequest.parent = wind->Id;
 	ev.u.mapRequest.window = w_id;
-	(void)ev;
-	_Evnt_Window(wind, SubstructureRedirectMask, MapRequest, w_id);
+	_Evnt_Window(wind, SubstructureRedirectMask, &ev);
 }
 
 
@@ -307,8 +298,7 @@ static inline void EvntReparentNotify(p_WINDOW wind, Mask event_mask, Window w_i
 	ev.u.reparent.x = w_xy.p_x;
 	ev.u.reparent.y = w_xy.p_y;
 	ev.u.reparent.override = override_redirect;
-	(void)ev;
-	_Evnt_Window(wind, event_mask, ReparentNotify, w_id, p_id, w_xy, override_redirect);
+	_Evnt_Window(wind, event_mask, &ev);
 }
 
 
@@ -327,8 +317,7 @@ static inline void EvntConfigureNotify(p_WINDOW wind, Window w_id, Window a_id, 
 	ev.u.configureNotify.height = rect->g_h;
 	ev.u.configureNotify.borderWidth = border_width;
 	ev.u.configureNotify.override = override_redirect;
-	(void)ev;
-	_Evnt_Struct(wind, ConfigureNotify, w_id, a_id, rect, border_width, override_redirect);
+	_Evnt_Struct(wind, &ev);
 }
 
 
@@ -347,8 +336,7 @@ static inline void EvntConfigureRequest(p_WINDOW wind, Window w_id, Window s_id,
 	ev.u.configureRequest.height = rect->g_h;
 	ev.u.configureRequest.borderWidth = border_width;
 	ev.u.configureRequest.valueMask = mask;
-	(void)ev;
-	_Evnt_Struct(wind, ConfigureRequest, w_id, s_id, rect, border_width, mask, detail);
+	_Evnt_Struct(wind, &ev);
 }
 
 
@@ -362,8 +350,7 @@ static inline void EvntGravityNotify(p_WINDOW wind, Window w_id, PXY w_xy)
 	ev.u.gravity.window = w_id;
 	ev.u.gravity.x = w_xy.p_x;
 	ev.u.gravity.y = w_xy.p_y;
-	(void)ev;
-	_Evnt_Struct(wind, GravityNotify, w_id, w_xy);
+	_Evnt_Struct(wind, &ev);
 }
 
 
@@ -376,8 +363,7 @@ static inline void EvntResizeRequest(p_WINDOW wind, CARD16 width, CARD16 height)
 	ev.u.resizeRequest.window = wind->Id;
 	ev.u.resizeRequest.width = width;
 	ev.u.resizeRequest.height = height;
-	(void)ev;
-	_Evnt_Struct(wind, ResizeRequest, width, height);
+	_Evnt_Struct(wind, &ev);
 }
 
 
@@ -391,8 +377,7 @@ static inline void EvntCirculateNotify(p_WINDOW wind, Window w_id, BYTE place)
 	ev.u.circulate.window = w_id;
 	ev.u.circulate.parent = None;
 	ev.u.circulate.place = place;
-	(void)ev;
-	_Evnt_Struct(wind, CirculateNotify, w_id, place);
+	_Evnt_Struct(wind, &ev);
 }
 
 
@@ -406,8 +391,7 @@ static inline void EvntCirculateRequest(p_WINDOW wind, Window w_id, BYTE place)
 	ev.u.circulate.window = w_id;
 	ev.u.circulate.parent = None;
 	ev.u.circulate.place = place;
-	(void)ev;
-	_Evnt_Window(wind, SubstructureRedirectMask, CirculateRequest, w_id, place);
+	_Evnt_Window(wind, SubstructureRedirectMask, &ev);
 }
 
 
@@ -421,8 +405,7 @@ static inline void EvntPropertyNotify(p_WINDOW wind, Atom type, BYTE mode)
 	ev.u.property.atom = type;
 	ev.u.property.time = MAIN_TimeStamp;
 	ev.u.property.state = mode;
-	(void)ev;
-	_Evnt_Window(wind, PropertyChangeMask, PropertyNotify, type, mode);
+	_Evnt_Window(wind, PropertyChangeMask, &ev);
 }
 
 
@@ -435,8 +418,7 @@ static inline void EvntSelectionClear(p_CLIENT clnt, Window w_id, Atom selection
 	ev.u.selectionClear.time = MAIN_TimeStamp;
 	ev.u.selectionClear.window = w_id;
 	ev.u.selectionClear.atom = selection;
-	(void)ev;
-	_Evnt_Client(clnt, SelectionClear, w_id, selection);
+	_Evnt_Client(clnt, &ev);
 }
 
 
@@ -452,8 +434,7 @@ static inline void EvntSelectionRequest(p_CLIENT clnt, Time timestamp, Window w_
 	ev.u.selectionRequest.selection = selection;
 	ev.u.selectionRequest.target = target;
 	ev.u.selectionRequest.property = property;
-	(void)ev;
-	_Evnt_Client(clnt, SelectionRequest, timestamp, w_id, requestor, selection, target, property);
+	_Evnt_Client(clnt, &ev);
 }
 
 
@@ -468,8 +449,7 @@ static inline void EvntSelectionNotify(p_CLIENT clnt, Time timestamp, Window w_i
 	ev.u.selectionNotify.selection = selection;
 	ev.u.selectionNotify.target = target;
 	ev.u.selectionNotify.property = property;
-	(void)ev;
-	_Evnt_Client(clnt, SelectionNotify, timestamp, w_id, selection, target, property);
+	_Evnt_Client(clnt, &ev);
 }
 
 
@@ -481,18 +461,13 @@ static inline void EvntColormapNotify(WINDOW *wind, Colormap colormap, BOOL c_ne
 	ev.u.u.detail = 0;
 	ev.u.colormap.window = wind->Id;
 	ev.u.colormap.colormap = colormap;
-#ifdef __cplusplus
 	ev.u.colormap.c_new = c_new;
-#else
-	ev.u.colormap.new = c_new;
-#endif
 	ev.u.colormap.state = state;
-	(void)ev;
-	_Evnt_Struct(wind, ColormapNotify, colormap, c_new, state);
+	_Evnt_Struct(wind, &ev);
 }
 
 
-void FT_Evnt_send_MSB(p_CLIENT, p_WINDOW, CARD16 evnt, va_list);
-void FT_Evnt_send_LSB(p_CLIENT, p_WINDOW, CARD16 evnt, va_list);
+void FT_Evnt_send_Unswapped(p_CLIENT, p_WINDOW, const xEvent *ev);
+void FT_Evnt_send_Swapped(p_CLIENT, p_WINDOW, const xEvent *ev);
 
 #endif /* __EVENT_H__ */
