@@ -17,9 +17,9 @@
 !-o-:         -I-              ! allways use Italic instead of Oblique
 
 ! With the examples above, a request for '-adobe-times-*-*-*-*-*-*-*-*-*-*-*-*'
-! would be tanslated to                  '-*-Life-*-*-*-*-*-*-*-*-*-*-*-*'
+! would be translated to                  '-*-Life-*-*-*-*-*-*-*-*-*-*-*-*'
 ! and a request for     '-adobe-foobar-*-*-*-*-*-*-*-*-*-*-*-*'
-! would be tanslated to '-*-foobar-*-*-*-*-*-*-*-*-*-*-*-*'
+! would be translated to '-*-foobar-*-*-*-*-*-*-*-*-*-*-*-*'
 
 
 !!! Edit and uncomment the following lines to define _complete_lines_ to be

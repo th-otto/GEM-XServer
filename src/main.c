@@ -58,7 +58,11 @@ CARD16 MAIN_KeyButMask = 0;
 short _MAIN_Mctrl = 0;
 short _MAIN_Wupdt = 0;
 
+#define REDIR 0
+
+#if REDIR
 static short _MAIN_Xcons = 0;			/* pid of xconsole, if started by server */
+#endif
 
 
 /* ============================================================================== */
@@ -72,12 +76,15 @@ int main(int argc, char *argv[])
 		x_printf("ERROR: Can't initialize AES.\n");
 	} else
 	{
+#if REDIR
 		short xcon;
 		short redir = _app;
+#endif
 
-		xcon = Fopen("/dev/xconout2", 0x80);
 		signal(SIGCHLD, sig_child);
 
+#if REDIR
+		xcon = Fopen("/dev/xconout2", 0x80);
 		if (xcon >= 0)
 		{
 			const char *args[] = {
@@ -101,9 +108,12 @@ int main(int argc, char *argv[])
 			if (redir)
 				sleep(1);
 		}
+#endif
+
 		atexit(shutdown);
 		WmgrIntro(xTrue);
 
+#if REDIR
 		if (redir)
 		{
 			short typ;
@@ -139,6 +149,7 @@ int main(int argc, char *argv[])
 				(void) Pkill(pid + 1, 1);
 			}
 		}
+#endif
 
 		x_printf("X Server %s [%s] starting ...\n", GLBL_Version, GLBL_Build);
 
@@ -274,7 +285,11 @@ int main(int argc, char *argv[])
 				else if (event & MU_M2)
 					WindPointerMove(NULL);
 
+#if REDIR
 				if (reset || SrvrSelect(_MAIN_Xcons))
+#else
+				if (reset || SrvrSelect(0))
+#endif
 				{
 					x_printf("\nLast client left, server reset ...\n");
 					if (_MAIN_Mctrl)
@@ -290,11 +305,13 @@ int main(int argc, char *argv[])
 						WindUpdate(xFalse);
 					}
 					SrvrReset();
+#if REDIR
 				} else if (_MAIN_Xcons && WIND_ChngTrigger)
 				{
 					SrvrUngrab(NULL);
 					set_printf(xFalse);
 					_MAIN_Xcons = 0;
+#endif
 				}
 			}
 		}
@@ -307,12 +324,14 @@ static void sig_child(int sig)
 {
 	long rusage;
 
+#if REDIR
 	if (_MAIN_Xcons && Pkill(0, _MAIN_Xcons))
 	{
 		SrvrUngrab(NULL);
 		set_printf(xFalse);
 		_MAIN_Xcons = 0;
 	}
+#endif
 	Pwaitpid(-1, 0, &rusage);
 }
 

@@ -20,7 +20,7 @@ CARD32 CNFG_MaxReqLength = 65535uL;		/* maximum size */
 
 #define X_BIN_U "U:\\usr\\X11\\bin"
 
-const char PATH_DEBUG_OUT[] = "U:\\usr\\bin\\xcat";
+const char PATH_DEBUG_OUT[] = X_BIN_U "\\xcat";
 const char PATH_XBIN_RSRC[] = X_BIN_U "\\Xapp.rsc";
 const char *PATH_RSRC = PATH_XBIN_RSRC + sizeof(X_BIN_U);
 

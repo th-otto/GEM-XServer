@@ -193,7 +193,7 @@ void _Font_Bounds(FONTFACE *face, BOOL mono)
 	}
 	face->MinAttr = face->MaxAttr = 0;
 
-	if ((!face->Type || face->Type >= 2) && (face->HalfLine >= face->Ascent || face->MaxDesc > face->Ascent / 2))
+	if ((face->Type == 0 || face->Type >= 2) && (face->HalfLine >= face->Ascent || face->MaxDesc > face->Ascent / 2))
 	{
 		short hgt = face->Ascent + face->Descent;
 		short size = hgt * GRPH_Depth;
@@ -214,7 +214,7 @@ void _Font_Bounds(FONTFACE *face, BOOL mono)
 			vs_clip(hdl, 1, pxy);
 			vswr_mode(hdl, MD_TRANS);
 			vst_alignment(hdl, 1, 5, pxy, pxy);
-			if (!face->Type)
+			if (face->Type == 0)
 			{
 				vst_height(hdl, face->Height, pxy, pxy, pxy, pxy);
 				vst_width(hdl, face->Width, pxy, pxy, pxy, pxy);
@@ -232,7 +232,7 @@ void _Font_Bounds(FONTFACE *face, BOOL mono)
 				while (--i)
 					v_gtext16n(hdl, p, &txt[i], 1);
 				i = hgt;
-				while (--i && !buf[i])
+				while (--i && buf[i] == 0)
 					;
 				face->MaxDesc = i - face->Ascent + 1;
 			}
@@ -244,7 +244,7 @@ void _Font_Bounds(FONTFACE *face, BOOL mono)
 				while (--i)
 					v_gtext16n(hdl, p, &txt[i], 1);
 				i = -1;
-				while (++i < hgt && !buf[i])
+				while (++i < hgt && buf[i] == 0)
 					;
 				face->HalfLine = face->MinAsc = face->Ascent - i;
 			}
@@ -256,7 +256,7 @@ void _Font_Bounds(FONTFACE *face, BOOL mono)
 				while (--i)
 					v_gtext16n(hdl, p, &txt[0], 1);
 				i = -1;
-				while (++i < hgt && !buf[i])
+				while (++i < hgt && buf[i] == 0)
 					;
 				face->MaxAsc = face->Ascent - i;
 			}
@@ -287,7 +287,7 @@ void FontInit(short count)
 
 	/*--- read font.alias --*/
 
-	if ((f_db = fopen(PATH_FontsAlias, "r")))
+	if ((f_db = fopen(PATH_FontsAlias, "r")) != NULL)
 	{
 		FONTALIAS **subst = &_FONT_Subst;
 		FONTALIAS **alias = &_FONT_Alias;
@@ -302,23 +302,23 @@ void FontInit(short count)
 
 			while (isspace(*a))
 				a++;
-			if (!*a || *a == '!')
+			if (*a == '\0' || *a == '!')
 				continue;
 
-			if (!(len_a = strcspn(a, " \t:\r\n")))
+			if ((len_a = strcspn(a, " \t:\r\n")) == 0)
 				break;
 			b = a + len_a;
-			while (isspace(*(b)))
+			while (isspace(*b))
 				b++;
-			if ((is_subst = (*b == ':')))
+			if ((is_subst = (*b == ':')) != 0)
 			{
 				while (isspace(*++b))
 					;
 			}
-			if (!(len_b = strcspn(b, " \t\r\n")))
+			if ((len_b = strcspn(b, " \t\r\n")) == 0)
 				break;
 
-			if ((elem = malloc(sizeof(FONTALIAS) + len_a + len_b)))
+			if ((elem = malloc(sizeof(FONTALIAS) + len_a + len_b)) != NULL)
 			{
 				char *p = elem->Pattern = elem->Name + len_a + 1;
 
@@ -361,7 +361,7 @@ void FontInit(short count)
 		int minor = -1;
 		int tiny = 0;
 
-		if (!fgets(buf, sizeof(buf), f_db) ||
+		if (fgets(buf, sizeof(buf), f_db) == NULL ||
 			sscanf(buf, "# fonts.db; %d.%d.%d ", &major, &minor, &tiny) < 2 || minor < 6 || (minor == 6 && tiny < 3))
 		{
 			fclose(f_db);
@@ -392,7 +392,7 @@ void FontInit(short count)
 				{
 					x_printf("A\n");
 					break;
-				} else if (!(db = malloc(sizeof(struct FONT_DB) + len - j)))
+				} else if ((db = malloc(sizeof(struct FONT_DB) + len - j)) == NULL)
 				{
 					x_printf("a\n");
 					break;
@@ -411,7 +411,7 @@ void FontInit(short count)
 				fptr = &db->list;
 				font_db = db;
 
-			} else if (!font_db)
+			} else if (font_db == NULL)
 			{
 				x_printf("B\n");
 				break;
@@ -422,13 +422,13 @@ void FontInit(short count)
 				{
 					x_printf("C\n");
 					break;
-				} else if (!(face = _Font_Create(buf, len, type, isSymbol, isMono)))
+				} else if ((face = _Font_Create(buf, len, type, isSymbol, isMono)) == NULL)
 				{
 					x_printf("c\n");
 					break;
 				}
 
-			} else if (!face)
+			} else if (face == NULL)
 			{
 				x_printf("D\n");
 				break;
@@ -466,11 +466,11 @@ void FontInit(short count)
 
 	/*--- scan VDI fonts ---*/
 
-	if ((f_db = fopen(PATH_FontsDb, "w")))
+	if ((f_db = fopen(PATH_FontsDb, "w")) != NULL)
 	{
 		fprintf(f_db, "# fonts.db; %s\n", GLBL_Version);
 	}
-	x_printf("  loaded %i font%s\n", count, (count == 1 ? "" : "s"));
+	x_printf("  loaded %i font%s\n", count, count == 1 ? "" : "s");
 	for (i = 1; i <= count; i++)
 	{
 		struct FONT_DB *db = font_db;
@@ -525,12 +525,13 @@ void FontInit(short count)
 
 		while (db)
 		{
-			if (db->id == info.id && !strcmp(db->file, info.file_name1))
+			if (db->id == info.id && strcmp(db->file, info.file_name1) == 0)
 			{
 				if (db->cnt != info.pt_cnt)
 				{
 					db = NULL;
 				} else
+				{
 					for (j = 0; j < info.pt_cnt; ++j)
 					{
 						FONTFACE *face = db->list;
@@ -539,12 +540,13 @@ void FontInit(short count)
 						{
 							face = face->Next;
 						}
-						if (!face)
+						if (face == NULL)
 						{
 							db = NULL;
 							break;
 						}
 					}
+				}
 				break;
 			}
 			db = db->next;
@@ -572,23 +574,23 @@ void FontInit(short count)
 		if (info.format > 1)
 		{
 			vqt_fontheader(GRPH_Vdi, (char *) fhdr, info.file_name1);
-			spcg[0] = (fhdr->fh_cflgs & 2 ? fhdr->fh_famcl == 3 ? 'C' : 'M' : 'P');
-			slnt[0] = (fhdr->fh_cflgs & 1 ? 'I' : 'R');
+			spcg[0] = (fhdr->fh_cflgs & 2) ? fhdr->fh_famcl == 3 ? 'C' : 'M' : 'P';
+			slnt[0] = (fhdr->fh_cflgs & 1) ? 'I' : 'R';
 			resx = 0;
 			resy = 0;
 		}
 		if (info.format == 2)
 		{								/*___Speedo___ */
-			if (!strncasecmp(fmly, "Bits ", 5))
+			if (strncasecmp(fmly, "Bits ", 5) == 0)
 			{
 				fndr = "Bitstream";
 				fmly += 5;
-			} else if ((p = strstr(fhdr->fh_cpyrt, "opyright")))
+			} else if ((p = strstr(fhdr->fh_cpyrt, "opyright")) != NULL)
 			{
-				if ((p = strstr(p, "by ")))
+				if ((p = strstr(p, "by ")) != NULL)
 				{
 					fndr = p + 3;
-					if ((p = strchr(fndr, ' ')))
+					if ((p = strchr(fndr, ' ')) != NULL)
 						*p = '\0';
 				}
 			}
@@ -666,22 +668,22 @@ void FontInit(short count)
 				setw = "Expanded";
 				break;
 			}
-
 		} else if (latn)
 		{
 			do
 			{
 				fndr = info.font_name + 2;
-				if (!(p = strchr(fndr, '-')))
+				if ((p = strchr(fndr, '-')) == NULL)
 					break;
 				*(p++) = '\0';
 				fmly = p;
-				if (!(p = strchr(fmly, '-')))
+				if ((p = strchr(fmly, '-')) == NULL)
 					break;
 				*p = '\0';
-				if (!*(++p))
+				if (*(++p) == '\0')
 					break;
 				if (*p && *p != '-')
+				{
 					switch (*(p++))
 					{
 					case 'M':
@@ -691,6 +693,7 @@ void FontInit(short count)
 						wght = "Bold";
 						break;
 					}
+				}
 				if (*(p++) != '-')
 					break;
 				switch (*p)
@@ -703,6 +706,7 @@ void FontInit(short count)
 				if (*(p++) != '-')
 					break;
 				if (*p && *p != '-')
+				{
 					switch (*(p++))
 					{
 					case 'C':
@@ -721,6 +725,7 @@ void FontInit(short count)
 						setw = "Expanded";
 						break;
 					}
+				}
 				if (*(p++) != '-')
 					break;
 				if (*p != '-')
@@ -740,6 +745,7 @@ void FontInit(short count)
 				if (*(p++) != '-')
 					break;
 				if (*p && *p != '-')
+				{
 					switch (*(p++))
 					{
 					case 'I':
@@ -750,6 +756,7 @@ void FontInit(short count)
 						cenc = "FONTSPECIFIC";
 						break;
 					}
+				}
 				if (*(p++) != '-')
 					break;
 				switch (*p)
@@ -768,58 +775,58 @@ void FontInit(short count)
 
 		} else
 		{
-			if (!*spcg)
+			if (*spcg == '\0')
 			{
-				spcg[0] = (isMono ? 'C' : 'P');
+				spcg[0] = isMono ? 'C' : 'P';
 			}
 			if (isSymbol)
 			{
 				creg = "Gdos";
 				cenc = "FONTSPECIFIC";
 			}
-			if (!*fmly)
+			if (*fmly == '\0')
 			{
 				fmly = info.font_name;
 			}
-			if ((p = strstr(fmly, " sans")) || (p = strstr(fmly, " Sans")))
+			if ((p = strstr(fmly, " sans")) != NULL || (p = strstr(fmly, " Sans")) != NULL)
 			{
 				strcpy(p, p + 5);
 				astl = "Sans";
 			}
-			if (!strcasecmp(wght, "Regular"))
+			if (strcasecmp(wght, "Regular") == 0)
 			{
 				wght = "Medium";
-				if (!*slnt)
+				if (*slnt == '\0')
 					slnt[0] = 'R';
 			} else
 			{
-				if ((p = strstr(wght, "italic")) || (p = strstr(wght, "Italic")))
+				if ((p = strstr(wght, "italic")) != NULL || (p = strstr(wght, "Italic")) != NULL)
 				{
 					strcpy((p[-1] == ' ' ? p - 1 : p), p + 6);
-					if (!*slnt)
+					if (*slnt == '\0')
 						slnt[0] = 'I';
 				}
 			}
 			if (info.format == 1)
 			{
-				if (!*slnt)
+				if (*slnt == '\0')
 					slnt[0] = '*';
-				if (!wght || !*wght)
+				if (wght == NULL || *wght == '\0')
 					wght = "*";
 			} else
 			{
-				if (!*slnt)
+				if (*slnt == '\0')
 					slnt[0] = 'R';
-				if (!wght || !*wght)
+				if (wght == NULL || *wght == '\0')
 					wght = "Medium";
 			}
-			if (!setw)
+			if (setw == NULL)
 				setw = "Normal";
 		}
 
 		if (fmly)
 		{
-			while ((p = strchr(fmly, ' ')))
+			while ((p = strchr(fmly, ' ')) != NULL)
 				strcpy(p, p + 1);
 		}
 
@@ -827,9 +834,9 @@ void FontInit(short count)
 #pragma GCC diagnostic ignored "-Wformat-overflow"
 #endif
 		sprintf(info.file_name1,
-				"-%s-%s-%s-%s-%s-%s-%%u-%%u0-%u-%u-%s-%%u-%s-%s",
-				(fndr ? fndr : ""), (fmly ? fmly : ""), (wght ? wght : ""),
-				slnt, (setw ? setw : ""), (astl ? astl : ""), resx, resy, spcg, creg, cenc);
+			"-%s-%s-%s-%s-%s-%s-%%u-%%u0-%u-%u-%s-%%u-%s-%s",
+			fndr ? fndr : "", fmly ? fmly : "", wght ? wght : "",
+			slnt, setw ? setw : "", astl ? astl : "", resx, resy, spcg, creg, cenc);
 #if __GNUC_PREREQ(7,0)
 #pragma GCC diagnostic warning "-Wformat-overflow"
 #endif
@@ -854,7 +861,7 @@ void FontInit(short count)
 			}
 			len = sprintf(fhdr->fh_fmver, info.file_name1, pxsz, info.pt_sizes[j], avrg);
 
-			if ((*list = _Font_Create(fhdr->fh_fmver, len, info.format, isSymbol, isMono)))
+			if ((*list = _Font_Create(fhdr->fh_fmver, len, info.format, isSymbol, isMono)) != NULL)
 			{
 				FONTFACE *face = *list;
 
