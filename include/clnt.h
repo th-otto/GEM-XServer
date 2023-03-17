@@ -42,7 +42,7 @@ typedef struct
 
 
 /* --- Request Callback Functions --- */
-typedef void (*RQSTCB)(p_CLIENT, xReq *xReq);
+typedef void (*RQSTCB)(p_CLIENT, xReq *req);
 
 typedef struct
 {
@@ -96,8 +96,8 @@ extern CLIENT *CLNT_Requestor;
 typedef XRSCPOOL(CLIENT, CLNT_POOL, 4);
 extern CLNT_POOL CLNT_Pool;
 
-void Clnt_EvalSelect_Unswapped(CLIENT *, xReq *xReq);
-void Clnt_EvalSelect_Swapped(CLIENT *, xReq *xReq);
+void Clnt_EvalSelect_Unswapped(CLIENT *, xReq *req);
+void Clnt_EvalSelect_Swapped(CLIENT *, xReq *req);
 
 
 static inline CLIENT *ClntFind(CARD32 id)
