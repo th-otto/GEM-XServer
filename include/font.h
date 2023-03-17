@@ -20,10 +20,10 @@ typedef struct s_FONT
 	XRSC(FONTABLE, isFont);
 
 	struct s_FONTFACE *FontFace;
-	short FontIndex:16;
-	unsigned FontEffects:3;
-	unsigned FontPoints:13;
-	unsigned FontWidth;
+	short FontIndex;
+	unsigned short FontEffects;
+	unsigned short FontPoints;
+	unsigned short FontWidth;
 } FONT;
 
 
@@ -34,11 +34,10 @@ BOOL FontValues(p_FONTABLE, CARD32 id);
 
 static inline void FontCopy(p_FONTABLE dst, const p_FONTABLE src)
 {
-	long *d = (long *) &dst.p->FontFace;
-	long *s = (long *) &src.p->FontFace;
-
-	*(d++) = *(s++);
-	*(d) = *(s);
+	dst.p->FontFace = src.p->FontFace;
+	dst.p->FontIndex = src.p->FontIndex;
+	dst.p->FontEffects = src.p->FontEffects;
+	dst.p->FontPoints = src.p->FontPoints;
 	dst.p->FontWidth = src.p->FontWidth;
 }
 

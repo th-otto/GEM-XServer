@@ -24,10 +24,10 @@ typedef struct s_GC
 	XRSC(FONTABLE, isFont);
 
 	struct s_FONTFACE *FontFace;
-	short FontIndex:16;
-	unsigned FontEffects:3;
-	unsigned FontPoints:13;
-	unsigned FontWidth;
+	short FontIndex;
+	unsigned short FontEffects;
+	unsigned short FontPoints;
+	unsigned short FontWidth;
 
 	CARD16 Depth;
 	CARD8 Function;
