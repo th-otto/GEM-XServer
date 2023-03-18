@@ -383,7 +383,7 @@ static const RGB *_Cmap_LookupName(const char *name, size_t len)
 		RGB rgb;
 	} CMAP_NAME;
 
-	static CMAP_NAME Cmap_NameDB[] = {
+	static CMAP_NAME const Cmap_NameDB[] = {
 #define ENTRY(name, r,g,b)\
 			{name, {(r<<8)|r, (g<<8)|g, (b<<8)|b}}
 #include "color_db.c"
