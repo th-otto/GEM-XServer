@@ -828,6 +828,8 @@ void FontInit(short count)
 		{
 			while ((p = strchr(fmly, ' ')) != NULL)
 				strcpy(p, p + 1);
+			while ((p = strchr(fmly, '-')) != NULL)
+				strcpy(p, p + 1);
 		}
 
 #if __GNUC_PREREQ(7,0)
