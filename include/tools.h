@@ -39,34 +39,34 @@ static inline CARD32 Swap32(CARD32 val)
 	return val;
 }
 
-static inline void SwapPXY(PXY * dst, const PXY * src)
+static inline void SwapPXY(PXY *dst, const PXY *src)
 {
 	__asm__ volatile (
-		"\tmove.l	(%0), d0\n"
-		"\trol.w		#8, d0\n"
-		"\tswap		d0\n"
-		"\trol.w		#8, d0\n"
-		"\tswap		d0\n"
-		"\tmove.l	d0, (%1)\n"
+		"\tmove.l	(%0), %%d0\n"
+		"\trol.w		#8, %%d0\n"
+		"\tswap		%%d0\n"
+		"\trol.w		#8, %%d0\n"
+		"\tswap		%%d0\n"
+		"\tmove.l	%%d0, (%1)\n"
 		:                   /* output */
 		: "a"(src),"a"(dst) /* input */
 		: "d0", "cc" AND_MEMORY              /* clobbered */
 	);
 }
 
-static inline void SwapRCT(GRECT * dst, const GRECT * src)
+static inline void SwapRCT(GRECT *dst, const GRECT *src)
 {
 	__asm__ volatile (
-		"\tmovem.l	(%0), d0/d1\n"
-		"\trol.w		#8, d0\n"
-		"\tswap		d0\n"
-		"\trol.w		#8, d0\n"
-		"\tswap		d0\n"
-		"\trol.w		#8, d1\n"
-		"\tswap		d1\n"
-		"\trol.w		#8, d1\n"
-		"\tswap		d1\n"
-		"\tmovem.l	d0/d1, (%1)\n"
+		"\tmovem.l	(%0), %%d0/%%d1\n"
+		"\trol.w		#8, %%d0\n"
+		"\tswap		%%d0\n"
+		"\trol.w		#8, %%d0\n"
+		"\tswap		%%d0\n"
+		"\trol.w		#8, %%d1\n"
+		"\tswap		%%d1\n"
+		"\trol.w		#8, %%d1\n"
+		"\tswap		%%d1\n"
+		"\tmovem.l	%%d0/%%d1, (%1)\n"
 		:                   /* output */
 		: "a"(src),"a"(dst) /* input */
 		: "d0","d1", "cc" AND_MEMORY         /* clobbered */
@@ -83,6 +83,20 @@ static inline CARD16 Swap16(CARD16 val)
 static inline CARD32 Swap32(CARD32 val)
 {
 	return ((val >> 24) & 0xFF) | ((val >> 8) & 0xFF00) | ((val & 0xFF00) << 8) | ((val & 0xFF) << 24);
+}
+
+static inline void SwapPXY(PXY *dst, const PXY *src)
+{
+	dst->p_x = Swap16(src->p_x);
+	dst->p_y = Swap16(src->p_y);
+}
+
+static inline void SwapRCT(GRECT *dst, const GRECT *src)
+{
+	dst->g_x = Swap16(src->g_x);
+	dst->g_y = Swap16(src->g_y);
+	dst->g_w = Swap16(src->g_w);
+	dst->g_h = Swap16(src->g_h);
 }
 
 #endif

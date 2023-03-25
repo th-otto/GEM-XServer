@@ -138,9 +138,9 @@ int GrphSetup(void *format_arr)
 			short w_out[273];
 			short ver;
 			__asm__ volatile (
-				"\tclr.l		%%d0\n"
+				"\tclr.l	%%d0\n"
 				"\tjsr		(%1)\n"
-				"\tmove.w	%%d0, %0\n"
+				"\tmove.w	%%d0,%0\n"
 				: "=d"(ver)                 /* output */
 				: "a"(func)                 /* input */
 				: "d0","d1","d2", "a0","a1","a2","cc" AND_MEMORY /* clobbered */
@@ -292,43 +292,43 @@ int GrphSetup(void *format_arr)
 /* ============================================================================== */
 BOOL GrphIntersect(GRECT *dst, const GRECT *src)
 {
-#if 1
+#ifndef __mcoldfire__
 	register BOOL res __asm("d0");
 	__asm__ volatile(
-		"\tmoveq.l	#1, d0\n"
-		"\tmovem.l	(%1), d1/d2\n" /* a.x:a.y/a.w:a.h */
-		"\tmovem.l	(%2), d3/d4\n" /* b.x:b.y/b.w:b.h */
-		"\tadd.w		d1, d2\n" /* a.h += a.y */
-		"\tadd.w		d3, d4\n" /* b.h += b.y */
-			"\tcmp.w		d1, d3\n"
+		"\tmoveq.l	#1,%%d0\n"
+		"\tmovem.l	(%1),%%d1/%%d2\n" /* a.x:a.y/a.w:a.h */
+		"\tmovem.l	(%2),%%d3/%%d4\n" /* b.x:b.y/b.w:b.h */
+		"\tadd.w		%%d1,%%d2\n" /* a.h += a.y */
+		"\tadd.w		%%d3,%%d4\n" /* b.h += b.y */
+			"\tcmp.w		%%d1,%%d3\n"
 			"\tble.b		1f\n"   /* ? b.y <= a.y */
-			"\tmove.w	d3, d1\n" /* a.y = b.y */
-		"1:	cmp.w		d2, d4\n"
+			"\tmove.w	%%d3,%%d1\n" /* a.y = b.y */
+		"1:	cmp.w		%%d2,%%d4\n"
 		"\tbge.b		2f\n"   /* ? b.h >= a.h */
-		"\tmove.w	d4, d2\n" /* a.h = b.h */
-		"2: sub.w		d1, d2\n" /* a.h -= a.y */
+		"\tmove.w	%%d4,%%d2\n" /* a.h = b.h */
+		"2: sub.w		%%d1,%%d2\n" /* a.h -= a.y */
 		"\tbhi.b		3f\n"   /* ? a.h > a.y */
-		"\tmoveq.l	#0, d0\n"
+		"\tmoveq.l	#0,%%d0\n"
 		"3:\n"
-		"\tswap		d1\n" /* a.y:a.x */
-		"\tswap		d2\n" /* a.h:a.w */
-		"\tadd.w		d1, d2\n" /* a.w += a.x */
-		"\tswap		d3\n" /* b.y:b.x */
-		"\tswap		d4\n" /* b.h:b.w */
-		"\tadd.w		d3, d4\n" /* b.w += b.x */
-			"\tcmp.w		d1, d3\n"
+		"\tswap		%%d1\n" /* a.y:a.x */
+		"\tswap		%%d2\n" /* a.h:a.w */
+		"\tadd.w		%%d1,%%d2\n" /* a.w += a.x */
+		"\tswap		%%d3\n" /* b.y:b.x */
+		"\tswap		%%d4\n" /* b.h:b.w */
+		"\tadd.w		%%d3,%%d4\n" /* b.w += b.x */
+			"\tcmp.w		%%d1,%%d3\n"
 			"\tble.b		5f\n"   /* ? b.x <= a.x */
-			"\tmove.w	d3, d1\n" /* a.x = b.x */
-		"5:	cmp.w		d2, d4\n"
+			"\tmove.w	%%d3,%%d1\n" /* a.x = b.x */
+		"5:	cmp.w		%%d2,%%d4\n"
 		"\tbge.b		6f\n"   /* ? b.w >= a.w */
-		"\tmove.w	d4, d2\n" /* a.w = b.w */
-		"6:	sub.w		d1, d2\n" /* a.w -= a.x */
+		"\tmove.w	%%d4,%%d2\n" /* a.w = b.w */
+		"6:	sub.w		%%d1,%%d2\n" /* a.w -= a.x */
 		"\tbhi.b		7f\n"   /* ? a.w > a.x */
-		"\tmoveq.l	#0, d0\n"
+		"\tmoveq.l	#0,%%d0\n"
 		"7:\n"
-		"\tswap		d1\n"
-		"\tswap		d2\n"
-		"\tmovem.l	d1/d2, (%1)\n" /* a.x:a.y/a.w:a.h */
+		"\tswap		%%d1\n"
+		"\tswap		%%d2\n"
+		"\tmovem.l	%%d1/%%d2,(%1)\n" /* a.x:a.y/a.w:a.h */
 		: "=d"(res)           /* output */
 		: "a"(dst),"a"(src)   /* input */
 		: "d1","d2","d3","d4","cc" AND_MEMORY /* clobbered */
@@ -338,7 +338,7 @@ BOOL GrphIntersect(GRECT *dst, const GRECT *src)
 	short p = dst->g_x + dst->g_w - 1;
 	short q = src->g_x + src->g_w - 1;
 
-	dst->g_x = (dst->g_x >= src->g_x ? dst->g_x : src->g_x);
+	dst->g_x = dst->g_x >= src->g_x ? dst->g_x : src->g_x;
 	dst->g_w = (p <= q ? p : q) - dst->g_x + 1;
 	p = dst->g_y + dst->g_h - 1;
 	q = src->g_y + src->g_h - 1;
@@ -355,33 +355,33 @@ BOOL GrphIntersectP(PRECT *dst, const PRECT *src)
 #if 1
 	register BOOL res __asm("d0");
 	__asm__ volatile (
-		"\tmoveq.l	#0, d0\n"
-		"\tmovem.l	(%1), d1/d2\n" /* a.x0:a.y0/a.x1:a.y1 */
-		"\tmovem.l	(%2), d3/d4\n" /* b.x0:b.y0/b.x1:b.y1 */
-		"\t	cmp.w		d1, d3\n"
+		"\tmoveq.l	#0,%%d0\n"
+		"\tmovem.l	(%1),%%d1/%%d2\n" /* a.x0:a.y0/a.x1:a.y1 */
+		"\tmovem.l	(%2),%%d3/%%d4\n" /* b.x0:b.y0/b.x1:b.y1 */
+		"\t	cmp.w		%%d1,%%d3\n"
 		"\t	ble.b		1f\n"   /* ? b.y0 <= a.y0 */
-		"\t	move.w	d3, d1\n" /* a.y0 = b.y0 */
-		"1:	cmp.w		d2, d4\n"
+		"\t	move.w	%%d3,%%d1\n" /* a.y0 = b.y0 */
+		"1:	cmp.w		%%d2,%%d4\n"
 		"\t	bge.b		2f\n"   /* ? b.y1 >= a.y1 */
-		"\t	move.w	d4, d2\n" /* a.y1 = b.y1 */
-		"2:	cmp.w		d1, d2\n"
+		"\t	move.w	%%d4,%%d2\n" /* a.y1 = b.y1 */
+		"2:	cmp.w		%%d1,%%d2\n"
 		"\t	blt.b		9f\n"   /* ? a.y1 >= a.y0 */
-		"\tswap		d1\n" /* a.y0:a.x0 */
-		"\tswap		d2\n" /* a.y1:a.x1 */
-		"\tswap		d3\n" /* b.y0:b.x0 */
-		"\tswap		d4\n" /* b.y1:b.x1 */
-		"\t	cmp.w		d1, d3\n"
+		"\tswap		%%d1\n" /* a.y0:a.x0 */
+		"\tswap		%%d2\n" /* a.y1:a.x1 */
+		"\tswap		%%d3\n" /* b.y0:b.x0 */
+		"\tswap		%%d4\n" /* b.y1:b.x1 */
+		"\t	cmp.w		%%d1,%%d3\n"
 		"\t	ble.b		5f\n"   /* ? b.x0 <= a.x0 */
-		"\t	move.w	d3, d1\n" /* a.x0 = b.x0 */
-		"5:	cmp.w		d2, d4\n"
+		"\t	move.w	%%d3,%%d1\n" /* a.x0 = b.x0 */
+		"5:	cmp.w		%%d2,%%d4\n"
 		"\t	bge.b		6f\n"   /* ? b.x1 >= a.x1 */
-		"\t	move.w	d4, d2\n" /* a.x1 = b.x1 */
-		"6:	cmp.w		d1, d2\n"
+		"\t	move.w	%%d4,%%d2\n" /* a.x1 = b.x1 */
+		"6:	cmp.w		%%d1,%%d2\n"
 		"\t	blt.b		9f\n"   /* ? a.x1 >= a.x0 */
-		"\tswap		d1\n"
-		"\tswap		d2\n"
-		"\tmovem.l	d1/d2, (%1)\n" /* a.x:a.y/a.w:a.h */
-		"\tmoveq.l	#1, d0\n"
+		"\tswap		%%d1\n"
+		"\tswap		%%d2\n"
+		"\tmovem.l	%%d1/%%d2,(%1)\n" /* a.x:a.y/a.w:a.h */
+		"\tmoveq.l	#1,%%d0\n"
 		"9:\n"
 		: "=d"(res)           /* output */
 		: "a"(dst),"a"(src)   /* input */
@@ -516,7 +516,7 @@ static BOOL _r_put_I4(MFDB *mfdb, CARD16 width, CARD16 height)
 			} while (--w && c--);
 			dst += 4;
 		}
-		src += (int) src & 1;
+		src += (long) src & 1;
 	}
 	return xTrue;
 }
@@ -534,80 +534,111 @@ static BOOL _r_put_I8(MFDB *mfdb, CARD16 width, CARD16 height)
 	mfdb->fd_addr = dst;
 
 	__asm__ volatile(
-		"\tmovea.l	%0, a0\n" /* src */
-		"\tmovea.l	%1, a1\n" /* dst */
-		"\tlea		%3, a2\n" /* height */
+		"\tmovea.l	%0,%%a0\n" /* src */
+		"\tmovea.l	%1,%%a1\n" /* dst */
+		"\tlea		%3,%%a2\n" /* height */
+#ifdef __mcoldfire__
+		"\tmoveq.l	#0,%%d7\n"
+#endif
 		
 		"1:\n"
-		"\tmove.w	%2, d7\n" /* width counter */
+		"\tmove.w	%2,%%d7\n" /* width counter */
 		
 		"4:\n" /*line */
-		"\tmoveq.l	#0, d0\n"
-		"\tmoveq.l	#0, d1\n"
-		"\tmoveq.l	#0, d2\n"
-		"\tmoveq.l	#0, d3\n"
-		"\tmoveq.l	#15, d6\n" /* cluster counter */
+		"\tmoveq.l	#0,%%d0\n"
+		"\tmoveq.l	#0,%%d1\n"
+		"\tmoveq.l	#0,%%d2\n"
+		"\tmoveq.l	#0,%%d3\n"
+		"\tmoveq.l	#15,%%d6\n" /* cluster counter */
 		
-		"5:\n" /*cluster */
-		"\tmoveq.l	#0, d4\n"
-		"\tmove.b	(a0)+, d4\n"
+		"5:\n" /* cluster */
+		"\tmoveq.l	#0,%%d4\n"
+		"\tmove.b	(%%a0)+,%%d4\n"
 		"\tbeq		7f\n"
-		"\tcmpi.b	#1, d4\n"
+		"\tcmpi.b	#1,%%d4\n"
 		"\tbne.s		6f\n"
-		"\tmove.l	#0x00010001, d5\n"
-		/* "\tmove.b	#255, d4\n" */
-		"\tlsl.l		d6, d5\n"
-		"\tor.l		d5, d0\n"
-		"\tor.l		d5, d1\n"
-		"\tor.l		d5, d2\n"
-		"\tor.l		d5, d3\n"
+		"\tmove.l	#0x00010001,%%d5\n"
+		/* "\tmove.b	#255,%%d4\n" */
+		"\tlsl.l		%%d6,%%d5\n"
+		"\tor.l		%%d5,%%d0\n"
+		"\tor.l		%%d5,%%d1\n"
+		"\tor.l		%%d5,%%d2\n"
+		"\tor.l		%%d5,%%d3\n"
 		"\tbra		7f\n"
 		"6:\n"
-		"\tlsl.l  #8, d4\n"
-		"\tmove.l d4, d5\n"
-		"\tandi.w #0x0300, d5\n"
-		"\tlsl.l #7, d5\n"
-		"\trol.w #1, d5\n"
-		"\tswap   d5\n"
-		"\tlsl.l  d6, d5\n"
-		"\tor.l  d5, d0\n"
-		"\tmove.l d4, d5\n"
-		"\tandi.w #0x0C00, d5\n"
-		"\tlsl.l #5, d5\n"
-		"\trol.w #1, d5\n"
-		"\tswap   d5\n"
-		"\tlsl.l  d6, d5\n"
-		"\tor.l  d5, d1\n"
-		"\tmove.l d4, d5\n"
-		"\tandi.w #0x3000, d5\n"
-		"\tlsl.l #3, d5\n"
-		"\trol.w #1, d5\n"
-		"\tswap   d5\n"
-		"\tlsl.l  d6, d5\n"
-		"\tor.l  d5, d2\n"
-		"\tmove.l d4, d5\n"
-		"\tandi.w #0xC000, d5\n"
-		"\tlsl.l #1, d5\n"
-		"\trol.w #1, d5\n"
-		"\tswap   d5\n"
-		"\tlsl.l  d6, d5\n"
-		"\tor.l  d5, d3\n"
+		"\tlsl.l  #8,%%d4\n"
+		"\tmove.l %%d4,%%d5\n"
+#ifdef __mcoldfire__
+		/* TODO */
+#else
+		"\tandi.w #0x0300,%%d5\n"
+		"\tlsl.l #7,%%d5\n"
+		"\trol.w #1,%%d5\n"
+#endif
+		"\tswap   %%d5\n"
+		"\tlsl.l  %%d6,%%d5\n"
+		"\tor.l  %%d5,%%d0\n"
+		"\tmove.l %%d4,%%d5\n"
+#ifdef __mcoldfire__
+		/* TODO */
+#else
+		"\tandi.w #0x0C00,%%d5\n"
+		"\tlsl.l #5,%%d5\n"
+		"\trol.w #1,%%d5\n"
+#endif
+		"\tswap   %%d5\n"
+		"\tlsl.l  %%d6,%%d5\n"
+		"\tor.l  %%d5,%%d1\n"
+		"\tmove.l %%d4,%%d5\n"
+#ifdef __mcoldfire__
+		/* TODO */
+#else
+		"\tandi.w #0x3000,%%d5\n"
+		"\tlsl.l #3,%%d5\n"
+		"\trol.w #1,%%d5\n"
+#endif
+		"\tswap   %%d5\n"
+		"\tlsl.l  %%d6,%%d5\n"
+		"\tor.l  %%d5,%%d2\n"
+		"\tmove.l %%d4,%%d5\n"
+#ifdef __mcoldfire__
+		/* TODO */
+#else
+		"\tandi.w #0xC000,%%d5\n"
+		"\tlsl.l #1,%%d5\n"
+		"\trol.w #1,%%d5\n"
+#endif
+		"\tswap   %%d5\n"
+		"\tlsl.l  %%d6,%%d5\n"
+		"\tor.l  %%d5,%%d3\n"
 		"7:\n"
-		"\tsubq.w	#1, d7\n"
-		"\tdbeq		d6, 5b\n" /*cluster */
+#ifdef __mcoldfire__
+		"\tsubq.l	#1,%%d7\n"
+		"\tsubq.l	#1,%%d6\n"
+		"\tbpl.s    5b\n" /* cluster */
+#else
+		"\tsubq.w	#1,%%d7\n"
+		"\tdbeq		%%d6,5b\n" /* cluster */
+#endif
 		
-		"\tmovem.l	d0-d3, (a1)\n"
-		"\tadda.w	#16, a1\n"
-		"\ttst.w		d7\n"
+		"\tmovem.l	%%d0-%%d3,(%%a1)\n"
+		"\tlea		16(%%a1),%%a1\n"
+		"\ttst.w	%%d7\n"
 		"\tbgt		4b\n" /*line */
 		
-		"\tsub.w		#1, (a2)\n"
+#ifdef __mcoldfire__
+		"\tmvz.w	(%%a2),%%d4\n"
+		"\tsub.l	#1,%%d4\n"
+		"\tmove.w	%%d4,(%%a2)\n"
+#else
+		"\tsub.w	#1,(%%a2)\n"
+#endif
 		"\tble		9f\n"/*end */
 		
-		"\tmove		a0, d4\n"
-		"\tbtst		#0, d4\n"
+		"\tmove		%%a0,%%d4\n"
+		"\tbtst		#0,%%d4\n"
 		"\tbeq		1b\n"
-		"\taddq.w	#1, a0\n"
+		"\tlea		1(%%a0),%%a0\n"
 		"\tbra		1b\n"
 		"9:\n"
 		:                                          /* output */
@@ -640,7 +671,7 @@ static BOOL _r_put_P8(MFDB *mfdb, CARD16 width, CARD16 height)
 
 			*(d++) = (c == 1 ? 255 : c);
 		}
-		src += (int) src & 1;
+		src += (long) src & 1;
 		dst += inc / sizeof(*dst);
 	}
 	return xTrue;
@@ -823,7 +854,7 @@ static BOOL _r_get_I4(MFDB *mfdb, PRECT *pxy, MFDB *ptr)
 			}
 		}
 		src += inc / sizeof(*src);
-		dst += (int) dst & 1;
+		dst += (long) dst & 1;
 	}
 	return xTrue;
 }
@@ -895,7 +926,7 @@ static BOOL _r_get_I8(MFDB *mfdb, PRECT *pxy, MFDB *ptr)
 				s -= 8;
 		}
 		src += inc / sizeof(*src);
-		dst += (int) dst & 1;
+		dst += (long) dst & 1;
 	}
 	return xTrue;
 }
@@ -942,7 +973,7 @@ static BOOL _r_get_P8(MFDB *mfdb, PRECT *pxy, MFDB *ptr)
 			*(dst++) = c;
 		}
 		src += inc / sizeof(*src);
-		dst += (int) dst & 1;
+		dst += (long) dst & 1;
 	}
 	return xTrue;
 }
