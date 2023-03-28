@@ -12,16 +12,16 @@
    Library General Public License for more details.
 
    You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   License along with the GNU C Library; if not, see
+   <https://www.gnu.org/licenses/>.  */
 
-#include <float.h>
-#include <stdlib.h>
+#include <features.h>
 #include "gmp.h"
 #include "gmp-impl.h"
 #include "longlong.h"
 #include <ieee754.h>
+#include <float.h>
+#include <stdlib.h>
 
 /* Convert a `double' in IEEE754 standard double-precision format to a
    multi-precision integer representing the significand scaled up by its
@@ -34,6 +34,8 @@ __mpn_extract_double (mp_ptr res_ptr, mp_size_t size,
 {
   union ieee754_double u;
   u.d = value;
+
+  (void) size;
 
   *is_neg = u.ieee.negative;
   *expt = (int) u.ieee.exponent - IEEE754_DOUBLE_BIAS;

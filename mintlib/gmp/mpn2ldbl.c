@@ -12,17 +12,20 @@
    Library General Public License for more details.
 
    You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   License along with the GNU C Library; if not, see
+   <https://www.gnu.org/licenses/>.  */
 
+#include <features.h>
 #include "gmp.h"
 #include "gmp-impl.h"
 #include <ieee754.h>
 #include <float.h>
-#include <math.h>
 
 #ifndef __NO_LONG_DOUBLE_MATH
+
+#ifdef __mcoldfire__
+#  define NO_LONG_DOUBLE 1
+#endif
 
 /* Convert a multi-precision integer of the needed number of bits (64 for
    long double) and an integral power of two to a `long double' in IEEE854
@@ -31,10 +34,18 @@
 long double
 __mpn_construct_long_double (mp_srcptr frac_ptr, int expt, int sign)
 {
+#ifdef NO_LONG_DOUBLE
+  union ieee754_double u;
+#else
   union ieee854_long_double u;
+#endif
 
   u.ieee.negative = sign;
+#ifdef NO_LONG_DOUBLE
+  u.ieee.exponent = expt + IEEE754_DOUBLE_BIAS;
+#else
   u.ieee.exponent = expt + IEEE854_LONG_DOUBLE_BIAS;
+#endif
 #if BITS_PER_MP_LIMB == 32
   u.ieee.mantissa1 = frac_ptr[0];
   u.ieee.mantissa0 = frac_ptr[1];

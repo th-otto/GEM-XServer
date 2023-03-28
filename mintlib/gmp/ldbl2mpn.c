@@ -12,19 +12,22 @@
    Library General Public License for more details.
 
    You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   License along with the GNU C Library; if not, see
+   <https://www.gnu.org/licenses/>.  */
 
-#include <float.h>
-#include <math.h>
-#include <stdlib.h>
+#include <features.h>
 #include "gmp.h"
 #include "gmp-impl.h"
 #include "longlong.h"
 #include <ieee754.h>
+#include <float.h>
+#include <stdlib.h>
 
 #ifndef __NO_LONG_DOUBLE_MATH
+
+#ifdef __mcoldfire__
+#  define NO_LONG_DOUBLE 1
+#endif
 
 /* Convert a `long double' in IEEE854 standard double-precision format to a
    multi-precision integer representing the significand scaled up by its
@@ -36,11 +39,21 @@ __mpn_extract_long_double (mp_ptr res_ptr, mp_size_t size,
 			   int *expt, int *is_neg,
 			   long double value)
 {
+#ifdef NO_LONG_DOUBLE
+  union ieee754_double u;
+#else
   union ieee854_long_double u;
+#endif
   u.d = value;
 
+  (void) size;
+
   *is_neg = u.ieee.negative;
+#ifdef NO_LONG_DOUBLE
+  *expt = (int) u.ieee.exponent - IEEE754_DOUBLE_BIAS;
+#else
   *expt = (int) u.ieee.exponent - IEEE854_LONG_DOUBLE_BIAS;
+#endif
 
 #if BITS_PER_MP_LIMB == 32
   res_ptr[0] = u.ieee.mantissa1; /* Low-order 32 bits of fraction.  */
@@ -81,14 +94,22 @@ __mpn_extract_long_double (mp_ptr res_ptr, mp_size_t size,
 	          res_ptr[N - 1] <<= cnt;
 #endif
 		}
+#ifdef NO_LONG_DOUBLE
+	      *expt = DBL_MIN_EXP - 1 - cnt;
+#else
 	      *expt = LDBL_MIN_EXP - 1 - cnt;
+#endif
 	    }
 	  else
 	    {
 	      count_leading_zeros (cnt, res_ptr[0]);
 	      res_ptr[N - 1] = res_ptr[0] << cnt;
 	      res_ptr[0] = 0;
+#ifdef NO_LONG_DOUBLE
+	      *expt = DBL_MIN_EXP - 1 - BITS_PER_MP_LIMB - cnt;
+#else
 	      *expt = LDBL_MIN_EXP - 1 - BITS_PER_MP_LIMB - cnt;
+#endif
 	    }
 	}
     }
