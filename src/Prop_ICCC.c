@@ -186,7 +186,7 @@ void _Prop_ICCC(WINDOW *wind, PROPERTY *prop, BOOL changed)
 	case WM_PROTOCOLS:
 		if (prop->Type == XA_ATOM)
 		{
-			pool->ProtoDelWind = xFalse;
+			pool->wm_protocols = 0;
 			if (changed)
 			{
 				Atom *atom = (Atom *) prop->Data;
@@ -197,7 +197,15 @@ void _Prop_ICCC(WINDOW *wind, PROPERTY *prop, BOOL changed)
 					switch (*atom)
 					{
 					case WM_DELETE_WINDOW:
-						pool->ProtoDelWind = xTrue;
+						pool->wm_protocols |= ProtoWmDeleteWindow;
+						break;
+
+					case WM_TAKE_FOCUS:
+						pool->wm_protocols |= ProtoWmTakeFocus;
+						break;
+
+					case WM_SAVE_YOURSELF:
+						pool->wm_protocols |= ProtoWmSaveYourself;
 						break;
 
 					default:
@@ -213,6 +221,7 @@ void _Prop_ICCC(WINDOW *wind, PROPERTY *prop, BOOL changed)
 								x_printf("A:%lX.\n", *atom);
 							}
 						}
+						break;
 					}
 					atom++;
 				}

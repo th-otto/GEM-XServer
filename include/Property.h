@@ -57,9 +57,12 @@ typedef struct s_PROPERTIES
 
 	BOOL FixedSize;
 
-	BOOL ProtoDelWind;
+	unsigned short wm_protocols;
+#define ProtoWmDeleteWindow 0x0001
+#define ProtoWmTakeFocus    0x0002
+#define ProtoWmSaveYourself 0x0004
 
-	 XRSCPOOL(PROPERTY, Pool, 4);
+	XRSCPOOL(PROPERTY, Pool, 4);
 } PROPERTIES;
 
 

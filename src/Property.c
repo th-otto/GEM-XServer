@@ -150,7 +150,7 @@ void RQ_ChangeProperty(CLIENT *clnt, xChangePropertyReq *q)
 			pool->IconPmap = NULL;
 			pool->IconMask = NULL;
 			pool->FixedSize = xFalse;
-			pool->ProtoDelWind = xFalse;
+			pool->wm_protocols = 0;
 			wind->Properties = pool;
 
 		} else

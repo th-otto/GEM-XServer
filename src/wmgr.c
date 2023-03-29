@@ -1133,7 +1133,7 @@ BOOL WmgrMessage(short *msg)
 
 			if (clnt)
 			{
-				if (wind->Properties && wind->Properties->ProtoDelWind)
+				if (wind->Properties && (wind->Properties->wm_protocols & ProtoWmDeleteWindow))
 				{
 					static Atom const data[5] = { WM_DELETE_WINDOW, 0, 0, 0, 0 };
 					EvntClientMsg(clnt, wind->Id, WM_PROTOCOLS, 32, data);

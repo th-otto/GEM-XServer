@@ -47,8 +47,10 @@ Atom AtomGet(const char *name, size_t len, BOOL onlyIfExists);
 
 #define WM_PROTOCOLS     (XA_LAST_PREDEFINED +1)
 #define WM_DELETE_WINDOW (XA_LAST_PREDEFINED +2)
+#define WM_TAKE_FOCUS    (XA_LAST_PREDEFINED +3)
+#define WM_SAVE_YOURSELF (XA_LAST_PREDEFINED +4)
 
-#define LAST_PREDEF_ATOM (XA_LAST_PREDEFINED +2)
+#define LAST_PREDEF_ATOM (XA_LAST_PREDEFINED +4)
 
 
 #endif /* __ATOM_H__ */
